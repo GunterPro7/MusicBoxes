@@ -1,9 +1,6 @@
 package com.GunterPro7.main;
 
-import com.GunterPro7.main.FileManager;
-import com.GunterPro7.main.Main;
 import com.GunterPro7.utils.MapUtils;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,27 +18,27 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Random;
 
 @Mod.EventBusSubscriber
 public class MusicBox {
-    private static SimpleSoundInstance curInstance;
-
-    private static Random random = new Random();
+    private static final Random random = new Random();
 
     public MusicBox() {
 
     }
 
     @SubscribeEvent
-    public void blockPlace(BlockEvent.EntityPlaceEvent event) {
+    public void blockPlace(BlockEvent.EntityPlaceEvent event) throws IOException {
         if (event.getPlacedBlock().getBlock().equals(Blocks.NOTE_BLOCK)) {
             FileManager.Positions.add(event.getPos());
         }
     }
 
     @SubscribeEvent
-    public void blockBreak(BlockEvent.BreakEvent event) {
+    public void blockBreak(BlockEvent.BreakEvent event) throws IOException {
         if (event.getState().getBlock().equals(Blocks.NOTE_BLOCK)) {
             FileManager.Positions.remove(event.getPos());
         }
@@ -74,10 +71,6 @@ public class MusicBox {
 
             String[] args = message.split(" ");
 
-
-            //String message = event.getMessage().getString();
-            //ResourceLocation resourceLocation = new ResourceLocation(TutorialMod.MODID, message.substring("musicBox ".length()));
-            //SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
             SoundEvent soundEvent = null;
             if (args[1].equals("minecraft")) {
                 soundEvent = discSounds.get(args[2]);

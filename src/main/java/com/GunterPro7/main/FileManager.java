@@ -2,39 +2,56 @@ package com.GunterPro7.main;
 
 import net.minecraft.core.BlockPos;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileManager {
+    private static final String path = "libraries/MusicBox/";
+
     static {
-        for (String curValue : new String[]{"libraries/", "libraries/MusicBox/"}) {
-            File folder = new File(curValue);
-            if (!folder.exists()) {
-                try {
-                    folder.createNewFile();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        File folder = new File(path);
+        if (!folder.exists()) {
+            folder.mkdirs();
         }
     }
 
-    public void saveByKey(String key, String value) {
+    public void saveByKey(String key, String value) throws IOException {
+        File file = new File(path + key);
+        if (!file.exists()) {
+            file.createNewFile();
+        }
 
+        try (FileWriter fileWriter = new FileWriter(file)) {
+            fileWriter.write(value);
+        }
     }
 
     public boolean existsByKey(String key) {
-        return getByKey(key) != null;
+        return new File(path + key).exists();
     }
 
-    public String getByKey(String key) {
-        return "";
+    public String getByKey(String key) throws FileNotFoundException {
+        File file = new File(path + key);
+        if (!file.exists()) {
+            throw new FileNotFoundException("File " + file.getAbsolutePath() + " does not exist!");
+        }
+
+        StringBuilder value = new StringBuilder();
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                value.append(line);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return value.toString();
     }
 
-    public void appendByKey(String key, String value) {
-
+    public void appendByKey(String key, String value) throws IOException {
+        saveByKey(key, getByKey(key) + value);
     }
 
     static class Positions {
@@ -54,17 +71,21 @@ public class FileManager {
                 }
             }
 
-            for (String string : fileManager.getByKey("locations.txt").split(";")) {
-                blockPosList.add(blockPosFromString(string));
+            try {
+                for (String string : fileManager.getByKey("locations.txt").split(";")) {
+                    blockPosList.add(blockPosFromString(string));
+                }
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
             }
         }
 
-        public static void add(BlockPos blockPos) {
+        public static void add(BlockPos blockPos) throws IOException {
             blockPosList.add(blockPos);
             fileManager.appendByKey(key, blockPosToString(blockPos));
         }
 
-        public static void remove(BlockPos blockPos) {
+        public static void remove(BlockPos blockPos) throws IOException {
             blockPosList.remove(blockPos);
             fileManager.saveByKey(key, blockPosListToString(blockPosList));
         }
