@@ -1,7 +1,5 @@
 package com.GunterPro7.utils;
 
-import net.minecraft.sounds.SoundEvent;
-
 import java.util.HashMap;
 import java.util.Map;
 
