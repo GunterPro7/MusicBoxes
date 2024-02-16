@@ -1,5 +1,6 @@
 package com.GunterPro7.main;
 
+import com.GunterPro7.listener.AudioCableListener;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -14,6 +15,7 @@ public class Main {
 
         //ModItems.register(bus);
         //ModBlocks.register(bus);
+        MinecraftForge.EVENT_BUS.register(new AudioCableListener());
 
         MinecraftForge.EVENT_BUS.register(new MusicBox());
 

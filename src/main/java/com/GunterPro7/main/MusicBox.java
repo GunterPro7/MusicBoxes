@@ -1,9 +1,18 @@
 package com.GunterPro7.main;
 
 import com.GunterPro7.utils.MapUtils;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.LeashKnotModel;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.entity.LeashKnotRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -12,14 +21,20 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.LeadItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -64,6 +79,16 @@ public class MusicBox {
             "otherside", SoundEvents.MUSIC_DISC_OTHERSIDE,
             "relic", SoundEvents.MUSIC_DISC_RELIC
     );
+
+    @SubscribeEvent
+    public void realTICK(TickEvent.ClientTickEvent event) {
+        if (Minecraft.getInstance().player == null) return;
+        BlockPos playerPos = Minecraft.getInstance().player.getOnPos();
+
+        BlockPos pos2 = new BlockPos(playerPos.getX() + 5, playerPos.getY(), playerPos.getZ());
+
+        //renderLead(playerPos, pos2, 0.4f, 0.4f, 0.0f, 0.75f);
+    }
 
 
     @SubscribeEvent
