@@ -18,21 +18,21 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11C;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @OnlyIn(Dist.CLIENT) // TODO implement server side
 public class AudioCableListener {
-    private static final List<AudioCable> audioCables = new ArrayList<>();
+    private static final Set<AudioCable> audioCables = new CopyOnWriteArraySet<>();
     @Nullable private BlockPos pos1;
 
-
     @SubscribeEvent
-    public void onPlayerInteract(PlayerInteractEvent.RightClickItem event) {
+    public void onPlayerInteract(PlayerInteractEvent.RightClickBlock event) {
         if (pos1 == null) {
             pos1 = event.getPos();
         } else {
             audioCables.add(new AudioCable(pos1, event.getPos(), DyeColor.getColor(event.getItemStack())));
+            pos1 = null;
         }
     }
 

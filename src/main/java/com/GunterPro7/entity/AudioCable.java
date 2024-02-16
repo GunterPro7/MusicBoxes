@@ -45,11 +45,11 @@ public class AudioCable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AudioCable that = (AudioCable) o;
-        return Objects.equals(startPos, that.startPos) && Objects.equals(endPos, that.endPos) && color == that.color;
+        return startPos.equals(that.startPos) && endPos.equals(that.endPos);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(startPos, endPos, color);
+        return Objects.hash(startPos, endPos);
     }
 }
