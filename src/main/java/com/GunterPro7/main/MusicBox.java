@@ -1,6 +1,7 @@
 package com.GunterPro7.main;
 
 import com.GunterPro7.utils.MapUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -32,6 +33,7 @@ public class MusicBox {
 
     @SubscribeEvent
     public void blockPlace(BlockEvent.EntityPlaceEvent event) throws IOException {
+        Minecraft.getInstance().player.sendSystemMessage(Component.literal(System.getProperty("user.dir")));
         if (event.getPlacedBlock().getBlock().equals(Blocks.NOTE_BLOCK)) {
             FileManager.Positions.add(event.getPos());
         }
@@ -74,7 +76,7 @@ public class MusicBox {
             SoundEvent soundEvent = null;
             if (args[1].equals("minecraft")) {
                 soundEvent = discSounds.get(args[2]);
-            } else if (args[1].equals("costum")) {
+            } else if (args[1].equals("custom")) {
                 ResourceLocation resourceLocation = new ResourceLocation(Main.MODID, args[2]);
                 soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
             }

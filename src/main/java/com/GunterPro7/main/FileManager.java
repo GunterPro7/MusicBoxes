@@ -73,7 +73,8 @@ public class FileManager {
 
             try {
                 for (String string : fileManager.getByKey("locations.txt").split(";")) {
-                    blockPosList.add(blockPosFromString(string));
+                    if (!string.isEmpty())
+                        blockPosList.add(blockPosFromString(string));
                 }
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
@@ -82,7 +83,7 @@ public class FileManager {
 
         public static void add(BlockPos blockPos) throws IOException {
             blockPosList.add(blockPos);
-            fileManager.appendByKey(key, blockPosToString(blockPos));
+            fileManager.appendByKey(key, blockPosToString(blockPos) + ";");
         }
 
         public static void remove(BlockPos blockPos) throws IOException {
@@ -100,7 +101,7 @@ public class FileManager {
 
         private static String blockPosListToString(List<BlockPos> blockPosList) {
             StringBuilder stringBuilder = new StringBuilder();
-            blockPosList.forEach(pos -> stringBuilder.append(blockPosToString(pos)));
+            blockPosList.forEach(pos -> stringBuilder.append(blockPosToString(pos)).append(";"));
 
             return stringBuilder.toString();
         }

@@ -16,5 +16,7 @@ public class Main {
         //ModBlocks.register(bus);
 
         MinecraftForge.EVENT_BUS.register(new MusicBox());
+
+
     }
 }
