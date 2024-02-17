@@ -1,6 +1,9 @@
 package com.GunterPro7.listener;
 
 import com.GunterPro7.entity.AudioCable;
+import com.GunterPro7.entity.MusicBox;
+import com.GunterPro7.main.FileManager;
+import com.GunterPro7.utils.ChatUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
@@ -52,20 +55,23 @@ public class ClientAudioCableListener {
     }
 
     @SubscribeEvent
-    public void qeqwhiej(LivingEvent.LivingTickEvent event) {
-
-    }
-
-    @SubscribeEvent
     public void onPlayerInteract(PlayerInteractEvent.RightClickBlock event) {
         Vec3 newPos = event.getHitVec().getLocation();
+
+        MusicBox musicBox = ClientMusicBoxListener.getMusicBoxByPos(event.getPos());
+        if (musicBox != null) {
+            if (musicBox.isPowered()) {
+                ChatUtils.sendPrivateChatMessage("This music box already has a Audio Cable connected!");
+                return;
+            }
+        }
 
         if (pos1 != null && !pos1.equals(newPos) && System.currentTimeMillis() - timePos1 > 10) {
             DyeColor dyeColor = DyeColor.getColor(event.getItemStack());
             if (dyeColor != null) {
                 AudioCable audioCable = new AudioCable(pos1, newPos, block1, event.getPos(), dyeColor);
                 if (audioCable.getBlockDistance() > 32d) {
-                    Minecraft.getInstance().player.sendSystemMessage(Component.literal("The Audio-wire cant be longer then 32 blocks!"));
+                    ChatUtils.sendPrivateChatMessage("The Audio-wire cant be longer then 32 blocks!");
                     return;
                 }
                 audioCables.add(audioCable);
@@ -103,7 +109,13 @@ public class ClientAudioCableListener {
 
             HitResult hitResult = Minecraft.getInstance().hitResult;
             if (hitResult instanceof BlockHitResult) {
-                if (Minecraft.getInstance().level != null && !Minecraft.getInstance().level.getBlockState(((BlockHitResult) hitResult).getBlockPos()).is(Blocks.AIR)) {
+                BlockPos blockPos = ((BlockHitResult) hitResult).getBlockPos();
+                if (Minecraft.getInstance().level != null && !Minecraft.getInstance().level.getBlockState(blockPos).is(Blocks.AIR)) {
+                    MusicBox musicBox = ClientMusicBoxListener.getMusicBoxByPos(blockPos);
+                    if (musicBox != null && musicBox.isPowered()) {
+                        return;
+                    }
+
                     if (pos1.closerThan(hitResult.getLocation(), 32d)) {
                         renderLine(pos1, hitResult.getLocation(), rgb, view, buffer, vertexBuffer, event, VertexFormat.Mode.DEBUG_LINE_STRIP);
                     }

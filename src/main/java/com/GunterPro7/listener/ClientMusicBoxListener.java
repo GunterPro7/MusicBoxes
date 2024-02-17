@@ -1,18 +1,13 @@
-package com.GunterPro7.main;
+package com.GunterPro7.listener;
 
+import com.GunterPro7.entity.MusicBox;
+import com.GunterPro7.main.FileManager;
+import com.GunterPro7.main.Main;
+import com.GunterPro7.utils.ChatUtils;
 import com.GunterPro7.utils.MapUtils;
-import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.LeashKnotModel;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.renderer.entity.LeashKnotRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -21,11 +16,9 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.item.LeadItem;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -39,18 +32,30 @@ import java.util.Map;
 import java.util.Random;
 
 @Mod.EventBusSubscriber
-public class MusicBox {
+public class ClientMusicBoxListener {
     private static final Random random = new Random();
 
-    public MusicBox() {
+    private static final List<MusicBox> musicBoxes = new ArrayList<>();
+    private static boolean musicBoxesLoaded;
 
+    public ClientMusicBoxListener() {
+
+    }
+
+    public static MusicBox getMusicBoxByPos(BlockPos blockPos) {
+        for (MusicBox musicBox : musicBoxes) {
+            if (musicBox.getBlockPos().equals(blockPos)) {
+                return musicBox;
+            }
+        }
+        return null;
     }
 
     @SubscribeEvent
     public void blockPlace(BlockEvent.EntityPlaceEvent event) throws IOException {
-        Minecraft.getInstance().player.sendSystemMessage(Component.literal(System.getProperty("user.dir")));
         if (event.getPlacedBlock().getBlock().equals(Blocks.NOTE_BLOCK)) {
             FileManager.Positions.add(event.getPos());
+            musicBoxes.add(new MusicBox(event.getPos()));
         }
     }
 
@@ -58,6 +63,7 @@ public class MusicBox {
     public void blockBreak(BlockEvent.BreakEvent event) throws IOException {
         if (event.getState().getBlock().equals(Blocks.NOTE_BLOCK)) {
             FileManager.Positions.remove(event.getPos());
+            musicBoxes.remove(new MusicBox(event.getPos()));
         }
     }
 
@@ -107,14 +113,25 @@ public class MusicBox {
             }
 
             if (soundEvent == null) {
-                event.getPlayer().sendSystemMessage(Component.literal("Couldn't recognize this sound!"));
+                ChatUtils.sendPrivateChatMessage("Couldn't recognize this sound!");
                 return;
             }
 
             PlayerList playerList = event.getPlayer().getServer().getPlayerList();
             Level level = event.getPlayer().level();
-            for (BlockPos pos : FileManager.Positions.getAll()) {
-                broadcastSound(playerList, level, pos.getX(), pos.getY(), pos.getZ(), BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), SoundSource.RECORDS, 1f, 1f);
+
+            if (!musicBoxesLoaded) {
+                for (BlockPos blockPos : FileManager.Positions.getAll()) {
+                    musicBoxes.add(new MusicBox(blockPos));
+                }
+                musicBoxesLoaded = true;
+            }
+
+            for (MusicBox musicBox : musicBoxes) {
+                if (musicBox.isPowered() && musicBox.getDyeColor().equals(DyeColor.LIME)) { // or implement also for "all"
+                    BlockPos pos = musicBox.getBlockPos();
+                    broadcastSound(playerList, level, pos.getX(), pos.getY(), pos.getZ(), BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), SoundSource.RECORDS, 1f, 1f);
+                }
             }
         }
     }

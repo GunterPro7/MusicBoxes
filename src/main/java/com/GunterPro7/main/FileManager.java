@@ -54,7 +54,7 @@ public class FileManager {
         saveByKey(key, getByKey(key) + value);
     }
 
-    static class Positions {
+    public static class Positions {
         public static File file;
         private static final List<BlockPos> blockPosList = new ArrayList<>();
         private static final FileManager fileManager = new FileManager();
