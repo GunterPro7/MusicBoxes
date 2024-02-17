@@ -1,5 +1,6 @@
 package com.GunterPro7.entity;
 
+import com.GunterPro7.utils.Utils;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -9,39 +10,54 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Objects;
 
 public class AudioCable {
-    private final BlockPos startPos;
-    private final BlockPos endPos;
-    private final BlockPos centerPos;
+    private Vec3 startPos;
+    private Vec3 endPos;
+    private BlockPos startBlock;
+    private BlockPos endBlock;
+    private Vec3 centerPos;
     private DyeColor color;
 
     private final VertexBuffer vertexBuffer;
 
-    public AudioCable(BlockPos startPos, BlockPos endPos) {
-        this(startPos, endPos, DyeColor.WHITE);
+    public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock) {
+        this(startPos, endPos, startBlock, endBlock, DyeColor.WHITE);
     }
 
-    public AudioCable(BlockPos startPos, BlockPos endPos, DyeColor color) {
+    public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock, DyeColor color) {
         this.startPos = startPos;
         this.endPos = endPos;
+        this.startBlock = startBlock;
+        this.endBlock = endBlock;
         this.color = color;
         this.vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 
-        double x = startPos.getX() - ((double) (startPos.getX() - endPos.getX()) / 2);
-        double y = startPos.getY() - ((double) (startPos.getY() - endPos.getY()) / 2);
-        double z = startPos.getZ() - ((double) (startPos.getZ() - endPos.getZ()) / 2); // TODO this calculation is wrong
-        this.centerPos = new BlockPos((int) Math.round(x), (int) Math.round(y), (int) Math.round(z));
+
+        // x1 = 200, x2 = 220    -> mid => 210  ->
+        // x1 = 220, x2 = 200    -> mid => 210  ->
+        double x = Utils.getCenter(startPos.x(), endPos.x());
+        double y = Utils.getCenter(startPos.y(), endPos.y());
+        double z = Utils.getCenter(startPos.z(), endPos.z());
+        this.centerPos = new Vec3(x, y, z);
     }
 
     public void setColor(DyeColor color) {
         this.color = color;
     }
 
-    public BlockPos getStartPos() {
+    public Vec3 getStartPos() {
         return startPos;
     }
 
-    public BlockPos getEndPos() {
+    public Vec3 getEndPos() {
         return endPos;
+    }
+
+    public BlockPos getStartBlock() {
+        return startBlock;
+    }
+
+    public BlockPos getEndBlock() {
+        return endBlock;
     }
 
     public DyeColor getColor() {
@@ -70,10 +86,14 @@ public class AudioCable {
     }
 
     public double getDistance(Vec3 position) {
-        return centerPos.distToCenterSqr(position);
+        return centerPos.distanceToSqr(position);
+    }
+
+    public double getBlockDistance() {
+        return startPos.distanceTo(endPos);
     }
 
     public boolean isInRange(Vec3 position, double range) {
-        return centerPos.closerToCenterThan(position, range);
+        return centerPos.closerThan(position, range);
     }
 }
