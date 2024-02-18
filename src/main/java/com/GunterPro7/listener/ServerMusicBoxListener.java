@@ -6,13 +6,17 @@ import com.GunterPro7.main.FileManager;
 import com.GunterPro7.main.Main;
 import com.GunterPro7.utils.ChatUtils;
 import com.GunterPro7.utils.MapUtils;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -25,6 +29,8 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,6 +54,7 @@ public class ServerMusicBoxListener {
             if (musicBox.getBlockPos().equals(blockPos)) {
                 return musicBox;
             }
+            Minecraft.getInstance().getSoundManager().stop();
         }
         return null;
     }
@@ -118,11 +125,13 @@ public class ServerMusicBoxListener {
 
             String[] args = message.split(" ");
 
+            ResourceLocation resourceLocation = null;
             SoundEvent soundEvent = null;
             if (args[2].equals("minecraft")) {
                 soundEvent = discSounds.get(args[3]);
+                resourceLocation = soundEvent.getLocation();
             } else if (args[2].equals("custom")) {
-                ResourceLocation resourceLocation = new ResourceLocation(Main.MODID, args[3]);
+                resourceLocation = new ResourceLocation(Main.MODID, args[3]);
                 soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
             }
 
@@ -141,18 +150,31 @@ public class ServerMusicBoxListener {
                 musicBoxesLoaded = true;
             }
 
+            StringBuilder musicBoxesString = new StringBuilder();
+
             for (MusicBox musicBox : musicBoxes) {
                 if (musicBox.isPowered() && musicBox.getAudioCable().getColor().equals(DyeColor.valueOf(args[1].toUpperCase()))) { // or implement also for "all"
                     if (MusicController.getMusicControllerByMusicBox(musicBox) != null) {
                         BlockPos pos = musicBox.getBlockPos();
-                        broadcastSound(playerList, level, pos.getX(), pos.getY(), pos.getZ(), BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), SoundSource.RECORDS, 1f, 1f);
+                        musicBoxesString.append(pos.toShortString()).append(';');
+
+                        //broadcastSound(playerList, level, pos.getX(), pos.getY(), pos.getZ(), BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), SoundSource.RECORDS, 1f, 1f);
                     }
                 }
             }
+
+            String serialize = new ResourceLocation.Serializer().serialize(resourceLocation, null, null).getAsString();
+            String stringToClient = serialize.length() + serialize + musicBoxesString.length() + musicBoxesString;
+
+            sendToClient(playerList.getPlayers().get(0), stringToClient);
         }
     }
 
+    private void sendToClient(ServerPlayer player, String message) {
+        ClientMusicBoxEvent.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new ClientMusicBoxEvent(message)); // TODO hier wirklich die felder reinmachen, spirch List<BlockPos> und SoundEvent
+    }
 
+    @Deprecated
     private void broadcastSound(PlayerList players, Level level, double x, double y, double z, Holder<SoundEvent> sound, SoundSource source, float volume, float pitch) {
         net.minecraftforge.event.PlayLevelSoundEvent.AtPosition event = net.minecraftforge.event.ForgeEventFactory.onPlaySoundAtPosition(level, x, y, z, sound, source, volume, pitch);
         if (event.isCanceled() || event.getSound() == null) return;
