@@ -30,10 +30,6 @@ public class MusicController {
 
     public static MusicController getMusicControllerByMusicBox(MusicBox musicBox) {
         if (musicBox.hasAudioCable()) return getBlockPosOfMusicControllerByAudioCable(musicBox.getAudioCable(), new HashSet<>());
-
-        MusicController musicController = getBlockPosOfMusicControllerByAudioCable(musicBox.getAudioCable(), new HashSet<>());
-        Minecraft.getInstance().player.sendSystemMessage(Component.literal(musicController != null ? musicController.toString() : "Null sadly"));
-
         return null;
     }
 
@@ -91,4 +87,10 @@ public class MusicController {
         }
         return null;
     }
+
+    // TODO s:
+    // Saving audio Cables to file
+    // Saving music Controller to file
+    // check if there are any problmes with playing music when the cables are placed in different directions etc
+    // There are some errors like some music boxes are not playing, checking wenn ich wieder bock hab
 }
