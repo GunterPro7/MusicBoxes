@@ -2,7 +2,6 @@ package com.GunterPro7.listener;
 
 import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
-import com.GunterPro7.main.FileManager;
 import com.GunterPro7.utils.ChatUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -11,7 +10,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
@@ -19,15 +17,15 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11C;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -42,23 +40,44 @@ public class ClientAudioCableListener {
 
     private static VertexBuffer vertexBuffer;
 
+    public static List<AudioCable> getAudioCablesByPos(BlockPos pos) {
+        List<AudioCable> newAudioCables = new ArrayList<>();
+        for (AudioCable audioCable : audioCables) {
+            if (pos.equals(audioCable.getStartBlock()) || pos.equals(audioCable.getEndBlock())) {
+                newAudioCables.add(audioCable);
+            }
+        }
+        return newAudioCables;
+    }
+
     @SubscribeEvent
-    public void onPlayerBreakBlock(BlockEvent.BreakEvent event) {
+    public void onPlayerBreakBlock(BlockEvent.BreakEvent event) { // TODO This event should also be called at explosions for example, in generall if this block disapers
         BlockPos pos = event.getPos();
         audioCables.removeIf(audioCable -> {
             BlockPos startBlock = audioCable.getStartBlock();
             BlockPos endBlock = audioCable.getEndBlock();
 
             int posHashCode = pos.hashCode();
-            return (startBlock.hashCode() == posHashCode && startBlock.equals(pos)) || (endBlock.hashCode() == posHashCode && endBlock.equals(pos));
+            boolean remove = (startBlock.hashCode() == posHashCode && startBlock.equals(pos)) || (endBlock.hashCode() == posHashCode && endBlock.equals(pos));
+            if (remove) {
+                if (audioCable.getMusicBoxStart() != null) audioCable.getMusicBoxStart().powerDisconnected();
+                if (audioCable.getMusicBoxEnd() != null) audioCable.getMusicBoxEnd().powerDisconnected();
+            }
+            return remove;
         });
     }
 
     @SubscribeEvent
     public void onPlayerInteract(PlayerInteractEvent.RightClickBlock event) {
+        if (System.currentTimeMillis() - timePos1 < 250) return;
+
         Vec3 newPos = event.getHitVec().getLocation();
 
-        MusicBox musicBox = ClientMusicBoxListener.getMusicBoxByPos(event.getPos());
+        DyeColor dyeColor = DyeColor.getColor(event.getItemStack());
+        if (dyeColor == null) return;
+
+        MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(event.getPos());
+        if (musicBox == null) musicBox = ServerMusicBoxListener.getMusicBoxByPos(block1);
         if (musicBox != null) {
             if (musicBox.isPowered()) {
                 ChatUtils.sendPrivateChatMessage("This music box already has a Audio Cable connected!");
@@ -66,22 +85,23 @@ public class ClientAudioCableListener {
             }
         }
 
-        if (pos1 != null && !pos1.equals(newPos) && System.currentTimeMillis() - timePos1 > 10) {
-            DyeColor dyeColor = DyeColor.getColor(event.getItemStack());
-            if (dyeColor != null) {
-                AudioCable audioCable = new AudioCable(pos1, newPos, block1, event.getPos(), dyeColor);
-                if (audioCable.getBlockDistance() > 32d) {
-                    ChatUtils.sendPrivateChatMessage("The Audio-wire cant be longer then 32 blocks!");
-                    return;
-                }
+        if (pos1 != null && !pos1.equals(newPos)) {
+            AudioCable audioCable = new AudioCable(pos1, newPos, block1, event.getPos(), dyeColor);
+            if (audioCable.getBlockDistance() > 32d) {
+                ChatUtils.sendPrivateChatMessage("The Audio-wire cant be longer then 32 blocks!");
+            } else {
                 audioCables.add(audioCable);
                 pos1 = null;
+                block1 = null;
+                if (musicBox != null) {
+                    musicBox.powerConnected(audioCable);
+                }
             }
         } else {
             pos1 = newPos;
             block1 = event.getPos();
-            timePos1 = System.currentTimeMillis(); // TODO this wont work somehow
         }
+        timePos1 = System.currentTimeMillis();
     }
 
     @SubscribeEvent
@@ -111,7 +131,7 @@ public class ClientAudioCableListener {
             if (hitResult instanceof BlockHitResult) {
                 BlockPos blockPos = ((BlockHitResult) hitResult).getBlockPos();
                 if (Minecraft.getInstance().level != null && !Minecraft.getInstance().level.getBlockState(blockPos).is(Blocks.AIR)) {
-                    MusicBox musicBox = ClientMusicBoxListener.getMusicBoxByPos(blockPos);
+                    MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(blockPos);
                     if (musicBox != null && musicBox.isPowered()) {
                         return;
                     }

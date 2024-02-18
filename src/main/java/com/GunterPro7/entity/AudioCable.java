@@ -7,6 +7,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class AudioCable {
@@ -16,6 +17,11 @@ public class AudioCable {
     private BlockPos endBlock;
     private Vec3 centerPos;
     private DyeColor color;
+
+    @Nullable
+    private MusicBox musicBoxStart;
+    @Nullable
+    private MusicBox musicBoxEnd;
 
     private final VertexBuffer vertexBuffer;
 
@@ -62,6 +68,24 @@ public class AudioCable {
 
     public DyeColor getColor() {
         return color;
+    }
+
+    @Nullable
+    public MusicBox getMusicBoxStart() {
+        return musicBoxStart;
+    }
+
+    public void setMusicBoxStart(@Nullable MusicBox musicBoxStart) {
+        this.musicBoxStart = musicBoxStart;
+    }
+
+    @Nullable
+    public MusicBox getMusicBoxEnd() {
+        return musicBoxEnd;
+    }
+
+    public void setMusicBoxEnd(@Nullable MusicBox musicBoxEnd) {
+        this.musicBoxEnd = musicBoxEnd;
     }
 
     public float[] getRGB() {

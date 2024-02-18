@@ -1,6 +1,7 @@
 package com.GunterPro7.listener;
 
 import com.GunterPro7.entity.MusicBox;
+import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.main.FileManager;
 import com.GunterPro7.main.Main;
 import com.GunterPro7.utils.ChatUtils;
@@ -32,13 +33,13 @@ import java.util.Map;
 import java.util.Random;
 
 @Mod.EventBusSubscriber
-public class ClientMusicBoxListener {
+public class ServerMusicBoxListener {
     private static final Random random = new Random();
 
     private static final List<MusicBox> musicBoxes = new ArrayList<>();
     private static boolean musicBoxesLoaded;
 
-    public ClientMusicBoxListener() {
+    public ServerMusicBoxListener() {
 
     }
 
@@ -105,10 +106,10 @@ public class ClientMusicBoxListener {
             String[] args = message.split(" ");
 
             SoundEvent soundEvent = null;
-            if (args[1].equals("minecraft")) {
-                soundEvent = discSounds.get(args[2]);
-            } else if (args[1].equals("custom")) {
-                ResourceLocation resourceLocation = new ResourceLocation(Main.MODID, args[2]);
+            if (args[2].equals("minecraft")) {
+                soundEvent = discSounds.get(args[3]);
+            } else if (args[2].equals("custom")) {
+                ResourceLocation resourceLocation = new ResourceLocation(Main.MODID, args[3]);
                 soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
             }
 
@@ -128,13 +129,16 @@ public class ClientMusicBoxListener {
             }
 
             for (MusicBox musicBox : musicBoxes) {
-                if (musicBox.isPowered() && musicBox.getDyeColor().equals(DyeColor.LIME)) { // or implement also for "all"
-                    BlockPos pos = musicBox.getBlockPos();
-                    broadcastSound(playerList, level, pos.getX(), pos.getY(), pos.getZ(), BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), SoundSource.RECORDS, 1f, 1f);
+                if (musicBox.isPowered() && musicBox.getAudioCable().getColor().equals(DyeColor.valueOf(args[1].toUpperCase()))) { // or implement also for "all"
+                    if (MusicController.getMusicControllerByMusicBox(musicBox) != null) {
+                        BlockPos pos = musicBox.getBlockPos();
+                        broadcastSound(playerList, level, pos.getX(), pos.getY(), pos.getZ(), BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), SoundSource.RECORDS, 1f, 1f);
+                    }
                 }
             }
         }
     }
+
 
     private void broadcastSound(PlayerList players, Level level, double x, double y, double z, Holder<SoundEvent> sound, SoundSource source, float volume, float pitch) {
         net.minecraftforge.event.PlayLevelSoundEvent.AtPosition event = net.minecraftforge.event.ForgeEventFactory.onPlaySoundAtPosition(level, x, y, z, sound, source, volume, pitch);
