@@ -63,8 +63,21 @@ public class ServerMusicBoxListener {
     @SubscribeEvent
     public void blockBreak(BlockEvent.BreakEvent event) throws IOException {
         if (event.getState().getBlock().equals(Blocks.NOTE_BLOCK)) {
-            FileManager.Positions.remove(event.getPos());
-            musicBoxes.remove(new MusicBox(event.getPos()));
+            BlockPos pos = event.getPos();
+
+            FileManager.Positions.remove(pos);
+            musicBoxes.remove(new MusicBox(pos));
+
+            MusicBox musicBoxToDelete = null;
+            for (MusicBox musicBox : musicBoxes) {
+                if (pos.equals(musicBox.getBlockPos())) {
+                    musicBoxToDelete = musicBox;
+                }
+            }
+
+            if (musicBoxToDelete != null) {
+                musicBoxes.remove(musicBoxToDelete);
+            }
         }
     }
 
