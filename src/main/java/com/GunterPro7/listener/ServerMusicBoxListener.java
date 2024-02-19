@@ -154,11 +154,27 @@ public class ServerMusicBoxListener {
                 }
             }
 
-            sendToClient(playerList.getPlayers().get(0), new ClientMusicBoxManager(!(args.length > 4 && args[4].equals("stop")), resourceLocation, posList));
+            for (ServerPlayer serverPlayer : playerList.getPlayers()) {
+                sendToClient(serverPlayer, new ClientMusicBoxManager(!(args.length > 4 && args[4].equals("stop")), resourceLocation, posList));
+            }
         }
     }
 
-    private void sendToClient(ServerPlayer player, ClientMusicBoxManager message) {
+    public static List<MusicBox> getMusicBoxesContainingController(List<DyeColor> colors, boolean invert) {
+        List<MusicBox> musicBoxes = new ArrayList<>();
+        for (MusicBox musicBox : ServerMusicBoxListener.musicBoxes) {
+            if (musicBox.isPowered() && colors.contains(musicBox.getAudioCable().getColor())) { // or implement also for "all"
+                MusicController musicController = MusicController.getMusicControllerByMusicBox(musicBox);
+                if (invert == (musicController == null)) {
+                    musicBoxes.add(musicBox);
+                }
+            }
+        }
+
+        return musicBoxes;
+    }
+
+    public static void sendToClient(ServerPlayer player, ClientMusicBoxManager message) {
         ClientMusicBoxManager.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message); // TODO hier wirklich die felder reinmachen, spirch List<BlockPos> und SoundEvent
     }
 

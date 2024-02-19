@@ -23,35 +23,10 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11C;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-
-@OnlyIn(Dist.CLIENT) // TODO implement server side
-public class ClientAudioCableListener {
-    private static final Set<AudioCable> audioCables = new CopyOnWriteArraySet<>();
-    @Nullable
-    private Vec3 pos1;
-    private long timePos1;
-    @Nullable
-    private BlockPos block1;
-
-    private static VertexBuffer vertexBuffer;
-
-    public static List<AudioCable> getAudioCablesByPos(BlockPos pos) {
-        List<AudioCable> newAudioCables = new ArrayList<>();
-        for (AudioCable audioCable : audioCables) {
-            if (pos.equals(audioCable.getStartBlock()) || pos.equals(audioCable.getEndBlock())) {
-                newAudioCables.add(audioCable);
-            }
-        }
-        return newAudioCables;
-    }
-
+// Client & Server Side
+public class ClientAudioCableListener extends AudioCableListener {
     @SubscribeEvent
-    public void onPlayerBreakBlock(BlockEvent.BreakEvent event) { // TODO This event should also be called at explosions for example, in generall if this block disapers
+    public void onPlayerBreakBlock(BlockEvent.BreakEvent event) {
         BlockPos pos = event.getPos();
         audioCables.removeIf(audioCable -> {
             BlockPos startBlock = audioCable.getStartBlock();

@@ -43,7 +43,11 @@ public class ClientMusicBoxManager {
 
     public ClientMusicBoxManager(FriendlyByteBuf buffer) {
         this.play = buffer.readBoolean();
-        this.resourceLocation = locationSerializer.deserialize(new JsonPrimitive(buffer.readUtf(buffer.readShort())), null, null);
+        if (buffer.readBoolean()) {
+            this.resourceLocation = locationSerializer.deserialize(new JsonPrimitive(buffer.readUtf(buffer.readShort())), null, null);
+        } else {
+            this.resourceLocation = null;
+        }
 
         posList = new ArrayList<>();
         for (String curPos : buffer.readUtf(buffer.readShort()).split(";")) {
@@ -61,10 +65,13 @@ public class ClientMusicBoxManager {
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeBoolean(play);
+        buffer.writeBoolean(resourceLocation != null);
 
-        String serialized = locationSerializer.serialize(resourceLocation, null, null).getAsString();
-        buffer.writeShort(serialized.length());
-        buffer.writeUtf(serialized);
+        if (resourceLocation != null) {
+            String serialized = locationSerializer.serialize(resourceLocation, null, null).getAsString();
+            buffer.writeShort(serialized.length());
+            buffer.writeUtf(serialized);
+        }
 
         String posListString = blockPosListToString(posList);
         buffer.writeShort(posListString.length());
@@ -102,7 +109,7 @@ public class ClientMusicBoxManager {
 
         SoundManager soundManager = mc.getSoundManager();
         for (SoundInstance soundInstance : instances) {
-            if (soundInstance.getLocation().equals(resourceLocation)) {
+            if (resourceLocation == null || soundInstance.getLocation().equals(resourceLocation)) {
                 BlockPos blockPos = new BlockPos((int) soundInstance.getX(), (int) soundInstance.getY(), (int) soundInstance.getZ());
                 if (blockPosList.contains(blockPos)) {
                     soundManager.stop(soundInstance);
