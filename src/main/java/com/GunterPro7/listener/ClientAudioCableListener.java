@@ -2,6 +2,7 @@ package com.GunterPro7.listener;
 
 import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
+import com.GunterPro7.main.FileManager;
 import com.GunterPro7.utils.ChatUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -15,35 +16,40 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11C;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 // Client & Server Side
 public class ClientAudioCableListener extends AudioCableListener {
     @SubscribeEvent
-    public void onPlayerBreakBlock(BlockEvent.BreakEvent event) {
+    public void onPlayerBreakBlock(BlockEvent.BreakEvent event) throws IOException {
         BlockPos pos = event.getPos();
-        audioCables.removeIf(audioCable -> {
+        List<AudioCable> audioCableList = new ArrayList<>();
+
+        audioCables.forEach(audioCable -> {
             BlockPos startBlock = audioCable.getStartBlock();
             BlockPos endBlock = audioCable.getEndBlock();
 
             int posHashCode = pos.hashCode();
-            boolean remove = (startBlock.hashCode() == posHashCode && startBlock.equals(pos)) || (endBlock.hashCode() == posHashCode && endBlock.equals(pos));
-            if (remove) {
+            if ((startBlock.hashCode() == posHashCode && startBlock.equals(pos)) || (endBlock.hashCode() == posHashCode && endBlock.equals(pos))) {
                 if (audioCable.getMusicBoxStart() != null) audioCable.getMusicBoxStart().powerDisconnected();
                 if (audioCable.getMusicBoxEnd() != null) audioCable.getMusicBoxEnd().powerDisconnected();
+                audioCableList.add(audioCable);
             }
-            return remove;
         });
+
+        FileManager.AudioCables.removeAll(audioCableList);
     }
 
     @SubscribeEvent
-    public void onPlayerInteract(PlayerInteractEvent.RightClickBlock event) {
+    public void onPlayerInteract(PlayerInteractEvent.RightClickBlock event) throws IOException {
         if (System.currentTimeMillis() - timePos1 < 250) return;
 
         Vec3 newPos = event.getHitVec().getLocation();
@@ -65,7 +71,7 @@ public class ClientAudioCableListener extends AudioCableListener {
             if (audioCable.getBlockDistance() > 32d) {
                 ChatUtils.sendPrivateChatMessage("The Audio-wire cant be longer then 32 blocks!");
             } else {
-                audioCables.add(audioCable);
+                FileManager.AudioCables.add(audioCable);
                 pos1 = null;
                 block1 = null;
                 if (musicBox != null) {

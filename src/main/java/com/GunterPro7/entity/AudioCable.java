@@ -8,6 +8,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Objects;
 
 public class AudioCable {
@@ -119,5 +120,16 @@ public class AudioCable {
 
     public boolean isInRange(Vec3 position, double range) {
         return centerPos.closerThan(position, range);
+    }
+
+    @Override
+    public String toString() {
+        return ("startPos:" + startPos + ";endPos:" + endPos + ";startBlock:" + startBlock + ";endBlock" + endBlock + ";color:" + color.name()).replaceAll("[()]", "");
+    }
+
+    public static AudioCable fromString(String audioCableString) {
+        String[] parts = audioCableString.split(";");
+
+        return new AudioCable(Utils.vec3Of(parts[0]), Utils.vec3Of(parts[1]), Utils.blockPosOf(parts[2]), Utils.blockPosOf(parts[3]), DyeColor.valueOf(parts[4]));
     }
 }

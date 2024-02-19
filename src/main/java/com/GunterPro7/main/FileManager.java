@@ -1,5 +1,7 @@
 package com.GunterPro7.main;
 
+import com.GunterPro7.entity.AudioCable;
+import com.GunterPro7.utils.Utils;
 import net.minecraft.core.BlockPos;
 
 import java.io.*;
@@ -72,9 +74,9 @@ public class FileManager {
             }
 
             try {
-                for (String string : fileManager.getByKey("locations.txt").split(";")) {
+                for (String string : fileManager.getByKey(key).split(";")) {
                     if (!string.isEmpty())
-                        blockPosList.add(blockPosFromString(string));
+                        blockPosList.add(Utils.blockPosFromString(string));
                 }
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
@@ -83,32 +85,63 @@ public class FileManager {
 
         public static void add(BlockPos blockPos) throws IOException {
             blockPosList.add(blockPos);
-            fileManager.appendByKey(key, blockPosToString(blockPos) + ";");
+            fileManager.appendByKey(key, Utils.blockPosToString(blockPos) + ";");
         }
 
         public static void remove(BlockPos blockPos) throws IOException {
             blockPosList.remove(blockPos);
-            fileManager.saveByKey(key, blockPosListToString(blockPosList));
+            fileManager.saveByKey(key, Utils.blockPosListToString(blockPosList));
         }
 
         public static List<BlockPos> getAll() {
             return blockPosList;
         }
+    }
 
-        private static String blockPosToString(BlockPos blockPos) {
-            return blockPos.getX() + "," + blockPos.getY() + "," + blockPos.getZ();
+    public static class AudioCables {
+        public static File file;
+        private static final List<AudioCable> audioCableList = new ArrayList<>();
+        private static final FileManager fileManager = new FileManager();
+        private static final String key = "audioCables.txt";
+
+        static {
+            file = new File("libraries/MusicBox/" + key);
+
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            try {
+                for (String string : fileManager.getByKey(key).split("\n")) {
+                    if (!string.isEmpty())
+                        audioCableList.add(AudioCable.fromString(string));
+                }
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        private static String blockPosListToString(List<BlockPos> blockPosList) {
-            StringBuilder stringBuilder = new StringBuilder();
-            blockPosList.forEach(pos -> stringBuilder.append(blockPosToString(pos)).append(";"));
-
-            return stringBuilder.toString();
+        public static void add(AudioCable audioCable) throws IOException {
+            audioCableList.add(audioCable);
+            fileManager.appendByKey(key, audioCable.toString() + "\n");
         }
 
-        private static BlockPos blockPosFromString(String blockPosString) {
-            String[] parts = blockPosString.split(",");
-            return new BlockPos(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+        public static void remove(AudioCable audioCable) throws IOException {
+            audioCableList.remove(audioCable);
+            fileManager.saveByKey(key, Utils.audioCableListToString(audioCableList));
+        }
+
+        public static void removeAll(List<AudioCable> audioCableList) throws IOException {
+            AudioCables.audioCableList.removeAll(audioCableList);
+            fileManager.saveByKey(key, Utils.audioCableListToString(AudioCables.audioCableList));
+        }
+
+        public static List<AudioCable> getAll() {
+            return audioCableList;
         }
     }
 }
