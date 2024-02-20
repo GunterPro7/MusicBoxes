@@ -175,7 +175,7 @@ public class ServerMusicBoxListener {
     }
 
     public static void sendToClient(ServerPlayer player, ClientMusicBoxManager message) {
-        ClientMusicBoxManager.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message); // TODO hier wirklich die felder reinmachen, spirch List<BlockPos> und SoundEvent
+        ClientMusicBoxManager.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
     }
 
     @Deprecated

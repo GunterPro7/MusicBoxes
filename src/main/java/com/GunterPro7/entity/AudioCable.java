@@ -12,19 +12,19 @@ import java.util.List;
 import java.util.Objects;
 
 public class AudioCable {
-    private Vec3 startPos;
-    private Vec3 endPos;
-    private BlockPos startBlock;
-    private BlockPos endBlock;
-    private Vec3 centerPos;
-    private DyeColor color;
+        private Vec3 startPos;
+        private Vec3 endPos;
+        private BlockPos startBlock;
+        private BlockPos endBlock;
+        private Vec3 centerPos;
+        private DyeColor color;
 
-    @Nullable
-    private MusicBox musicBoxStart;
-    @Nullable
-    private MusicBox musicBoxEnd;
+        @Nullable
+        private MusicBox musicBoxStart;
+        @Nullable
+        private MusicBox musicBoxEnd;
 
-    private final VertexBuffer vertexBuffer;
+        private final VertexBuffer vertexBuffer;
 
     public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock) {
         this(startPos, endPos, startBlock, endBlock, DyeColor.WHITE);

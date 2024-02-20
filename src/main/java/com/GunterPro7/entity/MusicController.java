@@ -1,9 +1,9 @@
 package com.GunterPro7.entity;
 
+import com.GunterPro7.listener.AudioCableListener;
 import com.GunterPro7.listener.ClientAudioCableListener;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.DyeColor;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,6 +22,10 @@ public class MusicController {
         return pos;
     }
 
+    public List<AudioCable> getAudioCablesConnected() {
+        return AudioCableListener.getAudioCablesByPos(pos);
+    }
+
     @Override
     public String toString() {
         return "Position: " + pos;
@@ -29,15 +33,55 @@ public class MusicController {
 
 
     public static MusicController getMusicControllerByMusicBox(MusicBox musicBox) {
-        if (musicBox.hasAudioCable()) return getBlockPosOfMusicControllerByAudioCable(musicBox.getAudioCable(), new HashSet<>());
+        if (musicBox.hasAudioCable()) return getControllerByAudioCable(musicBox.getAudioCable(), new HashSet<>());
         return null;
     }
 
     public static MusicController getMusicControllerByAudioCable(AudioCable audioCable) {
-        return getBlockPosOfMusicControllerByAudioCable(audioCable, new HashSet<>());
+        return getControllerByAudioCable(audioCable, new HashSet<>());
     }
 
-    private static MusicController getBlockPosOfMusicControllerByAudioCable(AudioCable audioCable, Set<BlockPos> checkedPositions) {
+    public Set<MusicBox> getMusicBoxesByColor(DyeColor dyeColor) {
+        return getMusicBoxesByColor(pos, dyeColor, new ArrayList<>());
+    }
+
+    public static Set<MusicBox> getMusicBoxesByColorAndPos(BlockPos pos, DyeColor dyeColor) {
+        return getMusicBoxesByColor(pos, dyeColor, new ArrayList<>());
+    }
+
+    // TODO untested
+    private static Set<MusicBox> getMusicBoxesByColor(BlockPos blockPos, DyeColor dyeColor, List<BlockPos> checkedPositions) {
+        Set<MusicBox> musicBoxes = new HashSet<>();
+
+        List<AudioCable> audioCables = AudioCableListener.getAudioCablesByPos(blockPos);
+
+        for (AudioCable audioCable : audioCables) {
+            if (audioCable.getColor().equals(dyeColor)) {
+                if (audioCable.getMusicBoxStart() != null) {
+                    musicBoxes.add(audioCable.getMusicBoxStart());
+                } else if (audioCable.getMusicBoxEnd() != null) {
+                    musicBoxes.add(audioCable.getMusicBoxEnd());
+                }
+
+                BlockPos newBlockPos;
+                if (!checkedPositions.contains(audioCable.getStartBlock())) {
+                    newBlockPos = audioCable.getStartBlock() ;
+                } else {
+                    if (checkedPositions.contains(audioCable.getEndBlock())) {
+                        return musicBoxes;
+                    }
+                    newBlockPos = audioCable.getEndBlock();
+                }
+                checkedPositions.add(newBlockPos);
+
+                musicBoxes.addAll(getMusicBoxesByColor(newBlockPos, dyeColor, checkedPositions));
+            }
+        }
+
+        return musicBoxes;
+    }
+
+    private static MusicController getControllerByAudioCable(AudioCable audioCable, Set<BlockPos> checkedPositions) {
         BlockPos startBlock = audioCable.getStartBlock();
         BlockPos endBlock = audioCable.getEndBlock();
 
@@ -58,7 +102,7 @@ public class MusicController {
         for (AudioCable cable : startBlockCables) {
             BlockPos pos = cable.getStartBlock();
             if (!checkedPositions.contains(pos)) {
-                MusicController controllerPos = getBlockPosOfMusicControllerByAudioCable(cable, checkedPositions);
+                MusicController controllerPos = getControllerByAudioCable(cable, checkedPositions);
                 if (controllerPos != null) {
                     return controllerPos;
                 }
@@ -69,7 +113,7 @@ public class MusicController {
         for (AudioCable cable : endBlockCables) {
             BlockPos pos = cable.getEndBlock();
             if (!checkedPositions.contains(pos)) {
-                MusicController controllerPos = getBlockPosOfMusicControllerByAudioCable(cable, checkedPositions);
+                MusicController controllerPos = getControllerByAudioCable(cable, checkedPositions);
                 if (controllerPos != null) {
                     return controllerPos;
                 }
