@@ -119,9 +119,7 @@ public class FileManager {
             try {
                 for (String string : fileManager.getByKey(key).split("\n")) {
                     if (!string.isEmpty()) {
-                        // TODO improve fromString methode
-
-                        //audioCableList.add(AudioCable.fromString(string));
+                        audioCableList.add(AudioCable.fromString(string));
                     }
                 }
             } catch (FileNotFoundException e) {

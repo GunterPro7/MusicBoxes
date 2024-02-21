@@ -2,6 +2,7 @@ package com.GunterPro7.entity;
 
 import com.GunterPro7.listener.ClientMusicBoxManager;
 import com.GunterPro7.listener.ServerMusicBoxListener;
+import com.GunterPro7.utils.JsonUtils;
 import com.GunterPro7.utils.Utils;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import net.minecraft.client.Minecraft;
@@ -15,6 +16,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class AudioCable {
@@ -122,12 +124,12 @@ public class AudioCable {
 
     @Override
     public String toString() {
-        return ("startPos:" + startPos + ";endPos:" + endPos + ";startBlock:" + startBlock + ";endBlock" + endBlock + ";color:" + color.name()).replaceAll("[()]", "");
+        return ("startPos:" + startPos + ";endPos:" + endPos + ";startBlock:" + startBlock.toShortString() + ";endBlock:" + endBlock.toShortString() + ";color:" + color.name()).replaceAll("[()]", "");
     }
 
     public static AudioCable fromString(String audioCableString) {
-        String[] parts = audioCableString.split(";");
+        Map<String, String> map = JsonUtils.asMap(audioCableString);
 
-        return new AudioCable(Utils.vec3Of(parts[0]), Utils.vec3Of(parts[1]), Utils.blockPosOf(parts[2]), Utils.blockPosOf(parts[3]), DyeColor.valueOf(parts[4]));
+    return new AudioCable(Utils.vec3Of(map.get("startPos")), Utils.vec3Of(map.get("endPos")), Utils.blockPosOf(map.get("startBlock")), Utils.blockPosOf(map.get("endBlock")), DyeColor.valueOf(map.get("color")));
     }
 }
