@@ -45,7 +45,8 @@ public class ClientAudioCableListener extends AudioCableListener {
             }
         });
 
-        FileManager.AudioCables.removeAll(audioCableList);
+        audioCables.removeAll(audioCableList);
+        //FileManager.AudioCables.removeAll(audioCableList);
     }
 
     @SubscribeEvent
@@ -71,7 +72,7 @@ public class ClientAudioCableListener extends AudioCableListener {
             if (audioCable.getBlockDistance() > 32d) {
                 ChatUtils.sendPrivateChatMessage("The Audio-wire cant be longer then 32 blocks!");
             } else {
-                FileManager.AudioCables.add(audioCable);
+                audioCables.add(audioCable);
                 pos1 = null;
                 block1 = null;
                 if (musicBox != null) {

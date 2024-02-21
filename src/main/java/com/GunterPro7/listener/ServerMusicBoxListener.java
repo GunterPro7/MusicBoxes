@@ -9,6 +9,7 @@ import com.GunterPro7.utils.MapUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,10 +28,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Mod.EventBusSubscriber
 public class ServerMusicBoxListener {
@@ -48,7 +46,6 @@ public class ServerMusicBoxListener {
             if (musicBox.getBlockPos().equals(blockPos)) {
                 return musicBox;
             }
-            Minecraft.getInstance().getSoundManager().stop();
         }
         return null;
     }
@@ -144,16 +141,20 @@ public class ServerMusicBoxListener {
                 musicBoxesLoaded = true;
             }
 
-            List<BlockPos> posList = new ArrayList<>();
+            //List<BlockPos> posList = new ArrayList<>();
 
-            for (MusicBox musicBox : musicBoxes) {
-                if (musicBox.isPowered() && musicBox.getAudioCable().getColor().equals(DyeColor.valueOf(args[1].toUpperCase()))) { // or implement also for "all"
-                    if (MusicController.getMusicControllerByMusicBox(musicBox) != null) {
-                        posList.add(musicBox.getBlockPos());
-                    }
-                }
-            }
+            //for (MusicBox musicBox : musicBoxes) {
+            //    if (musicBox.isPowered() && musicBox.getAudioCable().getColor().equals(DyeColor.valueOf(args[1].toUpperCase()))) { // or implement also for "all"
+            //        if (MusicController.getMusicControllerByMusicBox(musicBox) != null) {
+            //            posList.add(musicBox.getBlockPos());
+            //        }
+            //    }
+            //}
 
+            Set<MusicBox> musicBoxes = MusicController.getMusicBoxesByColorAndPos(new BlockPos(0, 100, 0), DyeColor.valueOf(args[1].toUpperCase()));
+
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal(musicBoxes.toString()));
+            List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
             for (ServerPlayer serverPlayer : playerList.getPlayers()) {
                 sendToClient(serverPlayer, new ClientMusicBoxManager(!(args.length > 4 && args[4].equals("stop")), resourceLocation, posList));
             }

@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class FileManager {
     private static final String path = "libraries/MusicBox/";
@@ -115,14 +116,14 @@ public class FileManager {
                 }
             }
 
-            try {
-                for (String string : fileManager.getByKey(key).split("\n")) {
-                    if (!string.isEmpty())
-                        audioCableList.add(AudioCable.fromString(string));
-                }
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+            //try {
+            //    for (String string : fileManager.getByKey(key).split("\n")) {
+            //        if (!string.isEmpty())
+            //            audioCableList.add(AudioCable.fromString(string));
+            //    }
+            //} catch (FileNotFoundException e) {
+            //    throw new RuntimeException(e);
+            //}
         }
 
         public static void add(AudioCable audioCable) throws IOException {

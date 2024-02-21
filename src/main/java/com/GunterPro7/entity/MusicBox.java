@@ -54,4 +54,9 @@ public class MusicBox {
     public boolean hasAudioCable() {
         return audioCable != null;
     }
+
+    @Override
+    public String toString() {
+        return "MusicBox at: " + blockPos + ", AudioCable connected: " + (audioCable != null ? audioCable : "null") + "";
+    }
 }

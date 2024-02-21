@@ -12,7 +12,7 @@ import java.util.List;
 
 // Client & Server Side
 public class AudioCableListener {
-    public static final List<AudioCable> audioCables = FileManager.AudioCables.getAll();
+    public static final List<AudioCable> audioCables = new ArrayList<>();
     @Nullable
     protected Vec3 pos1;
     protected long timePos1;

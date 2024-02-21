@@ -2,6 +2,8 @@ package com.GunterPro7.entity;
 
 import com.GunterPro7.listener.AudioCableListener;
 import com.GunterPro7.listener.ClientAudioCableListener;
+import com.GunterPro7.utils.ChatUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.DyeColor;
 
@@ -58,8 +60,12 @@ public class MusicController {
         for (AudioCable audioCable : audioCables) {
             if (audioCable.getColor().equals(dyeColor)) {
                 if (audioCable.getMusicBoxStart() != null) {
+                    ChatUtils.sendPrivateChatMessage("in musicBoxStart check");
+                    ChatUtils.sendPrivateChatMessage(audioCable.getMusicBoxStart().toString());
                     musicBoxes.add(audioCable.getMusicBoxStart());
-                } else if (audioCable.getMusicBoxEnd() != null) {
+                } if (audioCable.getMusicBoxEnd() != null) {
+                    ChatUtils.sendPrivateChatMessage("in musicBoxStart check");
+                    ChatUtils.sendPrivateChatMessage(audioCable.getMusicBoxEnd().toString());
                     musicBoxes.add(audioCable.getMusicBoxEnd());
                 }
 

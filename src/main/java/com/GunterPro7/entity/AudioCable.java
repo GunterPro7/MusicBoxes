@@ -1,30 +1,36 @@
 package com.GunterPro7.entity;
 
+import com.GunterPro7.listener.ClientMusicBoxManager;
+import com.GunterPro7.listener.ServerMusicBoxListener;
 import com.GunterPro7.utils.Utils;
 import com.mojang.blaze3d.vertex.VertexBuffer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
 public class AudioCable {
-        private Vec3 startPos;
-        private Vec3 endPos;
-        private BlockPos startBlock;
-        private BlockPos endBlock;
-        private Vec3 centerPos;
-        private DyeColor color;
+    private Vec3 startPos;
+    private Vec3 endPos;
+    private BlockPos startBlock;
+    private BlockPos endBlock;
+    private Vec3 centerPos;
+    private DyeColor color;
 
-        @Nullable
-        private MusicBox musicBoxStart;
-        @Nullable
-        private MusicBox musicBoxEnd;
+    @Nullable
+    private MusicBox musicBoxStart;
+    @Nullable
+    private MusicBox musicBoxEnd;
 
-        private final VertexBuffer vertexBuffer;
+    private final VertexBuffer vertexBuffer;
 
     public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock) {
         this(startPos, endPos, startBlock, endBlock, DyeColor.WHITE);
@@ -73,20 +79,12 @@ public class AudioCable {
 
     @Nullable
     public MusicBox getMusicBoxStart() {
-        return musicBoxStart;
-    }
-
-    public void setMusicBoxStart(@Nullable MusicBox musicBoxStart) {
-        this.musicBoxStart = musicBoxStart;
+        return ServerMusicBoxListener.getMusicBoxByPos(startBlock);
     }
 
     @Nullable
     public MusicBox getMusicBoxEnd() {
-        return musicBoxEnd;
-    }
-
-    public void setMusicBoxEnd(@Nullable MusicBox musicBoxEnd) {
-        this.musicBoxEnd = musicBoxEnd;
+        return ServerMusicBoxListener.getMusicBoxByPos(endBlock);
     }
 
     public float[] getRGB() {
