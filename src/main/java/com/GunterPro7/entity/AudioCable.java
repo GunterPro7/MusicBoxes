@@ -130,6 +130,6 @@ public class AudioCable {
     public static AudioCable fromString(String audioCableString) {
         Map<String, String> map = JsonUtils.asMap(audioCableString);
 
-    return new AudioCable(Utils.vec3Of(map.get("startPos")), Utils.vec3Of(map.get("endPos")), Utils.blockPosOf(map.get("startBlock")), Utils.blockPosOf(map.get("endBlock")), DyeColor.valueOf(map.get("color")));
+        return new AudioCable(Utils.vec3Of(map.get("startPos")), Utils.vec3Of(map.get("endPos")), Utils.blockPosOf(map.get("startBlock")), Utils.blockPosOf(map.get("endBlock")), DyeColor.valueOf(map.get("color")));
     }
 }
