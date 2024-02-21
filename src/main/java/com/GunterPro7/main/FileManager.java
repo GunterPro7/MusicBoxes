@@ -116,14 +116,17 @@ public class FileManager {
                 }
             }
 
-            //try {
-            //    for (String string : fileManager.getByKey(key).split("\n")) {
-            //        if (!string.isEmpty())
-            //            audioCableList.add(AudioCable.fromString(string));
-            //    }
-            //} catch (FileNotFoundException e) {
-            //    throw new RuntimeException(e);
-            //}
+            try {
+                for (String string : fileManager.getByKey(key).split("\n")) {
+                    if (!string.isEmpty()) {
+                        // TODO improve fromString methode
+
+                        //audioCableList.add(AudioCable.fromString(string));
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public static void add(AudioCable audioCable) throws IOException {
