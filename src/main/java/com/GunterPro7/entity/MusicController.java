@@ -55,18 +55,12 @@ public class MusicController {
         Set<MusicBox> musicBoxes = new HashSet<>();
 
         List<AudioCable> audioCables = AudioCableListener.getAudioCablesByPos(blockPos);
-        ChatUtils.sendPrivateChatMessage("AudioCables connected to block " + blockPos + ": " + audioCables);
 
         for (AudioCable audioCable : audioCables) {
             if (audioCable.getColor().equals(dyeColor)) {
-                ChatUtils.sendPrivateChatMessage("dyeColor equals color");
                 if (audioCable.getMusicBoxStart() != null) {
-                    ChatUtils.sendPrivateChatMessage("in musicBoxStart check");
-                    ChatUtils.sendPrivateChatMessage(audioCable.getMusicBoxStart().toString());
                     musicBoxes.add(audioCable.getMusicBoxStart());
                 } if (audioCable.getMusicBoxEnd() != null) {
-                    ChatUtils.sendPrivateChatMessage("in musicBoxStart check");
-                    ChatUtils.sendPrivateChatMessage(audioCable.getMusicBoxEnd().toString());
                     musicBoxes.add(audioCable.getMusicBoxEnd());
                 }
 
@@ -79,7 +73,6 @@ public class MusicController {
                     }
                     newBlockPos = audioCable.getEndBlock();
                 }
-                ChatUtils.sendPrivateChatMessage("new Block Pos: " + newBlockPos);
                 checkedPositions.add(blockPos);
 
                 musicBoxes.addAll(getMusicBoxesByColor(newBlockPos, dyeColor, checkedPositions));
