@@ -73,7 +73,7 @@ public class ClientAudioCableListener extends AudioCableListener {
                 ChatUtils.sendPrivateChatMessage("The Audio-wire cant be longer then 32 blocks!");
             } else {
                 audioCables.add(audioCable);
-                FileManager.AudioCables.add(audioCable);
+                FileManager.AudioCables.add(audioCable); // TODO beim abspeichern in die file gibt es einen fehler
                 pos1 = null;
                 block1 = null;
                 if (musicBox != null) {

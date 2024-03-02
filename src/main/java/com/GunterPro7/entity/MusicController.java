@@ -79,8 +79,8 @@ public class MusicController {
                     }
                     newBlockPos = audioCable.getEndBlock();
                 }
-                checkedPositions.add(newBlockPos);
                 ChatUtils.sendPrivateChatMessage("new Block Pos: " + newBlockPos);
+                checkedPositions.add(blockPos);
 
                 musicBoxes.addAll(getMusicBoxesByColor(newBlockPos, dyeColor, checkedPositions));
             }
