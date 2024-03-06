@@ -4,6 +4,8 @@ import com.GunterPro7.entity.AudioCable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.List;
 
 public class Utils {
@@ -15,6 +17,10 @@ public class Utils {
     public static BlockPos blockPosOf(String string) {
         String[] parts = string.split(",");
         return new BlockPos(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+    }
+
+    public static BlockPos blockPosOf(Vec3 vec3) {
+        return new BlockPos((int) vec3.x, (int) vec3.y, (int) vec3.z);
     }
 
     public static String blockPosToString(BlockPos blockPos) {
@@ -43,7 +49,18 @@ public class Utils {
         return stringBuilder.toString();
     }
 
+    public static RandomAccessFile moveBytes(RandomAccessFile raf, int from, int to, int length) throws IOException {
+        byte[] byteArray = new byte[length];
+        raf.read(byteArray);
 
+        raf.seek(from);
+        if (to - from == length) {
+            raf.setLength(from + length);
+        }
+
+        raf.write(byteArray);
+        return raf;
+    }
 
 
     public <T> List<T> getStaticFields(Class<T> class_) {

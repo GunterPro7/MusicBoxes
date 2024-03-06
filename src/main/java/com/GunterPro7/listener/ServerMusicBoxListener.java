@@ -152,7 +152,6 @@ public class ServerMusicBoxListener {
             //}
 
             Set<MusicBox> musicBoxes = MusicController.getMusicBoxesByColorAndPos(new BlockPos(0, 100, 0), DyeColor.valueOf(args[1].toUpperCase()));
-            // TODO this is not working, we get an empty array, alr added test messages
 
 
             Minecraft.getInstance().player.sendSystemMessage(Component.literal(musicBoxes.toString()));

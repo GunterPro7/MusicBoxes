@@ -34,6 +34,10 @@ public class AudioCable {
 
     private final VertexBuffer vertexBuffer;
 
+    public AudioCable(Vec3 startPos, Vec3 endPos, DyeColor dyeColor) {
+        this(startPos, endPos, Utils.blockPosOf(startPos), Utils.blockPosOf(endPos), dyeColor);
+    }
+
     public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock) {
         this(startPos, endPos, startBlock, endBlock, DyeColor.WHITE);
     }
@@ -102,12 +106,12 @@ public class AudioCable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AudioCable that = (AudioCable) o;
-        return startPos.equals(that.startPos) && endPos.equals(that.endPos);
+        return startPos.equals(that.startPos) && endPos.equals(that.endPos) && color == that.color;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(startPos, endPos);
+        return Objects.hash(startPos, endPos, color);
     }
 
     public double getDistance(Vec3 position) {
@@ -124,12 +128,12 @@ public class AudioCable {
 
     @Override
     public String toString() {
-        return ("startPos:" + startPos + ";endPos:" + endPos + ";startBlock:" + startBlock.toShortString() + ";endBlock:" + endBlock.toShortString() + ";color:" + color.name()).replaceAll("[()]", "");
+        return ("startPos:" + startPos + ";endPos:" + endPos + ";color:" + color.name()).replaceAll("[()]", "");
     }
 
     public static AudioCable fromString(String audioCableString) {
         Map<String, String> map = JsonUtils.asMap(audioCableString);
 
-        return new AudioCable(Utils.vec3Of(map.get("startPos")), Utils.vec3Of(map.get("endPos")), Utils.blockPosOf(map.get("startBlock")), Utils.blockPosOf(map.get("endBlock")), DyeColor.valueOf(map.get("color")));
+        return new AudioCable(Utils.vec3Of(map.get("startPos")), Utils.vec3Of(map.get("endPos")), DyeColor.valueOf(map.get("color")));
     }
 }
