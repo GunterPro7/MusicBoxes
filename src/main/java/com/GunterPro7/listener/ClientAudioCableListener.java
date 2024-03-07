@@ -28,6 +28,7 @@ import java.util.List;
 
 // Client & Server Side
 public class ClientAudioCableListener extends AudioCableListener {
+
     @SubscribeEvent
     public void onPlayerBreakBlock(BlockEvent.BreakEvent event) throws IOException {
         BlockPos pos = event.getPos();
@@ -89,6 +90,11 @@ public class ClientAudioCableListener extends AudioCableListener {
 
     @SubscribeEvent
     public void renderLines(RenderLevelStageEvent event) {
+        if (!FileManager.AudioCables.loaded) {
+            FileManager.AudioCables.loaded = true;
+            audioCables.addAll(FileManager.AudioCables.getAll());
+        }
+
         if (Minecraft.getInstance().player == null) return;
         if (vertexBuffer == null) vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 
@@ -127,8 +133,10 @@ public class ClientAudioCableListener extends AudioCableListener {
         }
     }
 
+
+
     private void renderLine(AudioCable audioCable, Vec3 view, BufferBuilder buffer, RenderLevelStageEvent event, VertexFormat.Mode mode) {
-        renderLine(audioCable.getStartPos(), audioCable.getEndPos(), audioCable.getRGB(), view, buffer, audioCable.getVertexBuffer(), event, mode);
+        renderLine(audioCable.getStartPos(), audioCable.getEndPos(), audioCable.getRGB(), view, buffer, vertexBuffer, event, mode);
     }
 
     private void renderLine(Vec3 pos1, Vec3 pos2, float[] rgb, Vec3 view, BufferBuilder buffer, VertexBuffer vertexBuffer, RenderLevelStageEvent event, VertexFormat.Mode mode) {

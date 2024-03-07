@@ -2,7 +2,9 @@ package com.GunterPro7.main;
 
 import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.utils.Utils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
 
@@ -105,6 +107,7 @@ public class FileManager {
         private static final List<AudioCable> audioCableList = new ArrayList<>();
         private static final FileManager fileManager = new FileManager();
         private static final String key = "audioCables.bin";
+        public static boolean loaded;
 
         static {
             file = new File("libraries/MusicBox/" + key);
@@ -163,14 +166,16 @@ public class FileManager {
         public static void removeAll(List<AudioCable> audioCables) throws IOException {
             AudioCables.audioCableList.removeAll(audioCables);
 
-            remove(audioCableList, true);
+            remove(audioCables, true);
         }
 
         public static List<AudioCable> getAll() {
             return audioCableList;
         }
 
-        public static void remove(List<AudioCable> audioCables, boolean all) throws IOException {
+        private static void remove(List<AudioCable> audioCables, boolean all) throws IOException {
+            System.out.println(audioCables.toString());
+
             try (RandomAccessFile raf = fileManager.rafByKey(key)) {
                 while (raf.getFilePointer() != raf.length()) {
                     try {
@@ -178,9 +183,13 @@ public class FileManager {
                         Vec3 endPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
                         DyeColor dyeColor = DyeColor.valueOf(raf.readUTF());
 
+                        AudioCable curAudioCable = new AudioCable(startPos, endPos, dyeColor);
+
                         for (AudioCable audioCable : audioCables) {
-                            if (audioCable.equals(new AudioCable(startPos, endPos, dyeColor))) {
-                                removeEntry(raf);
+                            if (audioCable.hashCode() == curAudioCable.hashCode() && audioCable.equals(curAudioCable)) {
+                                System.out.println(curAudioCable + " CUR");
+                                System.out.println(audioCable + " NOR");
+                                removeEntry(raf, Double.BYTES * 6 + dyeColor.name().length() + 2);
                                 if (!all) {
                                     break;
                                 }
@@ -194,20 +203,22 @@ public class FileManager {
         }
 
         // Length: Double.BYTES * 6 + UTF
-        private static void removeEntry(RandomAccessFile raf) throws IOException {
+        private static void removeEntry(RandomAccessFile raf, int size) throws IOException {
             long position = raf.getFilePointer();
-
-            raf.skipBytes(Double.BYTES * 6);
-            short utfLength = raf.readShort();
-            raf.skipBytes(utfLength);
 
             byte[] byteArray = new byte[(int) (raf.length() - raf.getFilePointer())];
             raf.read(byteArray);
 
-            raf.seek(position);
-            raf.setLength(raf.length() - Double.BYTES * 6 + utfLength + Short.BYTES);
+            int newPos = (int) position - size;
+            if (newPos < 0) {
+                newPos = 0;
+            }
 
+            raf.seek(newPos);
+            raf.setLength(raf.length() - size);
             raf.write(byteArray);
+
+            raf.seek(newPos);
         }
     }
 }

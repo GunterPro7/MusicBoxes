@@ -32,8 +32,6 @@ public class AudioCable {
     @Nullable
     private MusicBox musicBoxEnd;
 
-    private final VertexBuffer vertexBuffer;
-
     public AudioCable(Vec3 startPos, Vec3 endPos, DyeColor dyeColor) {
         this(startPos, endPos, Utils.blockPosOf(startPos), Utils.blockPosOf(endPos), dyeColor);
     }
@@ -48,7 +46,6 @@ public class AudioCable {
         this.startBlock = startBlock;
         this.endBlock = endBlock;
         this.color = color;
-        this.vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 
 
         // x1 = 200, x2 = 220    -> mid => 210  ->
@@ -95,10 +92,6 @@ public class AudioCable {
 
     public float[] getRGB() {
         return color.getTextureDiffuseColors();
-    }
-
-    public VertexBuffer getVertexBuffer() {
-        return vertexBuffer;
     }
 
     @Override
