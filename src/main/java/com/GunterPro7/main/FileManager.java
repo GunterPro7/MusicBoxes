@@ -77,23 +77,25 @@ public class FileManager {
             blockPosList.remove(blockPos);
 
             try (RandomAccessFile raf = fileManager.rafByKey(key)) {
-                int x = raf.readInt();
-                int y = raf.readInt();
-                int z = raf.readInt();
+                while (raf.getFilePointer() != file.length()) {
+                    int x = raf.readInt();
+                    int y = raf.readInt();
+                    int z = raf.readInt();
 
-                if (blockPos.getX() == x && blockPos.getY() == y && blockPos.getZ() == z) {
-                    raf.seek(raf.getFilePointer() - Integer.BYTES * 3);
+                    if (blockPos.getX() == x && blockPos.getY() == y && blockPos.getZ() == z) {
+                        long position = raf.getFilePointer();
+                        byte[] byteArray = new byte[(int) (raf.length() - position)];
+                        raf.read(byteArray);
+
+                        raf.seek(position - Integer.BYTES * 3);
+
+                        raf.setLength(raf.length() - Integer.BYTES * 3);
+
+                        raf.write(byteArray);
+                    }
                 }
-                raf.skipBytes(Integer.BYTES * 3); // Bytes to delete
-                int position = (int) raf.getFilePointer();
-
-                byte[] byteArray = new byte[(int) (raf.length() - position)];
-                raf.read(byteArray);
-
-                raf.seek(position);
-                raf.setLength(position);
-
-                raf.write(byteArray);
+            } catch (EOFException e) {
+                e.printStackTrace();
             }
         }
 
