@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class MusicBoxItem extends BlockItem {
-
     public MusicBoxItem() {
         super(ModBlocks.MUSIC_BOX_BLOCK.get(), new Item.Properties().stacksTo(64));
     }

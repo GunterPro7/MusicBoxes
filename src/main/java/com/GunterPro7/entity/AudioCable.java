@@ -20,17 +20,12 @@ import java.util.Map;
 import java.util.Objects;
 
 public class AudioCable {
-    private Vec3 startPos;
-    private Vec3 endPos;
-    private BlockPos startBlock;
-    private BlockPos endBlock;
-    private Vec3 centerPos;
+    private final Vec3 startPos;
+    private final Vec3 endPos;
+    private final BlockPos startBlock;
+    private final BlockPos endBlock;
+    private final Vec3 centerPos;
     private DyeColor color;
-
-    @Nullable
-    private MusicBox musicBoxStart;
-    @Nullable
-    private MusicBox musicBoxEnd;
 
     public AudioCable(Vec3 startPos, Vec3 endPos, DyeColor dyeColor) {
         this(startPos, endPos, Utils.blockPosOf(startPos), Utils.blockPosOf(endPos), dyeColor);

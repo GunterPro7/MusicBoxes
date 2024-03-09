@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "musicboxes:block/music_controller" }
+  }
+}
