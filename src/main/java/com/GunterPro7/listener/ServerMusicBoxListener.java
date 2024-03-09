@@ -1,5 +1,7 @@
 package com.GunterPro7.listener;
 
+import com.GunterPro7.block.ModBlocks;
+import com.GunterPro7.block.MusicBoxBlock;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.main.FileManager;
@@ -52,7 +54,7 @@ public class ServerMusicBoxListener {
 
     @SubscribeEvent
     public void blockPlace(BlockEvent.EntityPlaceEvent event) throws IOException {
-        if (event.getPlacedBlock().getBlock().equals(Blocks.NOTE_BLOCK)) {
+        if (event.getPlacedBlock().is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
             FileManager.Positions.add(event.getPos());
             musicBoxes.add(new MusicBox(event.getPos()));
         }
@@ -60,7 +62,7 @@ public class ServerMusicBoxListener {
 
     @SubscribeEvent
     public void blockBreak(BlockEvent.BreakEvent event) throws IOException {
-        if (event.getState().getBlock().equals(Blocks.NOTE_BLOCK)) {
+        if (event.getState().is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
             BlockPos pos = event.getPos();
 
             FileManager.Positions.remove(pos);
