@@ -1,19 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "WWW",
     "WDW",
-    "WEW"
+    "WJW",
+    "WWW"
   ],
   "key": {
-    "E": {
-      "item": "minecraft:emerald_block"
+    "J": {
+      "item": "minecraft:jukebox"
     },
     "W": {
       "item": "minecraft:oak_planks"
     },
     "D": {
-      "item": "minecraft:diamond_block"
+      "item": "minecraft:diamond"
     }
   },
   "result": {
