@@ -1,5 +1,7 @@
 {
   "variants": {
-    "": { "model": "musicboxes:block/music_box" }
+    "type=bottom": { "model": "musicboxes:block/music_box_bottom" },
+    "type=top": { "model": "musicboxes:block/music_box_top" },
+    "type=double": { "model": "musicboxes:block/music_box_double" }
   }
 }

@@ -58,7 +58,7 @@ public class FileManager {
                     blockPosList.add(new BlockPos(raf.readInt(), raf.readInt(), raf.readInt()));
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
 
