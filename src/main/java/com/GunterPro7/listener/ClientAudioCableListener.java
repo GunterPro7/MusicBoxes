@@ -47,7 +47,7 @@ public class ClientAudioCableListener extends AudioCableListener {
         });
 
         audioCables.removeAll(audioCableList);
-        FileManager.AudioCables.removeAll(audioCableList);
+        FileManager.AudioCables.removeAll(audioCableList); // TODO also call this event server side and run this action here
     }
 
     @SubscribeEvent
@@ -90,11 +90,6 @@ public class ClientAudioCableListener extends AudioCableListener {
 
     @SubscribeEvent
     public void renderLines(RenderLevelStageEvent event) {
-        if (!FileManager.AudioCables.loaded) {
-            FileManager.AudioCables.loaded = true;
-            audioCables.addAll(FileManager.AudioCables.getAll());
-        }
-
         if (Minecraft.getInstance().player == null) return;
         if (vertexBuffer == null) vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 

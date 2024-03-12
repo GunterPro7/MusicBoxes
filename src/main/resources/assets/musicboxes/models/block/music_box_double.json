@@ -3,6 +3,6 @@
   "textures": {
     "side": "musicboxes:block/music_box_side",
     "top": "musicboxes:block/music_box_top",
-    "bottom": "musicboxes:block/music_box_top"
+    "bottom": "musicboxes:block/music_box_side"
   }
 }

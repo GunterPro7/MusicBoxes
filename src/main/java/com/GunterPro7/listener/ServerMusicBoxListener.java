@@ -1,7 +1,6 @@
 package com.GunterPro7.listener;
 
 import com.GunterPro7.block.ModBlocks;
-import com.GunterPro7.block.MusicBoxBlock;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.main.FileManager;
@@ -21,7 +20,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -36,8 +34,7 @@ import java.util.*;
 public class ServerMusicBoxListener {
     private static final Random random = new Random();
 
-    private static final List<MusicBox> musicBoxes = new ArrayList<>();
-    private static boolean musicBoxesLoaded;
+    public static final List<MusicBox> musicBoxes = new ArrayList<>();
 
     public ServerMusicBoxListener() {
 
@@ -100,19 +97,9 @@ public class ServerMusicBoxListener {
             "relic", SoundEvents.MUSIC_DISC_RELIC
     );
 
-    @SubscribeEvent
-    public void realTICK(TickEvent.ClientTickEvent event) {
-        if (Minecraft.getInstance().player == null) return;
-        BlockPos playerPos = Minecraft.getInstance().player.getOnPos();
-
-        BlockPos pos2 = new BlockPos(playerPos.getX() + 5, playerPos.getY(), playerPos.getZ());
-
-        //renderLead(playerPos, pos2, 0.4f, 0.4f, 0.0f, 0.75f);
-    }
-
 
     @SubscribeEvent
-    public void onTick(ServerChatEvent event) throws IllegalAccessException, NoSuchFieldException, NoSuchMethodException {
+    public void onDEPRECATEDCOMMAND(ServerChatEvent event) throws IllegalAccessException, NoSuchFieldException, NoSuchMethodException {
         if (event.getMessage().getString().startsWith("musicBox")) {
             String message = event.getMessage().getString();
 
@@ -135,13 +122,6 @@ public class ServerMusicBoxListener {
 
             PlayerList playerList = event.getPlayer().getServer().getPlayerList();
             Level level = event.getPlayer().level();
-
-            if (!musicBoxesLoaded) {
-                for (BlockPos blockPos : FileManager.Positions.getAll()) {
-                    musicBoxes.add(new MusicBox(blockPos));
-                }
-                musicBoxesLoaded = true;
-            }
 
             //List<BlockPos> posList = new ArrayList<>();
 

@@ -27,7 +27,8 @@ public class ServerAudioCableListener extends AudioCableListener {
 
         MinecraftServer server =  event.getLevel().getServer();
         if (server != null) {
-            server.getPlayerList().getPlayers().forEach(player -> ServerMusicBoxListener.sendToClient(player, new ClientMusicBoxManager(false, null, posList)));
+            server.getPlayerList().getPlayers().forEach(player ->
+                    ServerMusicBoxListener.sendToClient(player, new ClientMusicBoxManager(false, null, posList)));
         }
     }
 }

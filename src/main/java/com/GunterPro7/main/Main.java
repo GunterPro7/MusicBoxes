@@ -1,8 +1,10 @@
 package com.GunterPro7.main;
 
 import com.GunterPro7.block.ModBlocks;
+import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.item.ModItems;
 import com.GunterPro7.listener.*;
+import net.minecraft.core.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -24,5 +26,19 @@ public class Main {
         MinecraftForge.EVENT_BUS.register(new ServerMusicBoxListener());
 
         ClientMusicBoxManager.INSTANCE.registerMessage(0, ClientMusicBoxManager.class, ClientMusicBoxManager::encode, ClientMusicBoxManager::new, ClientMusicBoxManager::handle);
+
+        loadConfigs();
+    }
+
+    private void loadConfigs() {
+        ServerAudioCableListener.audioCables.addAll(FileManager.AudioCables.getAll());
+
+        for (BlockPos blockPos : FileManager.Positions.getAll()) {
+            ServerMusicBoxListener.musicBoxes.add(new MusicBox(blockPos));
+        }
+
+        System.out.println("qwheiuqwheiuqwehoiuwqeEHQWUIO");
+        System.out.println(ServerAudioCableListener.audioCables);
+        System.out.println(ServerMusicBoxListener.musicBoxes);
     }
 }

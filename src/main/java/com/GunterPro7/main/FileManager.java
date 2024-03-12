@@ -54,10 +54,11 @@ public class FileManager {
             }
 
             try (RandomAccessFile raf = fileManager.rafByKey(key)) {
-                for (int i = 0; i < raf.length() / Integer.BYTES * 3; i++) {
+                while (raf.getFilePointer() != raf.length()) {
                     blockPosList.add(new BlockPos(raf.readInt(), raf.readInt(), raf.readInt()));
                 }
             } catch (IOException e) {
+                System.out.println("File is invalid!");
                 e.printStackTrace();
             }
         }
@@ -109,7 +110,6 @@ public class FileManager {
         private static final List<AudioCable> audioCableList = new ArrayList<>();
         private static final FileManager fileManager = new FileManager();
         private static final String key = "audioCables.bin";
-        public static boolean loaded;
 
         static {
             file = new File("libraries/MusicBox/" + key);
@@ -127,9 +127,11 @@ public class FileManager {
                     try {
                         Vec3 startPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
                         Vec3 endPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
+                        BlockPos startBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
+                        BlockPos endBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
                         DyeColor color = DyeColor.valueOf(raf.readUTF());
 
-                        audioCableList.add(new AudioCable(startPos, endPos, color));
+                        audioCableList.add(new AudioCable(startPos, endPos, startBlock, endBlock, color));
                     } catch (EOFException e) {
                         System.out.println("File is invalid!");
                     }
@@ -147,13 +149,22 @@ public class FileManager {
                 Vec3 startPos = audioCable.getStartPos();
                 Vec3 endPos = audioCable.getEndPos();
 
+                BlockPos startBlock = audioCable.getStartBlock();
+                BlockPos endBlock = audioCable.getEndBlock();
+
                 raf.writeDouble(startPos.x);
                 raf.writeDouble(startPos.y);
                 raf.writeDouble(startPos.z);
-
                 raf.writeDouble(endPos.x);
                 raf.writeDouble(endPos.y);
                 raf.writeDouble(endPos.z);
+
+                raf.writeInt(startBlock.getX());
+                raf.writeInt(startBlock.getY());
+                raf.writeInt(startBlock.getZ());
+                raf.writeInt(endBlock.getX());
+                raf.writeInt(endBlock.getY());
+                raf.writeInt(endBlock.getZ());
 
                 raf.writeUTF(audioCable.getColor().name());
             }
@@ -176,21 +187,19 @@ public class FileManager {
         }
 
         private static void remove(List<AudioCable> audioCables, boolean all) throws IOException {
-            System.out.println(audioCables.toString());
-
             try (RandomAccessFile raf = fileManager.rafByKey(key)) {
                 while (raf.getFilePointer() != raf.length()) {
                     try {
                         Vec3 startPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
                         Vec3 endPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
+                        BlockPos startBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
+                        BlockPos endBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
                         DyeColor dyeColor = DyeColor.valueOf(raf.readUTF());
 
-                        AudioCable curAudioCable = new AudioCable(startPos, endPos, dyeColor);
+                        AudioCable curAudioCable = new AudioCable(startPos, endPos, startBlock, endBlock, dyeColor);
 
                         for (AudioCable audioCable : audioCables) {
                             if (audioCable.hashCode() == curAudioCable.hashCode() && audioCable.equals(curAudioCable)) {
-                                System.out.println(curAudioCable + " CUR");
-                                System.out.println(audioCable + " NOR");
                                 removeEntry(raf, Double.BYTES * 6 + dyeColor.name().length() + 2);
                                 if (!all) {
                                     break;

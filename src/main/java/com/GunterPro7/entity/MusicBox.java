@@ -1,10 +1,12 @@
 package com.GunterPro7.entity;
 
+import com.GunterPro7.listener.ServerAudioCableListener;
 import com.GunterPro7.listener.ServerMusicBoxListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import org.apache.logging.log4j.core.jmx.Server;
 
+import java.util.List;
 import java.util.Objects;
 
 public class MusicBox {
@@ -14,6 +16,11 @@ public class MusicBox {
 
     public MusicBox(BlockPos blockPos) {
         this.blockPos = blockPos;
+        List<AudioCable> cables = ServerAudioCableListener.getAudioCablesByPos(blockPos);
+        if (cables.size() > 0) {
+            this.audioCable = cables.get(0);
+            this.powered = true;
+        }
     }
 
     public BlockPos getBlockPos() {
