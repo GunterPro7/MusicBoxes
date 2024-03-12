@@ -95,44 +95,6 @@ public class MusicBoxesCommand {
         return 1;
     }
 
-
-    //ResourceLocation resourceLocation = null;
-    //            SoundEvent soundEvent = null;
-    //            if (args[2].equals("minecraft")) {
-    //                soundEvent = discSounds.get(args[3]);
-    //                resourceLocation = soundEvent.getLocation();
-    //            } else if (args[2].equals("custom")) {
-    //                resourceLocation = new ResourceLocation(Main.MODID, args[3]);
-    //                soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
-    //            }
-    //
-    //            if (soundEvent == null) {
-    //                ChatUtils.sendPrivateChatMessage("Couldn't recognize this sound!");
-    //                return;
-    //            }
-    //
-    //            PlayerList playerList = event.getPlayer().getServer().getPlayerList();
-    //            Level level = event.getPlayer().level();
-    //
-    //            //List<BlockPos> posList = new ArrayList<>();
-    //
-    //            //for (MusicBox musicBox : musicBoxes) {
-    //            //    if (musicBox.isPowered() && musicBox.getAudioCable().getColor().equals(DyeColor.valueOf(args[1].toUpperCase()))) { // or implement also for "all"
-    //            //        if (MusicController.getMusicControllerByMusicBox(musicBox) != null) {
-    //            //            posList.add(musicBox.getBlockPos());
-    //            //        }
-    //            //    }
-    //            //}
-    //
-    //            Set<MusicBox> musicBoxes = MusicController.getMusicBoxesByColorAndPos(new BlockPos(0, 100, 0), DyeColor.valueOf(args[1].toUpperCase()));
-    //
-    //
-    //            Minecraft.getInstance().player.sendSystemMessage(Component.literal(musicBoxes.toString()));
-    //            List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
-    //            for (ServerPlayer serverPlayer : playerList.getPlayers()) {
-    //                sendToClient(serverPlayer, new ClientMusicBoxManager(!(args.length > 4 && args[4].equals("stop")), resourceLocation, posList));
-    //            }
-
     private static int helpCommand(CommandContext<CommandSourceStack> context) {
         String[] args = context.getInput().split(" ");
 
