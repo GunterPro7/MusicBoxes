@@ -1,4 +1,4 @@
-package com.GunterPro7.main;
+package com.GunterPro7;
 
 import com.GunterPro7.block.ModBlocks;
 import com.GunterPro7.entity.MusicBox;
@@ -24,6 +24,7 @@ public class Main {
         MinecraftForge.EVENT_BUS.register(new ServerAudioCableListener());
 
         MinecraftForge.EVENT_BUS.register(new ServerMusicBoxListener());
+        MinecraftForge.EVENT_BUS.register(new MusicBoxesCommand());
 
         ClientMusicBoxManager.INSTANCE.registerMessage(0, ClientMusicBoxManager.class, ClientMusicBoxManager::encode, ClientMusicBoxManager::new, ClientMusicBoxManager::handle);
 

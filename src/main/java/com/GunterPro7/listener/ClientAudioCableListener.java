@@ -2,7 +2,7 @@ package com.GunterPro7.listener;
 
 import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
-import com.GunterPro7.main.FileManager;
+import com.GunterPro7.FileManager;
 import com.GunterPro7.utils.ChatUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;

@@ -1,17 +1,13 @@
-package com.GunterPro7.main;
+package com.GunterPro7;
 
 import com.GunterPro7.entity.AudioCable;
-import com.GunterPro7.utils.Utils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class FileManager {
     private static final String path = "libraries/MusicBox/";

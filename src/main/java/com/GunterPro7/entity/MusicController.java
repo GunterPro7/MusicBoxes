@@ -2,9 +2,10 @@ package com.GunterPro7.entity;
 
 import com.GunterPro7.listener.AudioCableListener;
 import com.GunterPro7.listener.ClientAudioCableListener;
-import com.GunterPro7.utils.ChatUtils;
-import net.minecraft.client.Minecraft;
+import com.GunterPro7.listener.ClientMusicBoxManager;
+import com.GunterPro7.listener.ServerMusicBoxListener;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.DyeColor;
 
 import java.util.ArrayList;
@@ -131,6 +132,10 @@ public class MusicController {
             }
         }
         return null;
+    }
+
+    public void play(List<ServerPlayer> players, ClientMusicBoxManager clientMusicBoxManager) {
+        players.forEach(player -> ServerMusicBoxListener.sendToClient(player, clientMusicBoxManager));
     }
 
     // TODO s:

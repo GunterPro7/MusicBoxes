@@ -1,6 +1,6 @@
 package com.GunterPro7.block;
 
-import com.GunterPro7.main.Main;
+import com.GunterPro7.Main;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;

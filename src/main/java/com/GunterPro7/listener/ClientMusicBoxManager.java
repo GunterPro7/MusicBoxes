@@ -1,6 +1,6 @@
 package com.GunterPro7.listener;
 
-import com.GunterPro7.main.Main;
+import com.GunterPro7.Main;
 import com.google.gson.JsonPrimitive;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;

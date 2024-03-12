@@ -1,6 +1,6 @@
 package com.GunterPro7.item;
 
-import com.GunterPro7.main.Main;
+import com.GunterPro7.Main;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
