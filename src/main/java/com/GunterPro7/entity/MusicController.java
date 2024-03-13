@@ -137,10 +137,4 @@ public class MusicController {
     public void play(List<ServerPlayer> players, ClientMusicBoxManager clientMusicBoxManager) {
         players.forEach(player -> ServerMusicBoxListener.sendToClient(player, clientMusicBoxManager));
     }
-
-    // TODO s:
-    // Saving audio Cables to file
-    // Saving music Controller to file
-    // check if there are any problmes with playing music when the cables are placed in different directions etc
-    // There are some errors like some music boxes are not playing, checking wenn ich wieder bock hab
 }

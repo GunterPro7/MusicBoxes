@@ -1,6 +1,7 @@
 package com.GunterPro7;
 
 import com.GunterPro7.entity.AudioCable;
+import com.GunterPro7.entity.MusicBox;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
@@ -34,7 +35,7 @@ public class FileManager {
 
     public static class Positions {
         public static File file;
-        private static final List<BlockPos> blockPosList = new ArrayList<>();
+        private static final List<MusicBox> blockPosList = new ArrayList<>();
         private static final FileManager fileManager = new FileManager();
         private static final String key = "locations.bin";
 
@@ -51,7 +52,7 @@ public class FileManager {
 
             try (RandomAccessFile raf = fileManager.rafByKey(key)) {
                 while (raf.getFilePointer() != raf.length()) {
-                    blockPosList.add(new BlockPos(raf.readInt(), raf.readInt(), raf.readInt()));
+                    blockPosList.add(new MusicBox(new BlockPos(raf.readInt(), raf.readInt(), raf.readInt()), raf.readBoolean()));
                 }
             } catch (IOException e) {
                 System.out.println("File is invalid!");
@@ -59,19 +60,25 @@ public class FileManager {
             }
         }
 
-        public static void add(BlockPos blockPos) throws IOException {
-            blockPosList.add(blockPos);
+        public static void add(MusicBox musicBox) throws IOException {
+            blockPosList.add(musicBox);
+
+            BlockPos blockPos = musicBox.getBlockPos();
 
             try (RandomAccessFile raf = fileManager.rafByKey(key)) {
                 raf.seek(raf.length());
                 raf.writeInt(blockPos.getX());
                 raf.writeInt(blockPos.getY());
                 raf.writeInt(blockPos.getZ());
+                raf.writeBoolean(musicBox.isActive());
             }
         }
 
-        public static void remove(BlockPos blockPos) throws IOException {
-            blockPosList.remove(blockPos);
+        public static void remove(MusicBox musicBox) throws IOException {
+            blockPosList.remove(musicBox);
+            BlockPos blockPos = musicBox.getBlockPos();
+
+            int length = Integer.BYTES * 3 + 1;
 
             try (RandomAccessFile raf = fileManager.rafByKey(key)) {
                 while (raf.getFilePointer() != file.length()) {
@@ -80,13 +87,14 @@ public class FileManager {
                     int z = raf.readInt();
 
                     if (blockPos.getX() == x && blockPos.getY() == y && blockPos.getZ() == z) {
+                        raf.skipBytes(1);
                         long position = raf.getFilePointer();
                         byte[] byteArray = new byte[(int) (raf.length() - position)];
                         raf.read(byteArray);
 
-                        raf.seek(position - Integer.BYTES * 3);
+                        raf.seek(position - length);
 
-                        raf.setLength(raf.length() - Integer.BYTES * 3);
+                        raf.setLength(raf.length() - length);
 
                         raf.write(byteArray);
                     }
@@ -96,7 +104,7 @@ public class FileManager {
             }
         }
 
-        public static List<BlockPos> getAll() {
+        public static List<MusicBox> getAll() {
             return blockPosList;
         }
     }

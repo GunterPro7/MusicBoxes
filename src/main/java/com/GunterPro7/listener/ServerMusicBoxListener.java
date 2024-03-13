@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@Mod.EventBusSubscriber
 public class ServerMusicBoxListener {
     private static final Random random = new Random();
 
@@ -45,8 +44,10 @@ public class ServerMusicBoxListener {
     @SubscribeEvent
     public void blockPlace(BlockEvent.EntityPlaceEvent event) throws IOException {
         if (event.getPlacedBlock().is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
-            FileManager.Positions.add(event.getPos());
-            musicBoxes.add(new MusicBox(event.getPos()));
+            MusicBox musicBox = new MusicBox(event.getPos());
+
+            FileManager.Positions.add(musicBox);
+            musicBoxes.add(musicBox);
         }
     }
 
@@ -55,13 +56,15 @@ public class ServerMusicBoxListener {
         if (event.getState().is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
             BlockPos pos = event.getPos();
 
-            FileManager.Positions.remove(pos);
-            musicBoxes.remove(new MusicBox(pos));
+            MusicBox musicBox = new MusicBox(pos);
+
+            FileManager.Positions.remove(musicBox);
+            musicBoxes.remove(musicBox);
 
             MusicBox musicBoxToDelete = null;
-            for (MusicBox musicBox : musicBoxes) {
-                if (pos.equals(musicBox.getBlockPos())) {
-                    musicBoxToDelete = musicBox;
+            for (MusicBox curMusicBox : musicBoxes) {
+                if (pos.equals(curMusicBox.getBlockPos())) {
+                    musicBoxToDelete = curMusicBox;
                 }
             }
 

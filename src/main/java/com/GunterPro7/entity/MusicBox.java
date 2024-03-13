@@ -1,10 +1,7 @@
 package com.GunterPro7.entity;
 
 import com.GunterPro7.listener.ServerAudioCableListener;
-import com.GunterPro7.listener.ServerMusicBoxListener;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,14 +10,21 @@ public class MusicBox {
     private final BlockPos blockPos;
     private AudioCable audioCable;
     private boolean powered;
+    private boolean active;
 
-    public MusicBox(BlockPos blockPos) {
+    public MusicBox(BlockPos blockPos, boolean active) {
         this.blockPos = blockPos;
         List<AudioCable> cables = ServerAudioCableListener.getAudioCablesByPos(blockPos);
         if (cables.size() > 0) {
             this.audioCable = cables.get(0);
             this.powered = true;
         }
+
+        this.active = active;
+    }
+
+    public MusicBox(BlockPos blockPos) {
+        this(blockPos, true);
     }
 
     public BlockPos getBlockPos() {
@@ -46,6 +50,14 @@ public class MusicBox {
 
     public boolean isPowered() {
         return powered;
+    }
+
+    public boolean isActive() {
+        return this.active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public void powerDisconnected() {

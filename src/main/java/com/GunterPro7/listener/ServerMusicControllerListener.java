@@ -26,15 +26,15 @@ public class ServerMusicControllerListener {
             FileManager.Controller.remove(pos);
             MusicController.musicControllers.remove(new MusicController(pos));
 
-            MusicController musicBoxToDelete = null;
+            MusicController musicControllerToDelete = null;
             for (MusicController musicBox : MusicController.musicControllers) {
                 if (pos.equals(musicBox.getPos())) {
-                    musicBoxToDelete = musicBox;
+                    musicControllerToDelete = musicBox;
                 }
             }
 
-            if (musicBoxToDelete != null) {
-                MusicController.musicControllers.remove(musicBoxToDelete);
+            if (musicControllerToDelete != null) {
+                MusicController.musicControllers.remove(musicControllerToDelete);
             }
         }
     }
