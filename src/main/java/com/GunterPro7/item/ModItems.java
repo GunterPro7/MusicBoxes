@@ -1,6 +1,7 @@
 package com.GunterPro7.item;
 
 import com.GunterPro7.Main;
+import joptsimple.internal.AbbreviationMap;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -15,6 +16,7 @@ public class ModItems {
 
     public static final RegistryObject<BlockItem> MUSIC_BOX_ITEM = registryObject("music_box", MusicBoxItem::new);
     public static final RegistryObject<BlockItem> MUSIC_CONTROLLER_ITEM = registryObject("music_controller", MusicControllerItem::new);
+    public static final RegistryObject<BlockItem> MUSIC_CABLE_ITEM = registryObject("music_cable", MusicCableItem::new);
 
     private static <T extends BlockItem> RegistryObject<BlockItem> registryObject(String name, Supplier<T> blockItem){
         return ModItems.ITEMS.register(name, blockItem);

@@ -1,5 +1,6 @@
 package com.GunterPro7.entity;
 
+import com.GunterPro7.item.ModItems;
 import com.GunterPro7.listener.ClientMusicBoxManager;
 import com.GunterPro7.listener.ServerMusicBoxListener;
 import com.GunterPro7.utils.JsonUtils;
@@ -8,7 +9,10 @@ import com.mojang.blaze3d.vertex.VertexBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -49,6 +53,13 @@ public class AudioCable {
         double y = Utils.getCenter(startPos.y(), endPos.y());
         double z = Utils.getCenter(startPos.z(), endPos.z());
         this.centerPos = new Vec3(x, y, z);
+    }
+
+    public void drop(Level level) {
+        ItemStack itemStack = new ItemStack(ModItems.MUSIC_CABLE_ITEM.get(), 1);
+        ItemEntity itemEntity = new ItemEntity(level, centerPos.x(), centerPos.y(), centerPos.z(), itemStack);
+
+        level.addFreshEntity(itemEntity);
     }
 
     public void setColor(DyeColor color) {

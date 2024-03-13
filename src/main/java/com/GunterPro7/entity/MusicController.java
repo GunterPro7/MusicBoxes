@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MusicController {
-    private static final List<MusicController> musicControllers = List.of(new MusicController(new BlockPos(0, 100, 0)));
+    public static final List<MusicController> musicControllers = new ArrayList<>();
     private final BlockPos pos;
 
     public MusicController(BlockPos pos) {

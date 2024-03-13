@@ -29,6 +29,8 @@ import java.util.List;
 // Client & Server Side
 public class ClientAudioCableListener extends AudioCableListener {
 
+    // TODO this methode should be server side too.
+    // TODO client side there should only be a packet send to the client containing the information about the nearest cables
     @SubscribeEvent
     public void onPlayerBreakBlock(BlockEvent.BreakEvent event) throws IOException {
         BlockPos pos = event.getPos();
@@ -43,11 +45,13 @@ public class ClientAudioCableListener extends AudioCableListener {
                 if (audioCable.getMusicBoxStart() != null) audioCable.getMusicBoxStart().powerDisconnected();
                 if (audioCable.getMusicBoxEnd() != null) audioCable.getMusicBoxEnd().powerDisconnected();
                 audioCableList.add(audioCable);
+                audioCable.drop(event.getPlayer().level());
             }
         });
 
+
         audioCables.removeAll(audioCableList);
-        FileManager.AudioCables.removeAll(audioCableList); // TODO also call this event server side and run this action here
+        FileManager.AudioCables.removeAll(audioCableList);
     }
 
     @SubscribeEvent
