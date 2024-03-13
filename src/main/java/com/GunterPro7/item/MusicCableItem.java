@@ -4,8 +4,8 @@ import com.GunterPro7.block.ModBlocks;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 
-public class MusicCableItem extends BlockItem {
-    public MusicCableItem() { // TODO
-        super(ModBlocks.MUSIC_BOX_BLOCK.get(), new Item.Properties().stacksTo(64));
+public class MusicCableItem extends Item {
+    public MusicCableItem() {
+        super(new Item.Properties().stacksTo(64));
     }
 }
