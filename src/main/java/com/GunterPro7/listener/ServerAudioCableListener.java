@@ -21,11 +21,14 @@ public class ServerAudioCableListener extends AudioCableListener {
         musicBoxesToDelete.forEach(MusicBox::powerDisconnected);
 
         List<BlockPos> posList = musicBoxesToDelete.stream().map(MusicBox::getBlockPos).toList();
+        if (posList.size() != 0) {
+            List<Float> volumeList = musicBoxesToDelete.stream().map(musicBox -> (float) musicBox.getVolume()).toList();
 
-        MinecraftServer server =  event.getLevel().getServer();
-        if (server != null) {
-            server.getPlayerList().getPlayers().forEach(player ->
-                    ServerMusicBoxListener.sendToClient(player, new ClientMusicBoxManager(false, null, posList)));
+            MinecraftServer server = event.getLevel().getServer();
+            if (server != null) {
+                server.getPlayerList().getPlayers().forEach(player ->
+                        ServerMusicBoxListener.sendToClient(player, new ClientMusicBoxManager(false, null, posList, volumeList)));
+            }
         }
     }
 }

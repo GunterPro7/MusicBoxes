@@ -9,10 +9,11 @@ import java.util.Objects;
 public class MusicBox {
     private final BlockPos blockPos;
     private AudioCable audioCable;
+    private double volume = 0.5d;
     private boolean powered;
     private boolean active;
 
-    public MusicBox(BlockPos blockPos, boolean active) {
+    public MusicBox(BlockPos blockPos, double volume, boolean active) {
         this.blockPos = blockPos;
         List<AudioCable> cables = ServerAudioCableListener.getAudioCablesByPos(blockPos);
         if (cables.size() > 0) {
@@ -24,7 +25,7 @@ public class MusicBox {
     }
 
     public MusicBox(BlockPos blockPos) {
-        this(blockPos, true);
+        this(blockPos, 50d, true);
     }
 
     public BlockPos getBlockPos() {
@@ -68,6 +69,14 @@ public class MusicBox {
     public void powerConnected(AudioCable audioCable) {
         this.audioCable = audioCable;
         powered = true;
+    }
+
+    public double getVolume() {
+        return this.volume;
+    }
+
+    public void setVolume(double volume) {
+        this.volume = volume;
     }
 
     public boolean hasAudioCable() {

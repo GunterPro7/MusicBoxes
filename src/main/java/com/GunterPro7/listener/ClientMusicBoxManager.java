@@ -40,6 +40,7 @@ public class ClientMusicBoxManager {
     private final boolean play;
     private final ResourceLocation resourceLocation;
     private final List<BlockPos> posList;
+    private final List<Float> volumeList;
 
     public ClientMusicBoxManager(FriendlyByteBuf buffer) {
         this.play = buffer.readBoolean();
@@ -55,11 +56,14 @@ public class ClientMusicBoxManager {
                 posList.add(parsePosString(curPos));
             }
         }
+
+        this.volumeList = floatListFromString(buffer.readUtf(buffer.readShort()));
     }
 
-    public ClientMusicBoxManager(boolean play, ResourceLocation resourceLocation, List<BlockPos> posList) {
+    public ClientMusicBoxManager(boolean play, ResourceLocation resourceLocation, List<BlockPos> posList, List<Float> volumeList) {
         this.resourceLocation = resourceLocation;
         this.posList = posList;
+        this.volumeList = volumeList;
         this.play = play;
     }
 
@@ -76,12 +80,16 @@ public class ClientMusicBoxManager {
         String posListString = blockPosListToString(posList);
         buffer.writeShort(posListString.length());
         buffer.writeUtf(posListString);
+
+        String floatListString = floatListToString(volumeList);
+        buffer.writeShort(floatListString.length());
+        buffer.writeUtf(floatListString);
     }
 
     public void handle(Supplier<NetworkEvent.Context> context) {
         context.get().enqueueWork(() -> {
             if (play) {
-                playSounds(resourceLocation, posList);
+                playSounds(resourceLocation, posList, volumeList);
             } else {
                 stopSounds(resourceLocation, posList);
             }
@@ -89,13 +97,16 @@ public class ClientMusicBoxManager {
         context.get().setPacketHandled(true);
     }
 
-    public void playSounds(ResourceLocation resourceLocation, List<BlockPos> blockPosList) {
+    public void playSounds(ResourceLocation resourceLocation, List<BlockPos> blockPosList, List<Float> volumeList) {
         removeInactiveSounds();
 
         SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
 
-        for (BlockPos pos : blockPosList) {
-            playSound(soundEvent, pos);
+        for (int i = 0; i < blockPosList.size(); i++) {
+            BlockPos pos = blockPosList.get(i);
+            float volume = volumeList.get(i);
+
+            playSound(soundEvent, pos, volume);
         }
     }
 
@@ -118,8 +129,8 @@ public class ClientMusicBoxManager {
         }
     }
 
-    public void playSound(SoundEvent soundEvent, BlockPos pos) {
-        SoundInstance soundInstance = new SimpleSoundInstance(soundEvent, SoundSource.RECORDS, 1f, 1f, SoundInstance.createUnseededRandom(), pos);
+    public void playSound(SoundEvent soundEvent, BlockPos pos, float volume) {
+        SoundInstance soundInstance = new SimpleSoundInstance(soundEvent, SoundSource.RECORDS, volume, 1f, SoundInstance.createUnseededRandom(), pos);
         instances.add(soundInstance);
 
         mc.getSoundManager().playDelayed(soundInstance, 2);
@@ -139,5 +150,22 @@ public class ClientMusicBoxManager {
 
     private static String blockPosToString(BlockPos blockPos) {
         return blockPos.getX() + "," + blockPos.getY() + "," + blockPos.getZ();
+    }
+
+    private static String floatListToString(List<Float> floatList) {
+        StringBuilder stringBuilder = new StringBuilder();
+        floatList.forEach(curFloat -> stringBuilder.append(curFloat).append(";"));
+
+        return stringBuilder.toString();
+    }
+
+    private static List<Float> floatListFromString(String floatListString) {
+        List<Float> floatList = new ArrayList<>();
+        for (String curFloat : floatListString.split(";")) {
+            if (!curFloat.isEmpty())
+                floatList.add(Float.valueOf(curFloat));
+        }
+
+        return floatList;
     }
 }

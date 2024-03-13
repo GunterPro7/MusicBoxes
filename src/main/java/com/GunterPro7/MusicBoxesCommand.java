@@ -88,8 +88,9 @@ public class MusicBoxesCommand {
 
             Set<MusicBox> musicBoxes = MusicController.getMusicBoxesByColorAndPos(new BlockPos(0, 100, 0), dyeColor);
             List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
+            List<Float> volumeList = musicBoxes.stream().map(musicBox -> (float) musicBox.getVolume()).toList();
 
-            musicController.play(players, new ClientMusicBoxManager(play, resourceLocation, posList));
+            musicController.play(players, new ClientMusicBoxManager(play, resourceLocation, posList, volumeList));
         }
 
         return 1;

@@ -8,14 +8,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.DyeColor;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class MusicController {
     public static final List<MusicController> musicControllers = new ArrayList<>();
     private final BlockPos pos;
+    public final Queue<String> musicQueue = new PriorityQueue<>();
 
     public MusicController(BlockPos pos) {
         this.pos = pos;
@@ -134,7 +132,12 @@ public class MusicController {
         return null;
     }
 
+    @Deprecated
     public void play(List<ServerPlayer> players, ClientMusicBoxManager clientMusicBoxManager) {
         players.forEach(player -> ServerMusicBoxListener.sendToClient(player, clientMusicBoxManager));
+    }
+
+    public Queue<String> getMusicQueue() {
+        return this.musicQueue;
     }
 }

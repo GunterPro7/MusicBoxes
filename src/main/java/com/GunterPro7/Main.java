@@ -2,6 +2,7 @@ package com.GunterPro7;
 
 import com.GunterPro7.block.ModBlocks;
 import com.GunterPro7.entity.MusicBox;
+import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.item.ModItems;
 import com.GunterPro7.listener.*;
 import net.minecraft.client.Minecraft;
@@ -39,5 +40,6 @@ public class Main {
     private void loadConfigs() {
         ServerAudioCableListener.audioCables.addAll(FileManager.AudioCables.getAll());
         ServerMusicBoxListener.musicBoxes.addAll(FileManager.Positions.getAll());
+        FileManager.Controller.getAll().forEach(pos -> MusicController.musicControllers.add(new MusicController(pos)));
     }
 }

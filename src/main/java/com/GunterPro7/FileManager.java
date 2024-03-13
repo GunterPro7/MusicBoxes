@@ -37,7 +37,7 @@ public class FileManager {
         public static File file;
         private static final List<MusicBox> blockPosList = new ArrayList<>();
         private static final FileManager fileManager = new FileManager();
-        private static final String key = "locations.bin";
+        private static final String key = "musicBoxes.bin";
 
         static {
             file = new File("libraries/MusicBox/" + key);
@@ -52,7 +52,7 @@ public class FileManager {
 
             try (RandomAccessFile raf = fileManager.rafByKey(key)) {
                 while (raf.getFilePointer() != raf.length()) {
-                    blockPosList.add(new MusicBox(new BlockPos(raf.readInt(), raf.readInt(), raf.readInt()), raf.readBoolean()));
+                    blockPosList.add(new MusicBox(new BlockPos(raf.readInt(), raf.readInt(), raf.readInt()), raf.readDouble(), raf.readBoolean()));
                 }
             } catch (IOException e) {
                 System.out.println("File is invalid!");
@@ -71,6 +71,7 @@ public class FileManager {
                 raf.writeInt(blockPos.getY());
                 raf.writeInt(blockPos.getZ());
                 raf.writeBoolean(musicBox.isActive());
+                raf.writeDouble(musicBox.getVolume());
             }
         }
 
@@ -87,7 +88,7 @@ public class FileManager {
                     int z = raf.readInt();
 
                     if (blockPos.getX() == x && blockPos.getY() == y && blockPos.getZ() == z) {
-                        raf.skipBytes(1);
+                        raf.skipBytes(Double.BYTES + 1);
                         long position = raf.getFilePointer();
                         byte[] byteArray = new byte[(int) (raf.length() - position)];
                         raf.read(byteArray);
