@@ -98,6 +98,8 @@ public class FileManager {
                         raf.setLength(raf.length() - length);
 
                         raf.write(byteArray);
+                    } else {
+                        raf.skipBytes(Double.BYTES + 1);
                     }
                 }
             } catch (EOFException e) {
@@ -107,6 +109,28 @@ public class FileManager {
 
         public static List<MusicBox> getAll() {
             return blockPosList;
+        }
+
+        public static void update(MusicBox musicBox) throws IOException {
+            BlockPos blockPos = musicBox.getBlockPos();
+            int length = Integer.BYTES * 3 + 1;
+
+            try (RandomAccessFile raf = fileManager.rafByKey(key)) {
+                while (raf.getFilePointer() != file.length()) {
+                    int x = raf.readInt();
+                    int y = raf.readInt();
+                    int z = raf.readInt();
+
+                    if (blockPos.getX() == x && blockPos.getY() == y && blockPos.getZ() == z) {
+                        raf.writeBoolean(musicBox.isActive());
+                        raf.writeDouble(musicBox.getVolume());
+                    } else {
+                        raf.skipBytes(Double.BYTES + 1);
+                    }
+                }
+            } catch (EOFException e) {
+                e.printStackTrace();
+            }
         }
     }
 

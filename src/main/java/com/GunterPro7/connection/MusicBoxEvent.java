@@ -1,4 +1,4 @@
-package com.GunterPro7.listener;
+package com.GunterPro7.connection;
 
 import com.GunterPro7.Main;
 import com.google.gson.JsonPrimitive;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
-public class ClientMusicBoxManager {
+public class MusicBoxEvent {
     private static final List<SoundInstance> instances = new ArrayList<>();
     private static final Minecraft mc = Minecraft.getInstance();
     private static final ResourceLocation.Serializer locationSerializer = new ResourceLocation.Serializer();
@@ -42,7 +42,7 @@ public class ClientMusicBoxManager {
     private final List<BlockPos> posList;
     private final List<Float> volumeList;
 
-    public ClientMusicBoxManager(FriendlyByteBuf buffer) {
+    public MusicBoxEvent(FriendlyByteBuf buffer) {
         this.play = buffer.readBoolean();
         if (buffer.readBoolean()) {
             this.resourceLocation = locationSerializer.deserialize(new JsonPrimitive(buffer.readUtf(buffer.readShort())), null, null);
@@ -60,7 +60,7 @@ public class ClientMusicBoxManager {
         this.volumeList = floatListFromString(buffer.readUtf(buffer.readShort()));
     }
 
-    public ClientMusicBoxManager(boolean play, ResourceLocation resourceLocation, List<BlockPos> posList, List<Float> volumeList) {
+    public MusicBoxEvent(boolean play, ResourceLocation resourceLocation, List<BlockPos> posList, List<Float> volumeList) {
         this.resourceLocation = resourceLocation;
         this.posList = posList;
         this.volumeList = volumeList;

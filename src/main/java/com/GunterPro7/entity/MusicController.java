@@ -2,7 +2,7 @@ package com.GunterPro7.entity;
 
 import com.GunterPro7.listener.AudioCableListener;
 import com.GunterPro7.listener.ClientAudioCableListener;
-import com.GunterPro7.listener.ClientMusicBoxManager;
+import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.listener.ServerMusicBoxListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -133,7 +133,7 @@ public class MusicController {
     }
 
     @Deprecated
-    public void play(List<ServerPlayer> players, ClientMusicBoxManager clientMusicBoxManager) {
+    public void play(List<ServerPlayer> players, MusicBoxEvent clientMusicBoxManager) {
         players.forEach(player -> ServerMusicBoxListener.sendToClient(player, clientMusicBoxManager));
     }
 

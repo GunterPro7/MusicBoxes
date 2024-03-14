@@ -1,25 +1,17 @@
 package com.GunterPro7.entity;
 
 import com.GunterPro7.item.ModItems;
-import com.GunterPro7.listener.ClientMusicBoxManager;
 import com.GunterPro7.listener.ServerMusicBoxListener;
 import com.GunterPro7.utils.JsonUtils;
 import com.GunterPro7.utils.Utils;
-import com.mojang.blaze3d.vertex.VertexBuffer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 

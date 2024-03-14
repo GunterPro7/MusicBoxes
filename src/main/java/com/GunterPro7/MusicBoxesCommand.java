@@ -2,7 +2,7 @@ package com.GunterPro7;
 
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.entity.MusicController;
-import com.GunterPro7.listener.ClientMusicBoxManager;
+import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.utils.MapUtils;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -90,7 +90,7 @@ public class MusicBoxesCommand {
             List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
             List<Float> volumeList = musicBoxes.stream().map(musicBox -> (float) musicBox.getVolume()).toList();
 
-            musicController.play(players, new ClientMusicBoxManager(play, resourceLocation, posList, volumeList));
+            musicController.play(players, new MusicBoxEvent(play, resourceLocation, posList, volumeList));
         }
 
         return 1;

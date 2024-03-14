@@ -1,5 +1,6 @@
 package com.GunterPro7.listener;
 
+import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.entity.MusicBox;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -27,7 +28,7 @@ public class ServerAudioCableListener extends AudioCableListener {
             MinecraftServer server = event.getLevel().getServer();
             if (server != null) {
                 server.getPlayerList().getPlayers().forEach(player ->
-                        ServerMusicBoxListener.sendToClient(player, new ClientMusicBoxManager(false, null, posList, volumeList)));
+                        ServerMusicBoxListener.sendToClient(player, new MusicBoxEvent(false, null, posList, volumeList)));
             }
         }
     }

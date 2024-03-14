@@ -1,20 +1,23 @@
 package com.GunterPro7;
 
 import com.GunterPro7.block.ModBlocks;
-import com.GunterPro7.entity.MusicBox;
+import com.GunterPro7.connection.MiscNetworkEvent;
+import com.GunterPro7.connection.MusicBoxEvent;
+import com.GunterPro7.connection.MusicBoxUpdateEvent;
 import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.item.ModItems;
 import com.GunterPro7.listener.*;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
+import java.util.Random;
+
 @Mod(Main.MODID)
 public class Main {
     public static final String MODID = "musicboxes";
+    public static Random random = new Random();
 
     public Main() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -32,7 +35,9 @@ public class Main {
 
         MinecraftForge.EVENT_BUS.register(new MusicBoxesCommand());
 
-        ClientMusicBoxManager.INSTANCE.registerMessage(0, ClientMusicBoxManager.class, ClientMusicBoxManager::encode, ClientMusicBoxManager::new, ClientMusicBoxManager::handle);
+        MusicBoxEvent.INSTANCE.registerMessage(0, MusicBoxEvent.class, MusicBoxEvent::encode, MusicBoxEvent::new, MusicBoxEvent::handle);
+        MusicBoxUpdateEvent.INSTANCE.registerMessage(0, MusicBoxUpdateEvent.class, MusicBoxUpdateEvent::encode, MusicBoxUpdateEvent::new, MusicBoxUpdateEvent::handle);
+        MiscNetworkEvent.INSTANCE.registerMessage(0, MiscNetworkEvent.class, MiscNetworkEvent::encode, MiscNetworkEvent::new, MiscNetworkEvent::handle);
 
         loadConfigs();
     }
