@@ -15,6 +15,7 @@ public class MusicBoxScreen extends Screen {
     public final long id;
 
     private ForgeSlider slider;
+    private Button button;
     public boolean newActive;
 
     public MusicBoxScreen(MusicBox musicBox, long id) {
@@ -30,11 +31,13 @@ public class MusicBoxScreen extends Screen {
         int centerX = (this.width) / 2 - 50;
         int centerY = (this.height) / 2 - 50;
 
-        this.addRenderableWidget(new Button.Builder(Component.literal(musicBox.isActive() ? "§a§lEnabled" : "§c§lDisabled"),
-                button -> {
-                    button.setMessage(Component.literal(newActive ? "§c§lDisabled" : "§a§lEnabled"));
+        button = new Button.Builder(Component.literal(musicBox.isActive() ? "§a§lEnabled" : "§c§lDisabled"),
+                cButton -> {
+                    cButton.setMessage(Component.literal(newActive ? "§c§lDisabled" : "§a§lEnabled"));
                     this.newActive = !newActive;
-                }).bounds(centerX, centerY, 100, 20).build());
+                }).bounds(centerX, centerY, 100, 20).build();
+
+        this.addRenderableWidget(button);
 
         slider = new ForgeSlider(centerX, centerY + 30, 100, 20, Component.literal("Volume: "), Component.literal("%"), 0d, 100d, musicBox.getVolume(), 1d, -1, true);
 
@@ -47,7 +50,6 @@ public class MusicBoxScreen extends Screen {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         if (this.minecraft != null) {
             this.renderBackground(guiGraphics);
-            musicBox.setVolume(slider.getValue());
             super.render(guiGraphics, mouseX, mouseY, partialTicks);
         }
     }
@@ -64,5 +66,14 @@ public class MusicBoxScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    public void updateInformation(double volume, boolean active) {
+        slider.setValue(volume);
+        newActive = active;
+        button.setMessage(Component.literal(active ? "§a§lEnabled" : "§c§lDisabled"));
+
+        musicBox.setVolume(volume);
+        musicBox.setActive(active);
     }
 }

@@ -45,7 +45,7 @@ public class MiscNetworkEvent {
 
     public void handle(Supplier<NetworkEvent.Context> context) {
         context.get().enqueueWork(() -> {
-            if (McUtils.isServerSide()) {
+            if (!context.get().getDirection().getOriginationSide().isClient()) {
                 MinecraftForge.EVENT_BUS.post(new ClientReceivedEvent(id, data));
             } else {
                 MinecraftForge.EVENT_BUS.post(new ServerReceivedEvent(id, data, context.get().getSender()));
@@ -97,10 +97,10 @@ public class MiscNetworkEvent {
     }
 
     public static void sendToClient(ServerPlayer player, String data, long id) {
-        MusicBoxEvent.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new MiscNetworkEvent(data, id));
+        INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new MiscNetworkEvent(data, id));
     }
 
     public static void sendToServer(String data, long id) {
-        MusicBoxEvent.INSTANCE.sendToServer(new MiscNetworkEvent(data, id));
+        INSTANCE.sendToServer(new MiscNetworkEvent(data, id));
     }
 }

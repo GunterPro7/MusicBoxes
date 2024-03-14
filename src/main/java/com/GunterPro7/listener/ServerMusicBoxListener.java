@@ -91,7 +91,7 @@ public class ServerMusicBoxListener {
                         }
                     }
                 } else if (data[1].equals("update")) {
-                    if (data.length > 4) {
+                    if (data.length > 3) {
                         MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(Utils.blockPosOf(data[2]));
 
                         if (musicBox != null) {

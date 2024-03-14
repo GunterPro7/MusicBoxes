@@ -17,8 +17,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class ClientMusicBoxListener {
     @SubscribeEvent
     public void onRightClickMusicBox(PlayerInteractEvent.RightClickBlock event) {
-        if (McUtils.gameLoaded()) {
-            if (event.getLevel().getBlockState(event.getPos()).is(ModBlocks.MUSIC_BOX_BLOCK.get())) { // TODO read data from here
+        if (McUtils.gameLoaded() && !(Minecraft.getInstance().screen instanceof MusicBoxScreen)) {
+            if (event.getLevel().getBlockState(event.getPos()).is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
                 BlockPos pos = event.getPos();
                 long id = 1L + (long) (Math.random() * (Long.MAX_VALUE - 1L));
                 MiscNetworkEvent.sendToServer("musicBox/get/" + pos.getX() + "," + pos.getY() + "," + pos.getZ() + "/", id);
@@ -35,8 +35,7 @@ public class ClientMusicBoxListener {
                 double volume = Double.parseDouble(data[0]);
                 boolean active = Boolean.parseBoolean(data[1]);
 
-                screen.musicBox.setActive(active);
-                screen.musicBox.setVolume(volume);
+                screen.updateInformation(volume, active);
             }
         }
     }
