@@ -25,20 +25,24 @@ public class MiscNetworkEvent {
     );
 
     private final long id;
+    private final MiscAction action;
     private final String data;
 
     public MiscNetworkEvent(FriendlyByteBuf buffer) {
         this.id = buffer.readLong();
+        this.action = MiscAction.valueOf(buffer.readByte());
         this.data = buffer.readUtf(buffer.readShort());
     }
 
-    public MiscNetworkEvent(String data, long id) {
+    public MiscNetworkEvent(String data, long id, MiscAction action) {
         this.data = data;
         this.id = id;
+        this.action = action;
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeLong(id);
+        buffer.writeByte(action.id);
         buffer.writeShort(data.length());
         buffer.writeUtf(data, data.length());
     }
@@ -46,9 +50,9 @@ public class MiscNetworkEvent {
     public void handle(Supplier<NetworkEvent.Context> context) {
         context.get().enqueueWork(() -> {
             if (!context.get().getDirection().getOriginationSide().isClient()) {
-                MinecraftForge.EVENT_BUS.post(new ClientReceivedEvent(id, data));
+                MinecraftForge.EVENT_BUS.post(new ClientReceivedEvent(id, action, data));
             } else {
-                MinecraftForge.EVENT_BUS.post(new ServerReceivedEvent(id, data, context.get().getSender()));
+                MinecraftForge.EVENT_BUS.post(new ServerReceivedEvent(id, action, data, context.get().getSender()));
             }
         });
         context.get().setPacketHandled(true);
@@ -56,15 +60,21 @@ public class MiscNetworkEvent {
 
     public static class ClientReceivedEvent extends Event {
         private final long id;
+        private final MiscAction action;
         private final String data;
 
-        public ClientReceivedEvent(long id, String data) {
+        public ClientReceivedEvent(long id, MiscAction action, String data) {
             this.id = id;
+            this.action = action;
             this.data = data;
         }
 
         public long getId() {
             return id;
+        }
+
+        public MiscAction getAction() {
+            return this.action;
         }
 
         public String getData() {
@@ -74,17 +84,23 @@ public class MiscNetworkEvent {
 
     public static class ServerReceivedEvent extends Event {
         private final long id;
+        private final MiscAction action;
         private final String data;
         private final ServerPlayer player;
 
-        public ServerReceivedEvent(long id, String data, ServerPlayer player) {
+        public ServerReceivedEvent(long id, MiscAction action, String data, ServerPlayer player) {
             this.id = id;
+            this.action = action;
             this.data = data;
             this.player = player;
         }
 
         public long getId() {
             return id;
+        }
+
+        public MiscAction getAction() {
+            return this.action;
         }
 
         public String getData() {
@@ -96,11 +112,11 @@ public class MiscNetworkEvent {
         }
     }
 
-    public static void sendToClient(ServerPlayer player, String data, long id) {
-        INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new MiscNetworkEvent(data, id));
+    public static void sendToClient(ServerPlayer player, long id, MiscAction action, String data) {
+        INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new MiscNetworkEvent(data, id, action));
     }
 
-    public static void sendToServer(String data, long id) {
-        INSTANCE.sendToServer(new MiscNetworkEvent(data, id));
+    public static void sendToServer(long id, MiscAction action, String data) {
+        INSTANCE.sendToServer(new MiscNetworkEvent(data, id, action));
     }
 }

@@ -2,6 +2,7 @@ package com.GunterPro7.listener;
 
 import com.GunterPro7.Main;
 import com.GunterPro7.block.ModBlocks;
+import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.ui.MusicBoxScreen;
@@ -21,7 +22,7 @@ public class ClientMusicBoxListener {
             if (event.getLevel().getBlockState(event.getPos()).is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
                 BlockPos pos = event.getPos();
                 long id = 1L + (long) (Math.random() * (Long.MAX_VALUE - 1L));
-                MiscNetworkEvent.sendToServer("musicBox/get/" + pos.getX() + "," + pos.getY() + "," + pos.getZ() + "/", id);
+                MiscNetworkEvent.sendToServer(id, MiscAction.MUSIC_BOX_GET, pos.getX() + "," + pos.getY() + "," + pos.getZ());
                 Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new MusicBoxScreen(new MusicBox(pos, 50f, true), id)));
             }
         }

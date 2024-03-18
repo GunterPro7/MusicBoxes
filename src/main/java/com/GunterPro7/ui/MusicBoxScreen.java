@@ -1,5 +1,6 @@
 package com.GunterPro7.ui;
 
+import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.entity.MusicBox;
 import net.minecraft.client.gui.GuiGraphics;
@@ -59,9 +60,9 @@ public class MusicBoxScreen extends Screen {
         super.onClose();
 
         if (musicBox.getVolume() != slider.getValue() || musicBox.isActive() != this.newActive) {
-            MiscNetworkEvent.sendToServer("musicBox/update/" +
+            MiscNetworkEvent.sendToServer(-1, MiscAction.MUSIC_BOX_INNER_UPDATE,
                     musicBox.getBlockPos().toShortString().replace(", ", ",")
-                    + "/" + (float) slider.getValue() + "/" + newActive, -1);
+                    + "/" + (float) slider.getValue() + "/" + newActive);
         }
     }
 

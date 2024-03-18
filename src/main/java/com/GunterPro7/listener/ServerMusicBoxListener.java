@@ -2,6 +2,7 @@ package com.GunterPro7.listener;
 
 import com.GunterPro7.FileManager;
 import com.GunterPro7.block.ModBlocks;
+import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.entity.MusicBox;
@@ -88,31 +89,30 @@ public class ServerMusicBoxListener {
     @SubscribeEvent
     public void onServerReceive(MiscNetworkEvent.ServerReceivedEvent event) throws IOException {
         String[] data = event.getData().split("/");
+        MiscAction action = event.getAction();
 
-        if (data.length > 1) {
-            if (data[0].equals("musicBox")) {
-                if (data[1].equals("get")) {
-                    if (data.length > 2) {
-                        MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(Utils.blockPosOf(data[2]));
+        if (action == MiscAction.MUSIC_BOX_GET) {
+            if (data.length > 0) {
+                MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(Utils.blockPosOf(data[0]));
 
-                        if (musicBox != null) {
-                            MiscNetworkEvent.sendToClient(event.getPlayer(), musicBox.getVolume() + "/" + musicBox.isActive(), event.getId());
-                        }
-                    }
-                } else if (data[1].equals("update")) {
-                    if (data.length > 4) {
-                        MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(Utils.blockPosOf(data[2]));
-
-                        if (musicBox != null) {
-                            musicBox.setVolume(Float.parseFloat(data[3]));
-                            musicBox.setActive(Boolean.parseBoolean(data[4]));
-                            FileManager.Positions.update(musicBox);
-                        }
-                    }
+                if (musicBox != null) {
+                    MiscNetworkEvent.sendToClient(event.getPlayer(), event.getId(), MiscAction.MUSIC_BOX_GET, musicBox.getVolume() + "/" + musicBox.isActive());
                 }
+            }
+        } else if (action == MiscAction.MUSIC_BOX_INNER_UPDATE) {
+            if (data.length > 2) {
+                MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(Utils.blockPosOf(data[0]));
+
+                if (musicBox != null) {
+                    musicBox.setVolume(Float.parseFloat(data[1]));
+                    musicBox.setActive(Boolean.parseBoolean(data[2]));
+                    FileManager.Positions.update(musicBox);
+                }
+
             }
         }
     }
+
 
     public static List<MusicBox> getMusicBoxesContainingController(List<DyeColor> colors, boolean invert) {
         List<MusicBox> musicBoxes = new ArrayList<>();

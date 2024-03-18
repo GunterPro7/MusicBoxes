@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClientAudioCableListener extends AudioCableListener {
+    public static final List<AudioCable> audioCables = new ArrayList<>();
+
     @SubscribeEvent
     public void renderLines(RenderLevelStageEvent event) {
         if (Minecraft.getInstance().player == null) return;
