@@ -39,7 +39,7 @@ public class MusicBoxScreen extends Screen {
 
         this.addRenderableWidget(button);
 
-        slider = new ForgeSlider(centerX, centerY + 30, 100, 20, Component.literal("Volume: "), Component.literal("%"), 0d, 100d, musicBox.getVolume(), 1d, -1, true);
+        slider = new ForgeSlider(centerX, centerY + 30, 100, 20, Component.literal("Volume: "), Component.literal("%"), 0d, 100d, musicBox.getVolume(), 0.1d, -1, true);
 
         this.addRenderableWidget(slider);
 
@@ -59,7 +59,9 @@ public class MusicBoxScreen extends Screen {
         super.onClose();
 
         if (musicBox.getVolume() != slider.getValue() || musicBox.isActive() != this.newActive) {
-            MiscNetworkEvent.sendToServer("musicBox/update/" + slider.getValue() + "/" + newActive, -1);
+            MiscNetworkEvent.sendToServer("musicBox/update/" +
+                    musicBox.getBlockPos().toShortString().replace(", ", ",")
+                    + "/" + (float) slider.getValue() + "/" + newActive, -1);
         }
     }
 
@@ -68,7 +70,7 @@ public class MusicBoxScreen extends Screen {
         return false;
     }
 
-    public void updateInformation(double volume, boolean active) {
+    public void updateInformation(float volume, boolean active) {
         slider.setValue(volume);
         newActive = active;
         button.setMessage(Component.literal(active ? "§a§lEnabled" : "§c§lDisabled"));

@@ -3,7 +3,6 @@ package com.GunterPro7;
 import com.GunterPro7.block.ModBlocks;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.connection.MusicBoxEvent;
-import com.GunterPro7.connection.MusicBoxUpdateEvent;
 import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.item.ModItems;
 import com.GunterPro7.listener.*;
@@ -36,7 +35,6 @@ public class Main {
         MinecraftForge.EVENT_BUS.register(new MusicBoxesCommand());
 
         MusicBoxEvent.INSTANCE.registerMessage(0, MusicBoxEvent.class, MusicBoxEvent::encode, MusicBoxEvent::new, MusicBoxEvent::handle);
-        MusicBoxUpdateEvent.INSTANCE.registerMessage(0, MusicBoxUpdateEvent.class, MusicBoxUpdateEvent::encode, MusicBoxUpdateEvent::new, MusicBoxUpdateEvent::handle);
         MiscNetworkEvent.INSTANCE.registerMessage(0, MiscNetworkEvent.class, MiscNetworkEvent::encode, MiscNetworkEvent::new, MiscNetworkEvent::handle);
 
         loadConfigs();

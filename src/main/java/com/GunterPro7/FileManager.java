@@ -52,7 +52,7 @@ public class FileManager {
 
             try (RandomAccessFile raf = fileManager.rafByKey(key)) {
                 while (raf.getFilePointer() != raf.length()) {
-                    blockPosList.add(new MusicBox(new BlockPos(raf.readInt(), raf.readInt(), raf.readInt()), raf.readDouble(), raf.readBoolean()));
+                    blockPosList.add(new MusicBox(new BlockPos(raf.readInt(), raf.readInt(), raf.readInt()), raf.readFloat(), raf.readBoolean()));
                 }
             } catch (IOException e) {
                 System.out.println("File is invalid!");
@@ -61,17 +61,19 @@ public class FileManager {
         }
 
         public static void add(MusicBox musicBox) throws IOException {
-            blockPosList.add(musicBox);
+            if (blockPosList.stream().filter(blockPos -> blockPos.getBlockPos().equals(musicBox.getBlockPos())).findFirst().isEmpty()) {
+                blockPosList.add(musicBox);
 
-            BlockPos blockPos = musicBox.getBlockPos();
+                BlockPos blockPos = musicBox.getBlockPos();
 
-            try (RandomAccessFile raf = fileManager.rafByKey(key)) {
-                raf.seek(raf.length());
-                raf.writeInt(blockPos.getX());
-                raf.writeInt(blockPos.getY());
-                raf.writeInt(blockPos.getZ());
-                raf.writeBoolean(musicBox.isActive());
-                raf.writeDouble(musicBox.getVolume());
+                try (RandomAccessFile raf = fileManager.rafByKey(key)) {
+                    raf.seek(raf.length());
+                    raf.writeInt(blockPos.getX());
+                    raf.writeInt(blockPos.getY());
+                    raf.writeInt(blockPos.getZ());
+                    raf.writeFloat(musicBox.getVolume());
+                    raf.writeBoolean(musicBox.isActive());
+                }
             }
         }
 
@@ -79,7 +81,7 @@ public class FileManager {
             blockPosList.remove(musicBox);
             BlockPos blockPos = musicBox.getBlockPos();
 
-            int length = Integer.BYTES * 3 + 1;
+            int length = Integer.BYTES * 3 + Float.BYTES + 1;
 
             try (RandomAccessFile raf = fileManager.rafByKey(key)) {
                 while (raf.getFilePointer() != file.length()) {
@@ -88,7 +90,7 @@ public class FileManager {
                     int z = raf.readInt();
 
                     if (blockPos.getX() == x && blockPos.getY() == y && blockPos.getZ() == z) {
-                        raf.skipBytes(Double.BYTES + 1);
+                        raf.skipBytes(Float.BYTES + 1);
                         long position = raf.getFilePointer();
                         byte[] byteArray = new byte[(int) (raf.length() - position)];
                         raf.read(byteArray);
@@ -99,7 +101,7 @@ public class FileManager {
 
                         raf.write(byteArray);
                     } else {
-                        raf.skipBytes(Double.BYTES + 1);
+                        raf.skipBytes(Float.BYTES + 1);
                     }
                 }
             } catch (EOFException e) {
@@ -122,8 +124,8 @@ public class FileManager {
                     int z = raf.readInt();
 
                     if (blockPos.getX() == x && blockPos.getY() == y && blockPos.getZ() == z) {
+                        raf.writeFloat(musicBox.getVolume());
                         raf.writeBoolean(musicBox.isActive());
-                        raf.writeDouble(musicBox.getVolume());
                     } else {
                         raf.skipBytes(Double.BYTES + 1);
                     }

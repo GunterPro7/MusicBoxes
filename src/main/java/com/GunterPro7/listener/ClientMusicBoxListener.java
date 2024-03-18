@@ -22,7 +22,7 @@ public class ClientMusicBoxListener {
                 BlockPos pos = event.getPos();
                 long id = 1L + (long) (Math.random() * (Long.MAX_VALUE - 1L));
                 MiscNetworkEvent.sendToServer("musicBox/get/" + pos.getX() + "," + pos.getY() + "," + pos.getZ() + "/", id);
-                Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new MusicBoxScreen(new MusicBox(pos, 50d, true), id)));
+                Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new MusicBoxScreen(new MusicBox(pos, 50f, true), id)));
             }
         }
     }
@@ -32,7 +32,7 @@ public class ClientMusicBoxListener {
         if (Minecraft.getInstance().screen instanceof MusicBoxScreen screen) {
             if (screen.id == event.getId()) {
                 String[] data = event.getData().split("/");
-                double volume = Double.parseDouble(data[0]);
+                float volume = Float.parseFloat(data[0]);
                 boolean active = Boolean.parseBoolean(data[1]);
 
                 screen.updateInformation(volume, active);

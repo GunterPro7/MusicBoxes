@@ -77,7 +77,7 @@ public class ServerMusicBoxListener {
     }
 
     @SubscribeEvent
-    public void onServerReceive(MiscNetworkEvent.ServerReceivedEvent event) {
+    public void onServerReceive(MiscNetworkEvent.ServerReceivedEvent event) throws IOException {
         String[] data = event.getData().split("/");
 
         if (data.length > 1) {
@@ -91,12 +91,13 @@ public class ServerMusicBoxListener {
                         }
                     }
                 } else if (data[1].equals("update")) {
-                    if (data.length > 3) {
+                    if (data.length > 4) {
                         MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(Utils.blockPosOf(data[2]));
 
                         if (musicBox != null) {
-                            musicBox.setVolume(Double.parseDouble(data[3]));
+                            musicBox.setVolume(Float.parseFloat(data[3]));
                             musicBox.setActive(Boolean.parseBoolean(data[4]));
+                            FileManager.Positions.update(musicBox);
                         }
                     }
                 }
