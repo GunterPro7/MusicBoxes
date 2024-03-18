@@ -59,7 +59,7 @@ public class AudioCableListener {
 
         audioCables.removeAll(audioCableList);
 
-        if (McUtils.isServerSide()) {
+        if (McUtils.isServerSide() || McUtils.isSinglePlayer()) {
             FileManager.AudioCables.removeAll(audioCableList);
         }
     }
@@ -88,7 +88,7 @@ public class AudioCableListener {
                 McUtils.sendPrivateChatMessage("The Audio-wire cant be longer then 32 blocks!");
             } else {
                 audioCables.add(audioCable);
-                if (McUtils.isServerSide()) {
+                if (McUtils.isServerSide() || McUtils.isSinglePlayer()) {
                     FileManager.AudioCables.add(audioCable);
                 }
 

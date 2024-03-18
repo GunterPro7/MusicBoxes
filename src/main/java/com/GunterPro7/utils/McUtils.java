@@ -7,8 +7,13 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class McUtils {
+    // Does not work in single player worlds
     public static boolean isServerSide() {
         return Minecraft.getInstance().player == null;
+    }
+
+    public static boolean isSinglePlayer() {
+        return Minecraft.getInstance().isSingleplayer();
     }
 
     @OnlyIn(Dist.CLIENT)

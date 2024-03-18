@@ -46,10 +46,6 @@ public class MusicController {
         return getMusicBoxesByColor(pos, dyeColor, new ArrayList<>());
     }
 
-    public static Set<MusicBox> getMusicBoxesByColorAndPos(BlockPos pos, DyeColor dyeColor) {
-        return getMusicBoxesByColor(pos, dyeColor, new ArrayList<>());
-    }
-
     private static Set<MusicBox> getMusicBoxesByColor(BlockPos blockPos, DyeColor dyeColor, List<BlockPos> checkedPositions) {
         Set<MusicBox> musicBoxes = new HashSet<>();
 

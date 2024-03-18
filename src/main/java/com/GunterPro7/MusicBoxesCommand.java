@@ -86,9 +86,9 @@ public class MusicBoxesCommand {
 
             List<ServerPlayer> players = Objects.requireNonNull(context.getSource().getPlayer()).server.getPlayerList().getPlayers();
 
-            Set<MusicBox> musicBoxes = MusicController.getMusicBoxesByColorAndPos(new BlockPos(0, 100, 0), dyeColor);
+            Set<MusicBox> musicBoxes = musicController.getMusicBoxesByColor(dyeColor);
             List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
-            List<Float> volumeList = musicBoxes.stream().map(musicBox -> (float) musicBox.getVolume()).toList();
+            List<Float> volumeList = musicBoxes.stream().map(MusicBox::getVolume).toList();
 
             musicController.play(players, new MusicBoxEvent(play, resourceLocation, posList, volumeList));
         }

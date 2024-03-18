@@ -43,9 +43,18 @@ public class ServerMusicBoxListener {
         return null;
     }
 
+    public static boolean containsBlockPos(BlockPos pos) {
+        for (MusicBox musicBox : musicBoxes) {
+            if (musicBox.getBlockPos().equals(pos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @SubscribeEvent
     public void blockPlace(BlockEvent.EntityPlaceEvent event) throws IOException {
-        if (event.getPlacedBlock().is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
+        if (event.getPlacedBlock().is(ModBlocks.MUSIC_BOX_BLOCK.get()) && !containsBlockPos(event.getPos())) {
             MusicBox musicBox = new MusicBox(event.getPos());
 
             FileManager.Positions.add(musicBox);

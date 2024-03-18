@@ -61,19 +61,17 @@ public class FileManager {
         }
 
         public static void add(MusicBox musicBox) throws IOException {
-            if (blockPosList.stream().filter(blockPos -> blockPos.getBlockPos().equals(musicBox.getBlockPos())).findFirst().isEmpty()) {
-                blockPosList.add(musicBox);
+            blockPosList.add(musicBox);
 
-                BlockPos blockPos = musicBox.getBlockPos();
+            BlockPos blockPos = musicBox.getBlockPos();
 
-                try (RandomAccessFile raf = fileManager.rafByKey(key)) {
-                    raf.seek(raf.length());
-                    raf.writeInt(blockPos.getX());
-                    raf.writeInt(blockPos.getY());
-                    raf.writeInt(blockPos.getZ());
-                    raf.writeFloat(musicBox.getVolume());
-                    raf.writeBoolean(musicBox.isActive());
-                }
+            try (RandomAccessFile raf = fileManager.rafByKey(key)) {
+                raf.seek(raf.length());
+                raf.writeInt(blockPos.getX());
+                raf.writeInt(blockPos.getY());
+                raf.writeInt(blockPos.getZ());
+                raf.writeFloat(musicBox.getVolume());
+                raf.writeBoolean(musicBox.isActive());
             }
         }
 

@@ -106,7 +106,7 @@ public class MusicBoxEvent {
             BlockPos pos = blockPosList.get(i);
             float volume = volumeList.get(i);
 
-            playSound(soundEvent, pos, volume);
+            playSound(soundEvent, pos, volume / 75);
         }
     }
 
