@@ -55,7 +55,7 @@ public class AudioCableRenderer {
     @SubscribeEvent
     public void onServerMessage(MiscNetworkEvent.ClientReceivedEvent event) {
         if (event.getAction() == MiscAction.AUDIO_CABLE_IS_FREE && event.getId() == lastId) {
-            if (event.getData().startsWith("False")) {
+            if (event.getData().startsWith("false")) {
                 McUtils.sendPrivateChatMessage("This music box already has an Audio Cable connected!");
             } else {
                 pos1 = preferredPos1;

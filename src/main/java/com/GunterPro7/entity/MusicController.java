@@ -10,7 +10,7 @@ import net.minecraft.world.item.DyeColor;
 import java.util.*;
 
 public class MusicController {
-    public static final List<MusicController> musicControllers = new ArrayList<>();
+    public static final List<MusicController> musicControllers = new ArrayList<>(); // TODO instead of writing it into external files, save it into the basic minecraft file
     private final BlockPos pos;
     public final Queue<String> musicQueue = new PriorityQueue<>();
 

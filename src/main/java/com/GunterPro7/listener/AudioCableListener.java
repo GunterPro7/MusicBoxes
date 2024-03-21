@@ -103,7 +103,7 @@ public class AudioCableListener {
 
                 event.reply(String.valueOf(!(musicBox != null && musicBox.isPowered())));
             } else {
-                event.reply("True");
+                event.reply("true");
             }
 
         } else if (action == MiscAction.AUDIO_CABLE_POST) {
@@ -111,7 +111,8 @@ public class AudioCableListener {
             AudioCable audioCable = new AudioCable(Utils.vec3Of(parts.get(0)), Utils.vec3Of(parts.get(1)),
                     Utils.blockPosOf(parts.get(2)), Utils.blockPosOf(parts.get(3)), event.getPlayer().level(), DyeColor.valueOf(parts.get(5)));
 
-            if (audioCable.getBlockDistance() <= 32d) {
+            if (audioCable.getBlockDistance() <= 32d && !ServerMusicBoxListener.containsBlockPos(audioCable.getStartBlock())
+                    && !ServerMusicBoxListener.containsBlockPos(audioCable.getEndBlock())) {
                 audioCables.add(audioCable);
                 FileManager.AudioCables.add(audioCable);
 

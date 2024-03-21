@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class MusicBox {
-    private final BlockPos blockPos;
+    private final BlockPos blockPos; // TODO instead of writing it into external files, save it into the basic minecraft file
     private AudioCable audioCable;
     private float volume = 0.5f;
     private boolean powered;
