@@ -1,9 +1,12 @@
 package com.GunterPro7.listener;
 
+import com.GunterPro7.FileManager;
+import com.GunterPro7.connection.MiscAction;
+import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
-import com.GunterPro7.FileManager;
 import com.GunterPro7.utils.McUtils;
+import com.GunterPro7.utils.Utils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
@@ -18,16 +21,72 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11C;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientAudioCableListener extends AudioCableListener {
+public class AudioCableRenderer {
     public static final List<AudioCable> audioCables = new ArrayList<>();
+    @Nullable
+    private Vec3 pos1;
+    private long timePos1;
+    @Nullable
+    private BlockPos block1;
+
+    private long lastId;
+    private Vec3 preferredPos1;
+    private BlockPos preferredBlockPos;
+
+    private static VertexBuffer vertexBuffer;
+
+    @SubscribeEvent
+    public void onServerMessage(MiscNetworkEvent.ClientReceivedEvent event) {
+        if (event.getAction() == MiscAction.AUDIO_CABLE_IS_FREE && event.getId() == lastId) {
+            if (event.getData().startsWith("False")) {
+                McUtils.sendPrivateChatMessage("This music box already has an Audio Cable connected!");
+            } else {
+                pos1 = preferredPos1;
+                block1 = preferredBlockPos;
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerInteract(PlayerInteractEvent.RightClickBlock event) throws IOException {
+        Vec3 newPos = event.getHitVec().getLocation();
+        if (System.currentTimeMillis() - timePos1 < 250 || (pos1 != null && pos1.equals(event.getHitVec().getLocation()))) return;
+
+        //DyeColor dyeColor = DyeColor.getColor(event.getItemStack());
+        DyeColor dyeColor = DyeColor.LIME;
+        if (dyeColor == null) return;
+
+        lastId = Utils.getRandomId();
+        MiscNetworkEvent.sendToServer(new MiscNetworkEvent(lastId, MiscAction.AUDIO_CABLE_IS_FREE, event.getPos().toShortString().replaceAll(", ", ",")));
+
+        if (pos1 != null) {
+            AudioCable audioCable = new AudioCable(pos1, newPos, block1, event.getPos(), event.getLevel(), dyeColor);
+            if (audioCable.getBlockDistance() > 32d) {
+                McUtils.sendPrivateChatMessage("The Audio-wire cant be longer then 32 blocks!");
+            } else {
+                audioCables.add(audioCable);
+                MiscNetworkEvent.sendToServer(Utils.getRandomId(), MiscAction.AUDIO_CABLE_POST, audioCable.toString());
+
+                pos1 = null;
+                block1 = null;
+                preferredPos1 = null;
+                preferredBlockPos = null;
+            }
+        } else {
+            preferredPos1 = newPos;
+            preferredBlockPos = event.getPos();
+        }
+
+        timePos1 = System.currentTimeMillis();
+    }
 
     @SubscribeEvent
     public void renderLines(RenderLevelStageEvent event) {

@@ -1,6 +1,6 @@
 package com.GunterPro7.entity;
 
-import com.GunterPro7.listener.ServerAudioCableListener;
+import com.GunterPro7.listener.AudioCableListener;
 import net.minecraft.core.BlockPos;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public class MusicBox {
 
     public MusicBox(BlockPos blockPos, float volume, boolean active) {
         this.blockPos = blockPos;
-        List<AudioCable> cables = ServerAudioCableListener.getAudioCablesByPos(blockPos);
+        List<AudioCable> cables = AudioCableListener.getAudioCablesByPos(blockPos);
         if (cables.size() > 0) {
             this.audioCable = cables.get(0);
             this.powered = true;

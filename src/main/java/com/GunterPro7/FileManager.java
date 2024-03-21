@@ -2,6 +2,7 @@ package com.GunterPro7;
 
 import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
+import com.GunterPro7.utils.McUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
@@ -228,9 +229,10 @@ public class FileManager {
                         Vec3 endPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
                         BlockPos startBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
                         BlockPos endBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
+                        String id = raf.readUTF(); // TODO das darf erst bei level laden geladen werden
                         DyeColor color = DyeColor.valueOf(raf.readUTF());
 
-                        audioCableList.add(new AudioCable(startPos, endPos, startBlock, endBlock, color));
+                        audioCableList.add(new AudioCable(startPos, endPos, startBlock, endBlock, McUtils.getLevelByName(id), color));
                     } catch (EOFException e) {
                         System.out.println("File is invalid!");
                     }
@@ -265,6 +267,8 @@ public class FileManager {
                 raf.writeInt(endBlock.getY());
                 raf.writeInt(endBlock.getZ());
 
+                raf.writeUTF(McUtils.getIdentifierByLevel(audioCable.getLevel()));
+
                 raf.writeUTF(audioCable.getColor().name());
             }
         }
@@ -293,13 +297,14 @@ public class FileManager {
                         Vec3 endPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
                         BlockPos startBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
                         BlockPos endBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
+                        String levelName = raf.readUTF();
                         DyeColor dyeColor = DyeColor.valueOf(raf.readUTF());
 
-                        AudioCable curAudioCable = new AudioCable(startPos, endPos, startBlock, endBlock, dyeColor);
+                        AudioCable curAudioCable = new AudioCable(startPos, endPos, startBlock, endBlock, McUtils.getLevelByName(levelName), dyeColor);
 
                         for (AudioCable audioCable : audioCables) {
                             if (audioCable.hashCode() == curAudioCable.hashCode() && audioCable.equals(curAudioCable)) {
-                                removeEntry(raf, Double.BYTES * 6 + dyeColor.name().length() + 2);
+                                removeEntry(raf, Double.BYTES * 6 + Integer.BYTES * 6 + dyeColor.name().length() + Short.BYTES + McUtils.getIdentifierByLevel(audioCable.getLevel()).length() + Short.BYTES);
                                 if (!all) {
                                     break;
                                 }
@@ -312,7 +317,7 @@ public class FileManager {
             }
         }
 
-        // Length: Double.BYTES * 6 + UTF
+        // Length: Double.BYTES * 6 + UTF + UTF
         private static void removeEntry(RandomAccessFile raf, int size) throws IOException {
             long position = raf.getFilePointer();
 

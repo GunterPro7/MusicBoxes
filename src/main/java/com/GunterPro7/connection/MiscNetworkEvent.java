@@ -34,7 +34,7 @@ public class MiscNetworkEvent {
         this.data = buffer.readUtf(buffer.readShort());
     }
 
-    public MiscNetworkEvent(String data, long id, MiscAction action) {
+    public MiscNetworkEvent(long id, MiscAction action, String data) {
         this.data = data;
         this.id = id;
         this.action = action;
@@ -110,13 +110,26 @@ public class MiscNetworkEvent {
         public ServerPlayer getPlayer() {
             return player;
         }
+
+        public void reply(String data) {
+            sendToClient(player, id, action, data);
+        }
     }
 
     public static void sendToClient(ServerPlayer player, long id, MiscAction action, String data) {
-        INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new MiscNetworkEvent(data, id, action));
+        sendToClient(player, new MiscNetworkEvent(id, action, data));
+    }
+
+    public static void sendToClient(ServerPlayer player, MiscNetworkEvent miscNetworkEvent) {
+        INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), miscNetworkEvent);
     }
 
     public static void sendToServer(long id, MiscAction action, String data) {
-        INSTANCE.sendToServer(new MiscNetworkEvent(data, id, action));
+        sendToServer(new MiscNetworkEvent(id, action, data));
     }
+
+    public static void sendToServer(MiscNetworkEvent miscNetworkEvent) {
+        INSTANCE.sendToServer(miscNetworkEvent);
+    }
+
 }

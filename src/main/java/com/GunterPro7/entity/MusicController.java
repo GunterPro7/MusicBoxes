@@ -1,7 +1,6 @@
 package com.GunterPro7.entity;
 
 import com.GunterPro7.listener.AudioCableListener;
-import com.GunterPro7.listener.ClientAudioCableListener;
 import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.listener.ServerMusicBoxListener;
 import net.minecraft.core.BlockPos;
@@ -94,7 +93,7 @@ public class MusicController {
         checkedPositions.add(startBlock);
         checkedPositions.add(endBlock);
 
-        List<AudioCable> startBlockCables = ClientAudioCableListener.getAudioCablesByPos(startBlock);
+        List<AudioCable> startBlockCables = AudioCableListener.getAudioCablesByPos(startBlock);
         for (AudioCable cable : startBlockCables) {
             BlockPos pos = cable.getStartBlock();
             if (!checkedPositions.contains(pos)) {
@@ -105,7 +104,7 @@ public class MusicController {
             }
         }
 
-        List<AudioCable> endBlockCables = ClientAudioCableListener.getAudioCablesByPos(endBlock);
+        List<AudioCable> endBlockCables = AudioCableListener.getAudioCablesByPos(endBlock);
         for (AudioCable cable : endBlockCables) {
             BlockPos pos = cable.getEndBlock();
             if (!checkedPositions.contains(pos)) {

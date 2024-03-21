@@ -14,6 +14,10 @@ public class Utils {
         return new Vec3(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]), Double.parseDouble(parts[2]));
     }
 
+    public static Vec3 vec3Of(BlockPos blockPos) {
+        return new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    }
+
     public static BlockPos blockPosOf(String string) {
         String[] parts = string.split(",");
         return new BlockPos(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
@@ -69,5 +73,9 @@ public class Utils {
 
     public static double getCenter(double x1, double x2) {
         return Math.max(x1, x2) - Math.abs(x1 - x2) / 2;
+    }
+
+    public static long getRandomId() {
+        return 1L + (long) (Math.random() * (Long.MAX_VALUE - 1L));
     }
 }

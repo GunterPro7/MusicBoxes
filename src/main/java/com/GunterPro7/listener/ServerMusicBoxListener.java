@@ -96,7 +96,7 @@ public class ServerMusicBoxListener {
                 MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(Utils.blockPosOf(data[0]));
 
                 if (musicBox != null) {
-                    MiscNetworkEvent.sendToClient(event.getPlayer(), event.getId(), MiscAction.MUSIC_BOX_GET, musicBox.getVolume() + "/" + musicBox.isActive());
+                    event.reply(musicBox.getVolume() + "/" + musicBox.isActive());
                 }
             }
         } else if (action == MiscAction.MUSIC_BOX_INNER_UPDATE) {

@@ -3,12 +3,17 @@ package com.GunterPro7.entity;
 import com.GunterPro7.item.ModItems;
 import com.GunterPro7.listener.ServerMusicBoxListener;
 import com.GunterPro7.utils.JsonUtils;
+import com.GunterPro7.utils.MapUtils;
+import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.WorldData;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -21,23 +26,20 @@ public class AudioCable {
     private final BlockPos startBlock;
     private final BlockPos endBlock;
     private final Vec3 centerPos;
+    private final Level level;
     private DyeColor color;
 
-    public AudioCable(Vec3 startPos, Vec3 endPos, DyeColor dyeColor) {
-        this(startPos, endPos, Utils.blockPosOf(startPos), Utils.blockPosOf(endPos), dyeColor);
+    public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock, Level level) {
+        this(startPos, endPos, startBlock, endBlock, level, DyeColor.WHITE);
     }
 
-    public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock) {
-        this(startPos, endPos, startBlock, endBlock, DyeColor.WHITE);
-    }
-
-    public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock, DyeColor color) {
+    public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock, Level level, DyeColor color) { // TODO add "Level"
         this.startPos = startPos;
         this.endPos = endPos;
         this.startBlock = startBlock;
         this.endBlock = endBlock;
         this.color = color;
-
+        this.level = level;
 
         // x1 = 200, x2 = 220    -> mid => 210  ->
         // x1 = 220, x2 = 200    -> mid => 210  ->
@@ -66,12 +68,25 @@ public class AudioCable {
         return endPos;
     }
 
+    public Vec3 getCenterPos() {
+        return centerPos;
+    }
+
+    public AABB getBoundingBox(double boundingArea) {
+        return new AABB(centerPos.x - boundingArea, centerPos.y - boundingArea, centerPos.z - boundingArea,
+                centerPos.x + boundingArea, centerPos.y + boundingArea, centerPos.z + boundingArea);
+    }
+
     public BlockPos getStartBlock() {
         return startBlock;
     }
 
     public BlockPos getEndBlock() {
         return endBlock;
+    }
+
+    public Level getLevel() {
+        return level;
     }
 
     public DyeColor getColor() {
@@ -119,12 +134,15 @@ public class AudioCable {
 
     @Override
     public String toString() {
-        return ("startPos:" + startPos + ";endPos:" + endPos + ";color:" + color.name()).replaceAll("[()]", "");
+        return ("startPos:" + startPos + ";endPos:" + endPos + ";startBlock:" + startBlock.toShortString().replaceAll(", ", ",")
+                + ";endBlock:" + endBlock.toShortString().replaceAll(", ", ",") + ";id:" + McUtils.getIdentifierByLevel(level)
+                + ";color:" + color.name()).replaceAll("[()]", "");
     }
 
-    public static AudioCable fromString(String audioCableString) {
-        Map<String, String> map = JsonUtils.asMap(audioCableString);
+    public AudioCable fromString(String string) {
+        Map<String, String> map = JsonUtils.asMap(string);
 
-        return new AudioCable(Utils.vec3Of(map.get("startPos")), Utils.vec3Of(map.get("endPos")), DyeColor.valueOf(map.get("color")));
+        return new AudioCable(Utils.vec3Of(map.get("startPos")), Utils.vec3Of(map.get("endPos")),
+                Utils.blockPosOf(map.get("startBlock")), Utils.blockPosOf(map.get("endBlock")), McUtils.getLevelByName(map.get("id")), DyeColor.valueOf(map.get("color")));
     }
 }
