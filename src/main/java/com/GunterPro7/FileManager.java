@@ -4,12 +4,16 @@ import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.utils.McUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
+import org.apache.logging.log4j.core.jmx.Server;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FileManager {
     private static final String path = "libraries/MusicBox/";
@@ -207,32 +211,33 @@ public class FileManager {
 
     public static class AudioCables {
         public static File file;
-        private static final List<AudioCable> audioCableList = new ArrayList<>();
+        public static final Map<ServerLevel, List<AudioCable>> audioCableList = new HashMap<>();
         private static final FileManager fileManager = new FileManager();
-        private static final String key = "audioCables.bin";
+        private static final String key = "audio_cables/";
 
         static {
             file = new File("libraries/MusicBox/" + key);
 
             if (!file.exists()) {
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                file.mkdirs();
             }
+        }
 
-            try (RandomAccessFile raf = fileManager.rafByKey(key)) {
+        public static void load(ServerLevel level) {
+            List<AudioCable> audioCables = new ArrayList<>();
+            audioCableList.put(level, audioCables);
+
+            try (RandomAccessFile raf = fileManager.rafByKey(getKey(level))) {
                 while (raf.getFilePointer() != raf.length()) {
                     try {
                         Vec3 startPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
                         Vec3 endPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
                         BlockPos startBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
                         BlockPos endBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
-                        String id = raf.readUTF(); // TODO das darf erst bei level laden geladen werden
+                        String id = raf.readUTF();
                         DyeColor color = DyeColor.valueOf(raf.readUTF());
 
-                        audioCableList.add(new AudioCable(startPos, endPos, startBlock, endBlock, McUtils.getLevelByName(id), color));
+                        audioCables.add(new AudioCable(startPos, endPos, startBlock, endBlock, McUtils.getLevelByName(id), color));
                     } catch (EOFException e) {
                         System.out.println("File is invalid!");
                     }
@@ -243,9 +248,13 @@ public class FileManager {
         }
 
         public static void add(AudioCable audioCable) throws IOException {
-            audioCableList.add(audioCable);
+            ServerLevel level = (ServerLevel) audioCable.getLevel();
+            if (!audioCableList.containsKey(level)) {
+                load(level);
+            }
+            audioCableList.get(level).add(audioCable);
 
-            try (RandomAccessFile raf = fileManager.rafByKey(key)) {
+            try (RandomAccessFile raf = fileManager.rafByKey(getKey(level))) {
                 raf.seek(raf.length());
                 Vec3 startPos = audioCable.getStartPos();
                 Vec3 endPos = audioCable.getEndPos();
@@ -274,23 +283,36 @@ public class FileManager {
         }
 
         public static void remove(AudioCable audioCable) throws IOException {
-            audioCableList.remove(audioCable);
+            ServerLevel level = (ServerLevel) audioCable.getLevel();
+            if (!audioCableList.containsKey(level)) {
+                load(level);
+            }
+            audioCableList.get(level).remove(audioCable);
 
             remove(List.of(audioCable), false);
         }
 
         public static void removeAll(List<AudioCable> audioCables) throws IOException {
-            AudioCables.audioCableList.removeAll(audioCables);
+            if (audioCables.size() > 0) {
+                ServerLevel level = (ServerLevel) audioCables.get(0).getLevel();
+                if (!audioCableList.containsKey(level)) {
+                    load(level);
+                }
+                audioCableList.get(level).removeAll(audioCables);
 
-            remove(audioCables, true);
+                remove(audioCables, true);
+            }
         }
 
-        public static List<AudioCable> getAll() {
-            return audioCableList;
+        public static List<AudioCable> getAll(ServerLevel level) {
+            if (!audioCableList.containsKey(level)) {
+                load(level);
+            }
+            return audioCableList.get(level);
         }
 
         private static void remove(List<AudioCable> audioCables, boolean all) throws IOException {
-            try (RandomAccessFile raf = fileManager.rafByKey(key)) {
+            try (RandomAccessFile raf = fileManager.rafByKey(getKey((ServerLevel) audioCables.get(0).getLevel()))) {
                 while (raf.getFilePointer() != raf.length()) {
                     try {
                         Vec3 startPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
@@ -334,6 +356,10 @@ public class FileManager {
             raf.write(byteArray);
 
             raf.seek(newPos);
+        }
+
+        private static String getKey(ServerLevel level) {
+            return key + McUtils.getIdentifierByLevel(level) + ".bin";
         }
     }
 }

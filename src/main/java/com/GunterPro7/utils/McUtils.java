@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -32,11 +33,16 @@ public class McUtils {
     }
 
     public static Level getLevelByName(String levelName) {
-        String name = levelName.substring(0, levelName.length() - 1);
-        ResourceKey<Level> dimension = getDimensionByIdentifier(levelName.charAt(levelName.length() - 1));
-        if (isServerSide()) {
+        ResourceKey<Level> dimension = getDimensionByIdentifier(Integer.parseInt(String.valueOf(levelName.charAt(levelName.length() - 1))));
+        if (isServerSide() && Main.minecraftServer != null) {
             for (Level level : Main.minecraftServer.getAllLevels()) {
-                if (getIdentifierByLevel(level).equals(name) && dimension.equals(level.dimension())) {
+                if (getIdentifierByLevel(level).equals(levelName) && dimension.equals(level.dimension())) {
+                    return level;
+                }
+            }
+        } else if (isSinglePlayer()) {
+            for (Level level : Minecraft.getInstance().getSingleplayerServer().getAllLevels()) {
+                if (getIdentifierByLevel(level).equals(levelName) && dimension.equals(level.dimension())) {
                     return level;
                 }
             }
@@ -48,8 +54,8 @@ public class McUtils {
     }
 
     public static String getIdentifierByLevel(Level level) {
-        String part = level.toString().split("\\[")[0]; // TODO somehow its the wrong name of the toString :O
-        return part.substring(0, part.length() - 1) + getShortDimensionByLevel(level);
+        return (level.toString().contains("[") ? level.toString().split("\\[")[1].
+                replaceAll("]", "") : level.toString()) + getShortDimensionByLevel(level);
     }
 
     public static ResourceKey<Level> getDimensionByIdentifier(int identifier) {
@@ -62,11 +68,21 @@ public class McUtils {
     }
 
     public static int getShortDimensionByLevel(Level level) {
-        return switch (level.dimension().registry().getPath()) {
+        return switch (level.dimension().location().getPath()) {
             case "overworld" -> 0;
             case "the_nether" -> 1;
             case "the_end" -> 2;
             default -> 3;
         };
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static LocalPlayer player() {
+        return Minecraft.getInstance().player;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static Level level() {
+        return player().level();
     }
 }

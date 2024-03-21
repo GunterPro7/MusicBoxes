@@ -49,7 +49,7 @@ public class AudioCable {
         this.centerPos = new Vec3(x, y, z);
     }
 
-    public void drop(Level level) {
+    public void drop() {
         ItemStack itemStack = new ItemStack(ModItems.MUSIC_CABLE_ITEM.get(), 1);
         ItemEntity itemEntity = new ItemEntity(level, centerPos.x(), centerPos.y(), centerPos.z(), itemStack);
 
@@ -139,7 +139,7 @@ public class AudioCable {
                 + ";color:" + color.name()).replaceAll("[()]", "");
     }
 
-    public AudioCable fromString(String string) {
+    public static AudioCable fromString(String string) {
         Map<String, String> map = JsonUtils.asMap(string);
 
         return new AudioCable(Utils.vec3Of(map.get("startPos")), Utils.vec3Of(map.get("endPos")),

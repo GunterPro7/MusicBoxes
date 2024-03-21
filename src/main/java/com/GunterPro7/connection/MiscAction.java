@@ -3,6 +3,7 @@ package com.GunterPro7.connection;
 public enum MiscAction {
     AUDIO_CABLE_POST(0),
     AUDIO_CABLE_FETCH(1),
+    AUDIO_CABLE_NEW(8),
     AUDIO_CABLE_REMOVE(2),
     AUDIO_CABLE_IS_FREE(7),
 

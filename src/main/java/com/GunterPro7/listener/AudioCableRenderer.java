@@ -13,21 +13,30 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.telemetry.events.WorldLoadEvent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.ChunkTicketLevelUpdatedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11C;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AudioCableRenderer {
     public static final List<AudioCable> audioCables = new ArrayList<>();
@@ -52,11 +61,27 @@ public class AudioCableRenderer {
                 pos1 = preferredPos1;
                 block1 = preferredBlockPos;
             }
+        } else if (event.getAction() == MiscAction.AUDIO_CABLE_REMOVE) {
+            String[] parts = event.getData().split("/");
+            for (String part : parts) {
+                AudioCable audioCable = AudioCable.fromString(part);
+                audioCables.remove(audioCable); // TODO test if there are no errors when creating an AudioCable
+            }
+        } else if (event.getAction() == MiscAction.AUDIO_CABLE_NEW) {
+            AudioCable audioCable = AudioCable.fromString(event.getData());
+            audioCables.add(audioCable);
+        } else if (event.getAction() == MiscAction.AUDIO_CABLE_FETCH) {
+            audioCables.clear();
+            String[] parts = event.getData().split("/");
+            for (String part : parts) {
+                AudioCable audioCable = AudioCable.fromString(part);
+                audioCables.add(audioCable); // TODO test if there are no errors when creating an AudioCable
+            }
         }
     }
 
     @SubscribeEvent
-    public void onPlayerInteract(PlayerInteractEvent.RightClickBlock event) throws IOException {
+    public void onPlayerInteract(PlayerInteractEvent.RightClickBlock event) {
         Vec3 newPos = event.getHitVec().getLocation();
         if (System.currentTimeMillis() - timePos1 < 250 || (pos1 != null && pos1.equals(event.getHitVec().getLocation()))) return;
 

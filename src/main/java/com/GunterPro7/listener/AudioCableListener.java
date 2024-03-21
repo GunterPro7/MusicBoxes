@@ -17,7 +17,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -27,6 +29,7 @@ import java.util.*;
 // Client & Server Side
 public class AudioCableListener {
     public static final List<AudioCable> audioCables = new ArrayList<>();
+    private static final List<Level> loadedLevels = new ArrayList<>();
     public static final Map<LivingEntity, List<AudioCable>> FETCHED_CABLE_MAP = new HashMap<>();
 
     public static List<AudioCable> getAudioCablesByPos(BlockPos pos) {
@@ -40,7 +43,7 @@ public class AudioCableListener {
     }
 
     @SubscribeEvent
-    public void onPlayerBreakBlock(BlockEvent.BreakEvent event) throws IOException {
+    public void onPlayerBreakBlock(BlockEvent.BreakEvent event) throws IOException { // TODO is this call client side?
         BlockPos pos = event.getPos();
         List<AudioCable> audioCableList = new ArrayList<>();
 
@@ -53,15 +56,20 @@ public class AudioCableListener {
                 if (audioCable.getMusicBoxStart() != null) audioCable.getMusicBoxStart().powerDisconnected();
                 if (audioCable.getMusicBoxEnd() != null) audioCable.getMusicBoxEnd().powerDisconnected();
                 audioCableList.add(audioCable);
-                audioCable.drop(event.getPlayer().level());
+                audioCable.drop();
             }
         });
-
 
         audioCables.removeAll(audioCableList);
 
         if (McUtils.isServerSide() || McUtils.isSinglePlayer()) {
-            FileManager.AudioCables.removeAll(audioCableList); // TODO zum client schicken
+            StringBuilder sb = new StringBuilder();
+            for (AudioCable audioCable : audioCableList) {
+                sb.append(audioCable.toString()).append('/');
+            }
+
+            event.getLevel().players().forEach(player -> MiscNetworkEvent.sendToClient((ServerPlayer) player, new MiscNetworkEvent(-1, MiscAction.AUDIO_CABLE_REMOVE, sb.toString())));
+            FileManager.AudioCables.removeAll(audioCableList);
 
             Set<DyeColor> colors = new HashSet<>();
             getAudioCablesByPos(event.getPos()).forEach(cable -> colors.add(cable.getColor()));
@@ -117,24 +125,37 @@ public class AudioCableListener {
                     musicBox.powerConnected(audioCable);
                 }
 
-                event.getPlayer().level().players().forEach(player -> MiscNetworkEvent.sendToClient((ServerPlayer) player,
-                        new MiscNetworkEvent(-1, MiscAction.AUDIO_CABLE_FETCH, audioCable.toString())));
-            }
-
-        } else if (action == MiscAction.AUDIO_CABLE_FETCH) {
-            BlockPos playerPos = Utils.blockPosOf(data[0]);
-
-            //List<AudioCable> fetchedCables = FETCHED_CABLE_MAP.computeIfAbsent(event.getPlayer(), k -> new ArrayList<>());
-            //List<AudioCable> cablesForClient = new ArrayList<>();
-
-            List<AudioCable> newAudioCables = new ArrayList<>();
-            for (AudioCable audioCable : audioCables) {
-                if (true) {
-
-                }
+                event.getPlayer().level().players().forEach(player -> {
+                    if (player != event.getPlayer()) {
+                        MiscNetworkEvent.sendToClient((ServerPlayer) player,
+                                new MiscNetworkEvent(-1, MiscAction.AUDIO_CABLE_NEW, audioCable.toString()));
+                    }
+                });
             }
 
         }
+    }
+
+    @SubscribeEvent
+    public void onLevelChange(EntityJoinLevelEvent event) {
+        if (event.getLevel() instanceof ServerLevel level) {
+            if (!loadedLevels.contains(level)) {
+                audioCables.addAll(FileManager.AudioCables.getAll(level));
+                loadedLevels.add(level);
+            }
+
+            if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+                List<AudioCable> newAudioCables = audioCables.stream().filter(audioCable -> audioCable.getLevel() == level).toList();
+
+                StringBuilder sb = new StringBuilder();
+                for (AudioCable audioCable : newAudioCables) {
+                    sb.append(audioCable.toString()).append('/');
+                }
+
+                MiscNetworkEvent.sendToClient(serverPlayer, -1, MiscAction.AUDIO_CABLE_FETCH, sb.toString());
+            }
+        }
+
     }
 
     //@SubscribeEvent
