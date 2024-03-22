@@ -46,7 +46,7 @@ public class Main {
     }
 
     private void loadConfigs() {
-        ServerMusicBoxListener.musicBoxes.addAll(FileManager.Positions.getAll());
+        //ServerMusicBoxListener.musicBoxes.addAll(FileManager.Positions.getAll());
         FileManager.Controller.getAll().forEach(pos -> MusicController.musicControllers.add(new MusicController(pos)));
     }
 

@@ -7,23 +7,24 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.gui.widget.ForgeSlider;
 import org.jetbrains.annotations.NotNull;
 
 public class MusicBoxScreen extends Screen {
-    public final MusicBox musicBox;
+    public final BlockPos pos;
     public final long id;
 
     private ForgeSlider slider;
     private Button button;
     public boolean newActive;
 
-    public MusicBoxScreen(MusicBox musicBox, long id) {
+    public MusicBoxScreen(BlockPos pos, long id) {
         super(Component.literal("Music Box"));
         this.id = id;
-        this.musicBox = musicBox;
-        this.newActive = musicBox.isActive();
+        this.pos = pos;
+        this.newActive = true;
     }
 
     @Override
@@ -32,7 +33,7 @@ public class MusicBoxScreen extends Screen {
         int centerX = (this.width) / 2 - 50;
         int centerY = (this.height) / 2 - 50;
 
-        button = new Button.Builder(Component.literal(musicBox.isActive() ? "§a§lEnabled" : "§c§lDisabled"),
+        button = new Button.Builder(Component.literal(newActive ? "§a§lEnabled" : "§c§lDisabled"),
                 cButton -> {
                     cButton.setMessage(Component.literal(newActive ? "§c§lDisabled" : "§a§lEnabled"));
                     this.newActive = !newActive;
@@ -40,7 +41,7 @@ public class MusicBoxScreen extends Screen {
 
         this.addRenderableWidget(button);
 
-        slider = new ForgeSlider(centerX, centerY + 30, 100, 20, Component.literal("Volume: "), Component.literal("%"), 0d, 100d, musicBox.getVolume(), 0.1d, -1, true);
+        slider = new ForgeSlider(centerX, centerY + 30, 100, 20, Component.literal("Volume: "), Component.literal("%"), 0d, 100d, 0d, 0.1d, -1, true);
 
         this.addRenderableWidget(slider);
 
@@ -59,11 +60,9 @@ public class MusicBoxScreen extends Screen {
     public void onClose() {
         super.onClose();
 
-        if (musicBox.getVolume() != slider.getValue() || musicBox.isActive() != this.newActive) {
-            MiscNetworkEvent.sendToServer(-1, MiscAction.MUSIC_BOX_INNER_UPDATE,
-                    musicBox.getBlockPos().toShortString().replace(", ", ",")
-                    + "/" + (float) slider.getValue() + "/" + newActive);
-        }
+        MiscNetworkEvent.sendToServer(-1, MiscAction.MUSIC_BOX_INNER_UPDATE,
+                pos.toShortString().replace(", ", ",")
+                        + "/" + (float) slider.getValue() + "/" + newActive);
     }
 
     @Override
@@ -75,8 +74,5 @@ public class MusicBoxScreen extends Screen {
         slider.setValue(volume);
         newActive = active;
         button.setMessage(Component.literal(active ? "§a§lEnabled" : "§c§lDisabled"));
-
-        musicBox.setVolume(volume);
-        musicBox.setActive(active);
     }
 }

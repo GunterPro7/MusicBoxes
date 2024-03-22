@@ -140,11 +140,6 @@ public class AudioCableRenderer {
             if (hitResult instanceof BlockHitResult) {
                 BlockPos blockPos = ((BlockHitResult) hitResult).getBlockPos();
                 if (Minecraft.getInstance().level != null && !Minecraft.getInstance().level.getBlockState(blockPos).is(Blocks.AIR)) {
-                    MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(blockPos);
-                    if (musicBox != null && musicBox.isPowered()) {
-                        return;
-                    }
-
                     if (pos1.closerThan(hitResult.getLocation(), 32d)) {
                         renderLine(pos1, hitResult.getLocation(), rgb, view, buffer, vertexBuffer, event, VertexFormat.Mode.DEBUG_LINE_STRIP);
                     }

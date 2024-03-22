@@ -74,7 +74,7 @@ public class AudioCableListener {
             Set<DyeColor> colors = new HashSet<>();
             getAudioCablesByPos(event.getPos()).forEach(cable -> colors.add(cable.getColor()));
 
-            List<MusicBox> musicBoxesToDelete = ServerMusicBoxListener.getMusicBoxesContainingController(colors.stream().toList(), true);
+            List<MusicBox> musicBoxesToDelete = ServerMusicBoxListener.getMusicBoxesContainingController(colors.stream().toList(), true); // TODO diesen code überarbeiten, es sollten eigentlich alle MusicBoxen beendet werden, aber nur die beenden lassen, die "von dem Contorller aus weg gehen" TODO TODO
             musicBoxesToDelete.forEach(MusicBox::powerDisconnected);
 
             List<BlockPos> posList = musicBoxesToDelete.stream().map(MusicBox::getBlockPos).toList();
@@ -94,12 +94,13 @@ public class AudioCableListener {
     public void onAudioCablePost(MiscNetworkEvent.ServerReceivedEvent event) throws IOException {
         MiscAction action = event.getAction();
         String[] data = event.getData().split("/");
+        Level level = event.getPlayer().level();
 
         if (action == MiscAction.AUDIO_CABLE_IS_FREE) {
             BlockPos pos = Utils.blockPosOf(data[0]);
 
-            if (ServerMusicBoxListener.containsBlockPos(pos)) {
-                MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(pos);
+            if (ServerMusicBoxListener.containsBlockPos(level, pos)) {
+                MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(level, pos);
 
                 event.reply(String.valueOf(!(musicBox != null && musicBox.isPowered())));
             } else {
@@ -111,8 +112,8 @@ public class AudioCableListener {
             AudioCable audioCable = new AudioCable(Utils.vec3Of(parts.get(0)), Utils.vec3Of(parts.get(1)),
                     Utils.blockPosOf(parts.get(2)), Utils.blockPosOf(parts.get(3)), event.getPlayer().level(), DyeColor.valueOf(parts.get(5)));
 
-            if (audioCable.getBlockDistance() <= 32d && !ServerMusicBoxListener.containsBlockPos(audioCable.getStartBlock())
-                    && !ServerMusicBoxListener.containsBlockPos(audioCable.getEndBlock())) {
+            if (audioCable.getBlockDistance() <= 32d && !ServerMusicBoxListener.containsBlockPos(level, audioCable.getStartBlock())
+                    && !ServerMusicBoxListener.containsBlockPos(level, audioCable.getEndBlock())) {
                 audioCables.add(audioCable);
                 FileManager.AudioCables.add(audioCable);
 

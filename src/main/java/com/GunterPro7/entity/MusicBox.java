@@ -1,32 +1,31 @@
 package com.GunterPro7.entity;
 
+import com.GunterPro7.block.MusicBoxBlock;
 import com.GunterPro7.listener.AudioCableListener;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.Objects;
 
 public class MusicBox {
-    private final BlockPos blockPos; // TODO instead of writing it into external files, save it into the basic minecraft file
+    private final BlockPos blockPos;
+    private final Level level;
     private AudioCable audioCable;
-    private float volume = 0.5f;
     private boolean powered;
-    private boolean active;
 
-    public MusicBox(BlockPos blockPos, float volume, boolean active) {
+    public MusicBox(BlockPos blockPos, Level level) {
+        if (!(level instanceof ServerLevel)) {
+            throw new IllegalArgumentException("Level has to be a ServerLevel instance.");
+        }
         this.blockPos = blockPos;
+        this.level = level;
         List<AudioCable> cables = AudioCableListener.getAudioCablesByPos(blockPos);
         if (cables.size() > 0) {
             this.audioCable = cables.get(0);
             this.powered = true;
         }
-
-        this.volume = volume;
-        this.active = active;
-    }
-
-    public MusicBox(BlockPos blockPos) {
-        this(blockPos, 50f, true);
     }
 
     public BlockPos getBlockPos() {
@@ -55,11 +54,11 @@ public class MusicBox {
     }
 
     public boolean isActive() {
-        return this.active;
+        return this.level.getBlockState(blockPos).getValue(MusicBoxBlock.ACTIVE);
     }
 
     public void setActive(boolean active) {
-        this.active = active;
+        this.level.setBlock(blockPos, this.level.getBlockState(blockPos).setValue(MusicBoxBlock.ACTIVE, active), 1);
     }
 
     public void powerDisconnected() {
@@ -73,11 +72,11 @@ public class MusicBox {
     }
 
     public float getVolume() {
-        return this.volume;
+        return (float) this.level.getBlockState(blockPos).getValue(MusicBoxBlock.VOLUME);
     }
 
     public void setVolume(float volume) {
-        this.volume = volume;
+        this.level.setBlock(blockPos, this.level.getBlockState(blockPos).setValue(MusicBoxBlock.VOLUME, Math.round(volume)), 1);
     }
 
     public boolean hasAudioCable() {
@@ -88,4 +87,5 @@ public class MusicBox {
     public String toString() {
         return "MusicBox at: " + blockPos + ", AudioCable connected: " + (audioCable != null ? audioCable : "null") + "";
     }
+
 }

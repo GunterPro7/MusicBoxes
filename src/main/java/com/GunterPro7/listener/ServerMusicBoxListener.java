@@ -15,8 +15,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
@@ -29,71 +32,70 @@ import java.util.Random;
 public class ServerMusicBoxListener {
     private static final Random random = new Random();
 
-    public static final List<MusicBox> musicBoxes = new ArrayList<>();
-
     public ServerMusicBoxListener() {
 
     }
 
-    public static MusicBox getMusicBoxByPos(BlockPos blockPos) {
-        for (MusicBox musicBox : musicBoxes) {
-            if (musicBox.getBlockPos().equals(blockPos)) {
-                return musicBox;
-            }
+    public static MusicBox getMusicBoxByPos(Level level, BlockPos blockPos) {
+        BlockState state = level.getBlockState(blockPos);
+        if (state.is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
+            return new MusicBox(blockPos, level);
         }
+
         return null;
     }
 
-    public static boolean containsBlockPos(BlockPos pos) {
-        for (MusicBox musicBox : musicBoxes) {
-            if (musicBox.getBlockPos().equals(pos)) {
-                return true;
-            }
-        }
-        return false;
+    public static boolean containsBlockPos(Level level, BlockPos pos) {
+        return level.getBlockState(pos).is(ModBlocks.MUSIC_BOX_BLOCK.get());
     }
 
     @SubscribeEvent
     public void blockPlace(BlockEvent.EntityPlaceEvent event) throws IOException {
-        if (event.getPlacedBlock().is(ModBlocks.MUSIC_BOX_BLOCK.get()) && !containsBlockPos(event.getPos())) {
-            MusicBox musicBox = new MusicBox(event.getPos());
+        if (event.getEntity() instanceof ServerPlayer player) {
+            Level level = player.level();
+            if (event.getPlacedBlock().is(ModBlocks.MUSIC_BOX_BLOCK.get()) && !containsBlockPos(level, event.getPos())) {
+                MusicBox musicBox = new MusicBox(event.getPos(), level);
 
-            FileManager.Positions.add(musicBox);
-            musicBoxes.add(musicBox);
-        }
-    }
-
-    @SubscribeEvent
-    public void blockBreak(BlockEvent.BreakEvent event) throws IOException {
-        if (event.getState().is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
-            BlockPos pos = event.getPos();
-
-            MusicBox musicBox = new MusicBox(pos);
-
-            FileManager.Positions.remove(musicBox);
-            musicBoxes.remove(musicBox);
-
-            MusicBox musicBoxToDelete = null;
-            for (MusicBox curMusicBox : musicBoxes) {
-                if (pos.equals(curMusicBox.getBlockPos())) {
-                    musicBoxToDelete = curMusicBox;
-                }
-            }
-
-            if (musicBoxToDelete != null) {
-                musicBoxes.remove(musicBoxToDelete);
+                //FileManager.Positions.add(musicBox);
+                //musicBoxes.add(musicBox);
             }
         }
     }
+
+    //@SubscribeEvent
+    //public void blockBreak(BlockEvent.BreakEvent event) throws IOException {
+    //    if (event.getPlayer() instanceof ServerPlayer player) {
+    //        if (event.getState().is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
+    //            BlockPos pos = event.getPos();
+//
+    //            MusicBox musicBox = new MusicBox(pos, player.level());
+    //
+    //            //FileManager.Positions.remove(musicBox);
+    //            musicBoxes.remove(musicBox);
+//
+    //            MusicBox musicBoxToDelete = null;
+    //            for (MusicBox curMusicBox : musicBoxes) {
+    //                if (pos.equals(curMusicBox.getBlockPos())) {
+    //                    musicBoxToDelete = curMusicBox;
+    //                }
+    //            }
+//
+    //            if (musicBoxToDelete != null) {
+    //                musicBoxes.remove(musicBoxToDelete);
+    //            }
+    //        }
+    //    }
+    //}
 
     @SubscribeEvent
     public void onServerReceive(MiscNetworkEvent.ServerReceivedEvent event) throws IOException {
         String[] data = event.getData().split("/");
         MiscAction action = event.getAction();
+        Level level = event.getPlayer().level();
 
         if (action == MiscAction.MUSIC_BOX_GET) {
             if (data.length > 0) {
-                MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(Utils.blockPosOf(data[0]));
+                MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(level, Utils.blockPosOf(data[0]));
 
                 if (musicBox != null) {
                     event.reply(musicBox.getVolume() + "/" + musicBox.isActive());
@@ -101,12 +103,12 @@ public class ServerMusicBoxListener {
             }
         } else if (action == MiscAction.MUSIC_BOX_INNER_UPDATE) {
             if (data.length > 2) {
-                MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(Utils.blockPosOf(data[0]));
+                MusicBox musicBox = ServerMusicBoxListener.getMusicBoxByPos(level, Utils.blockPosOf(data[0]));
 
                 if (musicBox != null) {
                     musicBox.setVolume(Float.parseFloat(data[1]));
                     musicBox.setActive(Boolean.parseBoolean(data[2]));
-                    FileManager.Positions.update(musicBox);
+                    //FileManager.Positions.update(musicBox);
                 }
 
             }
@@ -116,14 +118,14 @@ public class ServerMusicBoxListener {
 
     public static List<MusicBox> getMusicBoxesContainingController(List<DyeColor> colors, boolean invert) {
         List<MusicBox> musicBoxes = new ArrayList<>();
-        for (MusicBox musicBox : ServerMusicBoxListener.musicBoxes) {
-            if (musicBox.isPowered() && colors.contains(musicBox.getAudioCable().getColor())) { // or implement also for "all"
-                MusicController musicController = MusicController.getMusicControllerByMusicBox(musicBox);
-                if (invert == (musicController == null)) {
-                    musicBoxes.add(musicBox);
-                }
-            }
-        }
+        //for (MusicBox musicBox : ServerMusicBoxListener.musicBoxes) {
+        //    if (musicBox.isPowered() && colors.contains(musicBox.getAudioCable().getColor())) { // or implement also for "all"
+        //        MusicController musicController = MusicController.getMusicControllerByMusicBox(musicBox);
+        //        if (invert == (musicController == null)) {
+        //            musicBoxes.add(musicBox);
+        //        }
+        //    }
+        //}
 
         return musicBoxes;
     }

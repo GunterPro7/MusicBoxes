@@ -7,6 +7,7 @@ import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.ui.MusicBoxScreen;
 import com.GunterPro7.utils.McUtils;
+import com.GunterPro7.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
@@ -21,9 +22,9 @@ public class ClientMusicBoxListener {
         if (McUtils.gameLoaded() && !(Minecraft.getInstance().screen instanceof MusicBoxScreen)) {
             if (event.getLevel().getBlockState(event.getPos()).is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
                 BlockPos pos = event.getPos();
-                long id = 1L + (long) (Math.random() * (Long.MAX_VALUE - 1L));
+                long id = Utils.getRandomId();
                 MiscNetworkEvent.sendToServer(id, MiscAction.MUSIC_BOX_GET, pos.getX() + "," + pos.getY() + "," + pos.getZ());
-                Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new MusicBoxScreen(new MusicBox(pos, 50f, true), id)));
+                Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new MusicBoxScreen(pos, id)));
             }
         }
     }
@@ -31,7 +32,7 @@ public class ClientMusicBoxListener {
     @SubscribeEvent
     public void clientReceiveEvent(MiscNetworkEvent.ClientReceivedEvent event) {
         if (Minecraft.getInstance().screen instanceof MusicBoxScreen screen) {
-            if (screen.id == event.getId()) {
+            if (event.getAction() == MiscAction.MUSIC_BOX_GET && screen.id == event.getId()) {
                 String[] data = event.getData().split("/");
                 float volume = Float.parseFloat(data[0]);
                 boolean active = Boolean.parseBoolean(data[1]);

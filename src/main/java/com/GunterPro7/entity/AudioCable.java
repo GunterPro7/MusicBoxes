@@ -33,7 +33,7 @@ public class AudioCable {
         this(startPos, endPos, startBlock, endBlock, level, DyeColor.WHITE);
     }
 
-    public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock, Level level, DyeColor color) { // TODO add "Level"
+    public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock, Level level, DyeColor color) {
         this.startPos = startPos;
         this.endPos = endPos;
         this.startBlock = startBlock;
@@ -95,12 +95,12 @@ public class AudioCable {
 
     @Nullable
     public MusicBox getMusicBoxStart() {
-        return ServerMusicBoxListener.getMusicBoxByPos(startBlock);
+        return ServerMusicBoxListener.getMusicBoxByPos(level, startBlock);
     }
 
     @Nullable
     public MusicBox getMusicBoxEnd() {
-        return ServerMusicBoxListener.getMusicBoxByPos(endBlock);
+        return ServerMusicBoxListener.getMusicBoxByPos(level, endBlock);
     }
 
     public float[] getRGB() {
