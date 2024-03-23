@@ -8,17 +8,13 @@ import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.Utils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -112,8 +108,8 @@ public class AudioCableListener {
             AudioCable audioCable = new AudioCable(Utils.vec3Of(parts.get(0)), Utils.vec3Of(parts.get(1)),
                     Utils.blockPosOf(parts.get(2)), Utils.blockPosOf(parts.get(3)), event.getPlayer().level(), DyeColor.valueOf(parts.get(5)));
 
-            if (audioCable.getBlockDistance() <= 32d && !ServerMusicBoxListener.containsBlockPos(level, audioCable.getStartBlock())
-                    && !ServerMusicBoxListener.containsBlockPos(level, audioCable.getEndBlock())) {
+            if (audioCable.getBlockDistance() <= 32d && !ServerMusicBoxListener.isPowered(level, audioCable.getStartBlock())
+                    && !ServerMusicBoxListener.isPowered(level, audioCable.getEndBlock())) {
                 audioCables.add(audioCable);
                 FileManager.AudioCables.add(audioCable);
 
@@ -133,6 +129,8 @@ public class AudioCableListener {
                                 new MiscNetworkEvent(-1, MiscAction.AUDIO_CABLE_NEW, audioCable.toString()));
                     }
                 });
+            } else {
+                MiscNetworkEvent.sendToClient(event.getPlayer(), -1, MiscAction.AUDIO_CABLE_REMOVE, event.getData());
             }
 
         }

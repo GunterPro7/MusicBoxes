@@ -50,7 +50,7 @@ public class MusicBox {
     }
 
     public boolean isPowered() {
-        return powered;
+        return !AudioCableListener.getAudioCablesByPos(blockPos).isEmpty();
     }
 
     public boolean isActive() {

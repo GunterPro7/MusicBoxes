@@ -1,12 +1,10 @@
 package com.GunterPro7.listener;
 
-import com.GunterPro7.FileManager;
 import com.GunterPro7.block.ModBlocks;
 import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.entity.MusicBox;
-import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -15,11 +13,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
@@ -47,6 +43,11 @@ public class ServerMusicBoxListener {
 
     public static boolean containsBlockPos(Level level, BlockPos pos) {
         return level.getBlockState(pos).is(ModBlocks.MUSIC_BOX_BLOCK.get());
+    }
+
+    public static boolean isPowered(Level level, BlockPos startBlock) {
+        MusicBox musicBox = getMusicBoxByPos(level, startBlock);
+        return musicBox != null && musicBox.isPowered();
     }
 
     @SubscribeEvent
