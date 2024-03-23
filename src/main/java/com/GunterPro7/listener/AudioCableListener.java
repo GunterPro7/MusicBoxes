@@ -6,12 +6,14 @@ import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
+import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.Music;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
@@ -52,11 +54,13 @@ public class AudioCableListener {
                 if (audioCable.getMusicBoxStart() != null) audioCable.getMusicBoxStart().powerDisconnected();
                 if (audioCable.getMusicBoxEnd() != null) audioCable.getMusicBoxEnd().powerDisconnected();
                 audioCableList.add(audioCable);
-                audioCable.drop();
+                if (McUtils.isServerSide() || McUtils.isSinglePlayer()) {
+                    audioCable.drop();
+                }
             }
         });
 
-        audioCables.removeAll(audioCableList);
+        boolean audioCablesRemoved = false;
 
         if (McUtils.isServerSide() || McUtils.isSinglePlayer()) {
             StringBuilder sb = new StringBuilder();
@@ -67,22 +71,27 @@ public class AudioCableListener {
             event.getLevel().players().forEach(player -> MiscNetworkEvent.sendToClient((ServerPlayer) player, new MiscNetworkEvent(-1, MiscAction.AUDIO_CABLE_REMOVE, sb.toString())));
             FileManager.AudioCables.removeAll(audioCableList);
 
-            Set<DyeColor> colors = new HashSet<>();
-            getAudioCablesByPos(event.getPos()).forEach(cable -> colors.add(cable.getColor()));
+            MusicController musicController = MusicController.getMusicControllerByMusicBox(new MusicBox(event.getPos(), event.getPlayer().level()));
 
-            List<MusicBox> musicBoxesToDelete = ServerMusicBoxListener.getMusicBoxesContainingController(colors.stream().toList(), true); // TODO diesen code überarbeiten, es sollten eigentlich alle MusicBoxen beendet werden, aber nur die beenden lassen, die "von dem Contorller aus weg gehen" TODO TODO
-            musicBoxesToDelete.forEach(MusicBox::powerDisconnected);
+            if (musicController != null) {
+                Set<MusicBox> musicBoxesBefore = musicController.getMusicBoxesByColor(DyeColor.LIME); // TODO How should I do that with the colors?
 
-            List<BlockPos> posList = musicBoxesToDelete.stream().map(MusicBox::getBlockPos).toList();
-            if (posList.size() != 0) {
-                List<Float> volumeList = musicBoxesToDelete.stream().map(MusicBox::getVolume).toList();
+                audioCables.removeAll(audioCableList);
+                audioCablesRemoved = true;
 
-                MinecraftServer server = event.getLevel().getServer();
-                if (server != null) {
-                    server.getPlayerList().getPlayers().forEach(player ->
-                            ServerMusicBoxListener.sendToClient(player, new MusicBoxEvent(false, null, posList, volumeList)));
+                Set<MusicBox> musicBoxesAfter = musicController.getMusicBoxesByColor(DyeColor.LIME);
+                List<MusicBox> musicBoxesToDelete = musicBoxesBefore.stream().filter(musicBox -> !musicBoxesAfter.contains(musicBox) && musicBox.isActive()).toList();
+
+                List<BlockPos> posList = musicBoxesToDelete.stream().map(MusicBox::getBlockPos).toList();
+                if (posList.size() != 0) {
+                    List<Float> volumeList = musicBoxesToDelete.stream().map(MusicBox::getVolume).toList();
+                    event.getLevel().players().forEach(player -> ServerMusicBoxListener.sendToClient((ServerPlayer) player, new MusicBoxEvent(false, null, posList, volumeList)));
                 }
             }
+        }
+
+        if (!audioCablesRemoved) {
+            audioCables.removeAll(audioCableList);
         }
     }
 

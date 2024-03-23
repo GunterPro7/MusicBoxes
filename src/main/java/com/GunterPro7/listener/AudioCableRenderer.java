@@ -5,6 +5,7 @@ import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
+import com.GunterPro7.item.ModItems;
 import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.Utils;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -18,6 +19,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
@@ -82,35 +85,40 @@ public class AudioCableRenderer {
 
     @SubscribeEvent
     public void onPlayerInteract(PlayerInteractEvent.RightClickBlock event) {
-        Vec3 newPos = event.getHitVec().getLocation();
-        if (System.currentTimeMillis() - timePos1 < 250 || (pos1 != null && pos1.equals(event.getHitVec().getLocation()))) return;
+        ItemStack itemStack = event.getEntity().getMainHandItem();
+        itemStack = itemStack.is(Items.AIR) ? event.getEntity().getOffhandItem() : itemStack;
 
-        //DyeColor dyeColor = DyeColor.getColor(event.getItemStack());
-        DyeColor dyeColor = DyeColor.LIME;
-        if (dyeColor == null) return;
+        if (itemStack.is(ModItems.MUSIC_CABLE_ITEM.get())) {
+            Vec3 newPos = event.getHitVec().getLocation();
+            if (System.currentTimeMillis() - timePos1 < 250 || (pos1 != null && pos1.equals(event.getHitVec().getLocation()))) return;
 
-        lastId = Utils.getRandomId();
-        MiscNetworkEvent.sendToServer(new MiscNetworkEvent(lastId, MiscAction.AUDIO_CABLE_IS_FREE, event.getPos().toShortString().replaceAll(", ", ",")));
+            //DyeColor dyeColor = DyeColor.getColor(event.getItemStack());
+            DyeColor dyeColor = DyeColor.LIME; // TODO do color zuweisung
+            if (dyeColor == null) return;
 
-        if (pos1 != null) {
-            AudioCable audioCable = new AudioCable(pos1, newPos, block1, event.getPos(), event.getLevel(), dyeColor);
-            if (audioCable.getBlockDistance() > 32d) {
-                McUtils.sendPrivateChatMessage("The Audio-wire cant be longer then 32 blocks!");
+            lastId = Utils.getRandomId();
+            MiscNetworkEvent.sendToServer(new MiscNetworkEvent(lastId, MiscAction.AUDIO_CABLE_IS_FREE, event.getPos().toShortString().replaceAll(", ", ",")));
+
+            if (pos1 != null) {
+                AudioCable audioCable = new AudioCable(pos1, newPos, block1, event.getPos(), event.getLevel(), dyeColor);
+                if (audioCable.getBlockDistance() > 32d) {
+                    McUtils.sendPrivateChatMessage("The Audio-wire cant be longer then 32 blocks!");
+                } else {
+                    audioCables.add(audioCable);
+                    MiscNetworkEvent.sendToServer(Utils.getRandomId(), MiscAction.AUDIO_CABLE_POST, audioCable.toString());
+
+                    pos1 = null;
+                    block1 = null;
+                    preferredPos1 = null;
+                    preferredBlockPos = null;
+                }
             } else {
-                audioCables.add(audioCable);
-                MiscNetworkEvent.sendToServer(Utils.getRandomId(), MiscAction.AUDIO_CABLE_POST, audioCable.toString());
-
-                pos1 = null;
-                block1 = null;
-                preferredPos1 = null;
-                preferredBlockPos = null;
+                preferredPos1 = newPos;
+                preferredBlockPos = event.getPos();
             }
-        } else {
-            preferredPos1 = newPos;
-            preferredBlockPos = event.getPos();
-        }
 
-        timePos1 = System.currentTimeMillis();
+            timePos1 = System.currentTimeMillis();
+        }
     }
 
     @SubscribeEvent
