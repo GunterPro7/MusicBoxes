@@ -28,7 +28,6 @@ public class Main {
     public static boolean serverSide;
 
     public Main() {
-        new rdz();
         try {
             Minecraft.getInstance();
         } catch (RuntimeException e) {
