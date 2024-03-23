@@ -2,15 +2,10 @@ package com.GunterPro7.connection;
 
 import com.GunterPro7.Main;
 import com.google.gson.JsonPrimitive;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkEvent;
@@ -21,10 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-@OnlyIn(Dist.CLIENT)
 public class MusicBoxEvent {
-    private static final List<SoundInstance> instances = new ArrayList<>();
-    private static final Minecraft mc = Minecraft.getInstance();
     private static final ResourceLocation.Serializer locationSerializer = new ResourceLocation.Serializer();
 
     private static final String PROTOCOL_VERSION = "1";
@@ -91,14 +83,15 @@ public class MusicBoxEvent {
             if (play) {
                 playSounds(resourceLocation, posList, volumeList);
             } else {
-                stopSounds(resourceLocation, posList);
+                ClientBoxEventHandler.stopSounds(resourceLocation, posList);
             }
         });
         context.get().setPacketHandled(true);
     }
 
+    @OnlyIn(Dist.CLIENT)
     public void playSounds(ResourceLocation resourceLocation, List<BlockPos> blockPosList, List<Float> volumeList) {
-        removeInactiveSounds();
+        ClientBoxEventHandler.removeInactiveSounds();
 
         SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
 
@@ -106,35 +99,11 @@ public class MusicBoxEvent {
             BlockPos pos = blockPosList.get(i);
             float volume = volumeList.get(i);
 
-            playSound(soundEvent, pos, volume / 75);
+            ClientBoxEventHandler.playSound(soundEvent, pos, volume / 75);
         }
     }
 
-    private void removeInactiveSounds() {
-        SoundManager soundManager = mc.getSoundManager();
-        instances.removeIf(soundInstance -> !soundManager.isActive(soundInstance));
-    }
 
-    public void stopSounds(ResourceLocation resourceLocation, List<BlockPos> blockPosList) {
-        removeInactiveSounds();
-
-        SoundManager soundManager = mc.getSoundManager();
-        for (SoundInstance soundInstance : instances) {
-            if (resourceLocation == null || soundInstance.getLocation().equals(resourceLocation)) {
-                BlockPos blockPos = new BlockPos((int) soundInstance.getX(), (int) soundInstance.getY(), (int) soundInstance.getZ());
-                if (blockPosList.contains(blockPos)) {
-                    soundManager.stop(soundInstance);
-                }
-            }
-        }
-    }
-
-    public void playSound(SoundEvent soundEvent, BlockPos pos, float volume) {
-        SoundInstance soundInstance = new SimpleSoundInstance(soundEvent, SoundSource.RECORDS, volume, 1f, SoundInstance.createUnseededRandom(), pos);
-        instances.add(soundInstance);
-
-        mc.getSoundManager().playDelayed(soundInstance, 2);
-    }
 
     public BlockPos parsePosString(String posString) {
         String[] parts = posString.split(",");

@@ -34,13 +34,7 @@ public class McUtils {
 
     public static Level getLevelByName(String levelName) {
         ResourceKey<Level> dimension = getDimensionByIdentifier(Integer.parseInt(String.valueOf(levelName.charAt(levelName.length() - 1))));
-        if (isServerSide() && Main.minecraftServer != null) {
-            for (Level level : Main.minecraftServer.getAllLevels()) {
-                if (getIdentifierByLevel(level).equals(levelName) && dimension.equals(level.dimension())) {
-                    return level;
-                }
-            }
-        } else if (isSinglePlayer()) {
+        if (isSinglePlayer()) {
             for (Level level : Minecraft.getInstance().getSingleplayerServer().getAllLevels()) {
                 if (getIdentifierByLevel(level).equals(levelName) && dimension.equals(level.dimension())) {
                     return level;

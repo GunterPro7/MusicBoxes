@@ -1,11 +1,9 @@
 package com.GunterPro7.entity;
 
+import com.GunterPro7.Main;
 import com.GunterPro7.item.ModItems;
 import com.GunterPro7.listener.ServerMusicBoxListener;
-import com.GunterPro7.utils.JsonUtils;
-import com.GunterPro7.utils.MapUtils;
-import com.GunterPro7.utils.McUtils;
-import com.GunterPro7.utils.Utils;
+import com.GunterPro7.utils.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -135,7 +133,8 @@ public class AudioCable {
     @Override
     public String toString() {
         return ("startPos:" + startPos + ";endPos:" + endPos + ";startBlock:" + startBlock.toShortString().replaceAll(", ", ",")
-                + ";endBlock:" + endBlock.toShortString().replaceAll(", ", ",") + ";id:" + McUtils.getIdentifierByLevel(level)
+                + ";endBlock:" + endBlock.toShortString().replaceAll(", ", ",") + ";id:" +
+                (Main.serverSide ? ServerUtils.getIdentifierByLevel((ServerLevel) level) : McUtils.getIdentifierByLevel(level))
                 + ";color:" + color.name()).replaceAll("[()]", "");
     }
 

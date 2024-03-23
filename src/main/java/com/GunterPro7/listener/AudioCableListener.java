@@ -1,6 +1,7 @@
 package com.GunterPro7.listener;
 
 import com.GunterPro7.FileManager;
+import com.GunterPro7.Main;
 import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.connection.MusicBoxEvent;
@@ -54,7 +55,7 @@ public class AudioCableListener {
                 if (audioCable.getMusicBoxStart() != null) audioCable.getMusicBoxStart().powerDisconnected();
                 if (audioCable.getMusicBoxEnd() != null) audioCable.getMusicBoxEnd().powerDisconnected();
                 audioCableList.add(audioCable);
-                if (McUtils.isServerSide() || McUtils.isSinglePlayer()) {
+                if (Main.serverSide || McUtils.isSinglePlayer()) {
                     audioCable.drop();
                 }
             }
@@ -62,7 +63,7 @@ public class AudioCableListener {
 
         boolean audioCablesRemoved = false;
 
-        if (McUtils.isServerSide() || McUtils.isSinglePlayer()) {
+        if (Main.serverSide || McUtils.isSinglePlayer()) {
             StringBuilder sb = new StringBuilder();
             for (AudioCable audioCable : audioCableList) {
                 sb.append(audioCable.toString()).append('/');
@@ -191,7 +192,7 @@ public class AudioCableListener {
     //            McUtils.sendPrivateChatMessage("The Audio-wire cant be longer then 32 blocks!");
     //        } else {
     //            audioCables.add(audioCable);
-    //            if (McUtils.isServerSide() || McUtils.isSinglePlayer()) {
+    //            if (Main.serverSide || McUtils.isSinglePlayer()) {
     //                FileManager.AudioCables.add(audioCable);
     //            }
 //

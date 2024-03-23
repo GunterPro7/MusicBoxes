@@ -2,7 +2,7 @@ package com.GunterPro7;
 
 import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
-import com.GunterPro7.utils.McUtils;
+import com.GunterPro7.utils.ServerUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.DyeColor;
@@ -136,7 +136,7 @@ public class FileManager {
                         String id = raf.readUTF();
                         DyeColor color = DyeColor.valueOf(raf.readUTF());
 
-                        audioCables.add(new AudioCable(startPos, endPos, startBlock, endBlock, McUtils.getLevelByName(id), color));
+                        audioCables.add(new AudioCable(startPos, endPos, startBlock, endBlock, ServerUtils.getLevelByName(id), color));
                     } catch (EOFException e) {
                         System.out.println("File is invalid!");
                     }
@@ -175,7 +175,7 @@ public class FileManager {
                 raf.writeInt(endBlock.getY());
                 raf.writeInt(endBlock.getZ());
 
-                raf.writeUTF(McUtils.getIdentifierByLevel(audioCable.getLevel()));
+                raf.writeUTF(ServerUtils.getIdentifierByLevel((ServerLevel) audioCable.getLevel()));
 
                 raf.writeUTF(audioCable.getColor().name());
             }
@@ -221,11 +221,11 @@ public class FileManager {
                         String levelName = raf.readUTF();
                         DyeColor dyeColor = DyeColor.valueOf(raf.readUTF());
 
-                        AudioCable curAudioCable = new AudioCable(startPos, endPos, startBlock, endBlock, McUtils.getLevelByName(levelName), dyeColor);
+                        AudioCable curAudioCable = new AudioCable(startPos, endPos, startBlock, endBlock, ServerUtils.getLevelByName(levelName), dyeColor);
 
                         for (AudioCable audioCable : audioCables) {
                             if (audioCable.hashCode() == curAudioCable.hashCode() && audioCable.equals(curAudioCable)) {
-                                removeEntry(raf, Double.BYTES * 6 + Integer.BYTES * 6 + dyeColor.name().length() + Short.BYTES + McUtils.getIdentifierByLevel(audioCable.getLevel()).length() + Short.BYTES);
+                                removeEntry(raf, Double.BYTES * 6 + Integer.BYTES * 6 + dyeColor.name().length() + Short.BYTES + ServerUtils.getIdentifierByLevel((ServerLevel) audioCable.getLevel()).length() + Short.BYTES);
                                 if (!all) {
                                     break;
                                 }
@@ -258,7 +258,7 @@ public class FileManager {
         }
 
         private static String getKey(ServerLevel level) {
-            return key + McUtils.getIdentifierByLevel(level) + ".bin";
+            return key + ServerUtils.getIdentifierByLevel(level) + ".bin";
         }
     }
 }
