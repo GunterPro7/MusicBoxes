@@ -34,6 +34,6 @@ public class ModItems {
 
     @SubscribeEvent
     public void registerItemColors(RegisterColorHandlersEvent.Item event) {
-        event.register((item, c) -> (((MusicCableItem) item.getItem()).getColor(item)), ModItems.MUSIC_CABLE_ITEM.get());
+        event.register((item, tintIndex) -> tintIndex == 0 ? ((MusicCableItem) item.getItem()).getColor(item) : 0xFFFFFF, ModItems.MUSIC_CABLE_ITEM.get());
     }
 }
