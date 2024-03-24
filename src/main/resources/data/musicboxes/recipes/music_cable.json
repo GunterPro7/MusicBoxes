@@ -1,0 +1,7 @@
+{
+  "type": "musicboxes:music_cable",
+  "output": {
+    "count": 3,
+    "item": "musicboxes:music_cable"
+  }
+}

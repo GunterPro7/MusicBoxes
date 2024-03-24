@@ -33,9 +33,11 @@ public class ServerMusicBoxListener {
     }
 
     public static MusicBox getMusicBoxByPos(Level level, BlockPos blockPos) {
-        BlockState state = level.getBlockState(blockPos);
-        if (state.is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
-            return new MusicBox(blockPos, level);
+        if (level != null) {
+            BlockState state = level.getBlockState(blockPos);
+            if (state.is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
+                return new MusicBox(blockPos, level);
+            }
         }
 
         return null;

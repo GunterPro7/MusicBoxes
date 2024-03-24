@@ -1,6 +1,7 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "musicboxes:item/music_cable"
+    "layer0": "musicboxes:item/music_cable",
+    "layer1": "musicboxes:item/music_cable_overlay"
   }
 }

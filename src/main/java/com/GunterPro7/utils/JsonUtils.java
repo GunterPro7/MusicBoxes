@@ -12,7 +12,9 @@ public class JsonUtils {
         Map<String, String> map = new HashMap<>();
         for (String part : string.split(";")) {
             String[] partsPart = part.split(":");
-            map.put(partsPart[0], partsPart[1]);
+            if (partsPart.length == 2) {
+                map.put(partsPart[0], partsPart[1]);
+            }
         }
 
         return map;

@@ -6,7 +6,7 @@ import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.item.ModItems;
 import com.GunterPro7.listener.*;
-import com.google.common.eventbus.Subscribe;
+import com.GunterPro7.recipe.ModRecipes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
@@ -38,6 +38,7 @@ public class Main {
 
         ModBlocks.register(bus);
         ModItems.register(bus);
+        ModRecipes.register(bus);
 
         MinecraftForge.EVENT_BUS.register(new AudioCableListener());
         MinecraftForge.EVENT_BUS.register(new ServerMusicBoxListener());

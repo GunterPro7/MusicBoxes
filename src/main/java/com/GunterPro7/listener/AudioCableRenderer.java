@@ -6,11 +6,13 @@ import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.item.ModItems;
+import com.GunterPro7.item.MusicCableItem;
 import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.Utils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -18,18 +20,18 @@ import net.minecraft.client.telemetry.events.WorldLoadEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ChunkTicketLevelUpdatedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11C;
@@ -90,7 +92,8 @@ public class AudioCableRenderer {
 
         if (itemStack.is(ModItems.MUSIC_CABLE_ITEM.get())) {
             Vec3 newPos = event.getHitVec().getLocation();
-            if (System.currentTimeMillis() - timePos1 < 250 || (pos1 != null && pos1.equals(event.getHitVec().getLocation()))) return;
+            if (System.currentTimeMillis() - timePos1 < 250 || (pos1 != null && pos1.equals(event.getHitVec().getLocation())))
+                return;
 
             //DyeColor dyeColor = DyeColor.getColor(event.getItemStack());
             DyeColor dyeColor = DyeColor.LIME; // TODO do color zuweisung
@@ -155,7 +158,6 @@ public class AudioCableRenderer {
             }
         }
     }
-
 
 
     private void renderLine(AudioCable audioCable, Vec3 view, BufferBuilder buffer, RenderLevelStageEvent event, VertexFormat.Mode mode) {
