@@ -64,7 +64,7 @@ public class AudioCableListener {
 
         boolean audioCablesRemoved = false;
 
-        if (Main.serverSide || ClientUtils.isSinglePlayer()) {
+        if (Main.serverSide || ClientUtils.isSinglePlayer() && audioCableList.size() > 0) {
             StringBuilder sb = new StringBuilder();
             for (AudioCable audioCable : audioCableList) {
                 sb.append(audioCable.toString()).append('/');

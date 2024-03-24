@@ -12,7 +12,7 @@ public class MusicCableItem extends Item {
 
     public int getColor(ItemStack pStack) {
         CompoundTag compoundtag = pStack.getTagElement("display");
-        return compoundtag != null && compoundtag.contains("color", 99) ? compoundtag.getInt("color") : 0x5555FF;
+        return compoundtag != null && compoundtag.contains("color", 99) ? compoundtag.getInt("color") : 0xFFFFFF;
     }
 
     public void setColor(ItemStack pStack, int pColor) {

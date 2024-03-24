@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -42,6 +43,11 @@ public class AudioCableRenderer {
     private BlockPos preferredBlockPos;
 
     private static VertexBuffer vertexBuffer;
+
+    //@SubscribeEvent
+    //public void registerItemColors(RegisterColorHandlersEvent.Item event) {
+    //    event.register((item, tintIndex) -> tintIndex == 0 ? ((MusicCableItem) item.getItem()).getColor(item) : 0xFFFFFF, ModItems.MUSIC_CABLE_ITEM.get());
+    //}
 
     @SubscribeEvent
     public void onServerMessage(MiscNetworkEvent.ClientReceivedEvent event) {

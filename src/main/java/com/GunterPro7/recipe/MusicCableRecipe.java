@@ -45,7 +45,6 @@ public class MusicCableRecipe extends CustomRecipe {
             }
         }
 
-        System.out.println(!itemstack.isEmpty() && !list.isEmpty());
         return !itemstack.isEmpty() && !list.isEmpty();
     }
 
@@ -74,7 +73,6 @@ public class MusicCableRecipe extends CustomRecipe {
             }
         }
 
-        System.out.println();
         return !itemstack.isEmpty() && !list.isEmpty() ? MusicCableItem.dyeItem(itemstack, list) : ItemStack.EMPTY;
     }
 

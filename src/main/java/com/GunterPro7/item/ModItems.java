@@ -3,6 +3,8 @@ package com.GunterPro7.item;
 import com.GunterPro7.Main;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -29,9 +31,12 @@ public class ModItems {
 
     public static void register(IEventBus eventBus){
         ITEMS.register(eventBus);
-        eventBus.register(new ModItems());
+        if (!Main.serverSide) {
+            eventBus.register(new ModItems());
+        }
     }
 
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void registerItemColors(RegisterColorHandlersEvent.Item event) {
         event.register((item, tintIndex) -> tintIndex == 0 ? ((MusicCableItem) item.getItem()).getColor(item) : 0xFFFFFF, ModItems.MUSIC_CABLE_ITEM.get());

@@ -2,6 +2,7 @@ package com.GunterPro7.entity;
 
 import com.GunterPro7.Main;
 import com.GunterPro7.item.ModItems;
+import com.GunterPro7.item.MusicCableItem;
 import com.GunterPro7.listener.ServerMusicBoxListener;
 import com.GunterPro7.utils.*;
 import net.minecraft.core.BlockPos;
@@ -47,6 +48,7 @@ public class AudioCable {
 
     public void drop() {
         ItemStack itemStack = new ItemStack(ModItems.MUSIC_CABLE_ITEM.get(), 1);
+        ((MusicCableItem) itemStack.getItem()).setColor(itemStack, this.color);
         ItemEntity itemEntity = new ItemEntity(level, centerPos.x(), centerPos.y(), centerPos.z(), itemStack);
 
         level.addFreshEntity(itemEntity);

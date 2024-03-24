@@ -53,7 +53,7 @@ public class MusicBoxesCommand {
                         .then(Commands.argument("x", IntegerArgumentType.integer())
                                 .then(Commands.argument("y", IntegerArgumentType.integer())
                                         .then(Commands.argument("z", IntegerArgumentType.integer())
-                                                .then(Commands.argument("color", StringArgumentType.string())
+                                                .then(Commands.argument("color", IntegerArgumentType.integer())
                                                         .then(Commands.argument("Name of the Track", StringArgumentType.string())
                                                                 .then(Commands.literal("stop")
                                                                         .executes(context -> controllerCommand(context, false)))

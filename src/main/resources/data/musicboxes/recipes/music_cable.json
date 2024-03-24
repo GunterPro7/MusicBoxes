@@ -1,7 +1,21 @@
 {
-  "type": "musicboxes:music_cable",
-  "output": {
-    "count": 3,
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CRC",
+    "SSS"
+  ],
+  "key": {
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "C": {
+      "item": "minecraft:copper_ingot"
+    },
+    "S": {
+      "item": "minecraft:string"
+    }
+  },
+  "result": {
     "item": "musicboxes:music_cable"
   }
 }
