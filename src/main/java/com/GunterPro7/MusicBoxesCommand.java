@@ -69,7 +69,7 @@ public class MusicBoxesCommand {
                 context.getArgument("y", Integer.class), context.getArgument("z", Integer.class)));
 
         if (musicController != null) {
-            DyeColor dyeColor = DyeColor.valueOf(context.getArgument("color", String.class).toUpperCase());
+            int color = context.getArgument("color", Integer.class);
             String track = context.getArgument("Name of the Track", String.class);
 
             ResourceLocation resourceLocation;
@@ -86,7 +86,7 @@ public class MusicBoxesCommand {
 
             List<ServerPlayer> players = Objects.requireNonNull(context.getSource().getPlayer()).server.getPlayerList().getPlayers();
 
-            List<MusicBox> musicBoxes = musicController.getMusicBoxesByColor(dyeColor).stream().filter(musicBox -> !play || musicBox.isActive()).toList();
+            List<MusicBox> musicBoxes = musicController.getMusicBoxesByColor(color).stream().filter(musicBox -> !play || musicBox.isActive()).toList();
             List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
             List<Float> volumeList = musicBoxes.stream().map(MusicBox::getVolume).toList();
 

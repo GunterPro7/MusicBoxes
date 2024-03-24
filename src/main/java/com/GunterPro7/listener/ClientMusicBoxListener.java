@@ -6,6 +6,7 @@ import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.ui.MusicBoxScreen;
+import com.GunterPro7.utils.ClientUtils;
 import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.client.Minecraft;
@@ -19,7 +20,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class ClientMusicBoxListener {
     @SubscribeEvent
     public void onRightClickMusicBox(PlayerInteractEvent.RightClickBlock event) {
-        if (McUtils.gameLoaded() && !(Minecraft.getInstance().screen instanceof MusicBoxScreen)) {
+        if (ClientUtils.gameLoaded() && !(Minecraft.getInstance().screen instanceof MusicBoxScreen)) {
             if (event.getLevel().getBlockState(event.getPos()).is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
                 BlockPos pos = event.getPos();
                 long id = Utils.getRandomId();

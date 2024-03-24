@@ -7,10 +7,8 @@ import com.GunterPro7.utils.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -25,13 +23,13 @@ public class AudioCable {
     private final BlockPos endBlock;
     private final Vec3 centerPos;
     private final Level level;
-    private DyeColor color;
+    private int color;
 
     public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock, Level level) {
-        this(startPos, endPos, startBlock, endBlock, level, DyeColor.WHITE);
+        this(startPos, endPos, startBlock, endBlock, level, 0xFFFFFF);
     }
 
-    public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock, Level level, DyeColor color) {
+    public AudioCable(Vec3 startPos, Vec3 endPos, BlockPos startBlock, BlockPos endBlock, Level level, int color) {
         this.startPos = startPos;
         this.endPos = endPos;
         this.startBlock = startBlock;
@@ -54,7 +52,7 @@ public class AudioCable {
         level.addFreshEntity(itemEntity);
     }
 
-    public void setColor(DyeColor color) {
+    public void setColor(int color) {
         this.color = color;
     }
 
@@ -87,7 +85,7 @@ public class AudioCable {
         return level;
     }
 
-    public DyeColor getColor() {
+    public int getColor() {
         return color;
     }
 
@@ -102,7 +100,7 @@ public class AudioCable {
     }
 
     public float[] getRGB() {
-        return color.getTextureDiffuseColors();
+        return McUtils.getRGB(color);
     }
 
     @Override
@@ -134,14 +132,14 @@ public class AudioCable {
     public String toString() {
         return ("startPos:" + startPos + ";endPos:" + endPos + ";startBlock:" + startBlock.toShortString().replaceAll(", ", ",")
                 + ";endBlock:" + endBlock.toShortString().replaceAll(", ", ",") + ";id:" +
-                (Main.serverSide ? ServerUtils.getIdentifierByLevel((ServerLevel) level) : McUtils.getIdentifierByLevel(level))
-                + ";color:" + color.name()).replaceAll("[()]", "");
+                (Main.serverSide ? McUtils.getIdentifierByLevel((ServerLevel) level) : ClientUtils.getIdentifierByLevel(level))
+                + ";color:" + color).replaceAll("[()]", "");
     }
 
     public static AudioCable fromString(String string) {
         Map<String, String> map = JsonUtils.asMap(string);
 
         return new AudioCable(Utils.vec3Of(map.get("startPos")), Utils.vec3Of(map.get("endPos")),
-                Utils.blockPosOf(map.get("startBlock")), Utils.blockPosOf(map.get("endBlock")), McUtils.getLevelByName(map.get("id")), DyeColor.valueOf(map.get("color")));
+                Utils.blockPosOf(map.get("startBlock")), Utils.blockPosOf(map.get("endBlock")), ClientUtils.getLevelByName(map.get("id")), Integer.parseInt(map.get("color")));
     }
 }

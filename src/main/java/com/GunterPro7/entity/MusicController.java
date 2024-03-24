@@ -41,17 +41,17 @@ public class MusicController {
         return getControllerByAudioCable(audioCable, new HashSet<>());
     }
 
-    public Set<MusicBox> getMusicBoxesByColor(DyeColor dyeColor) {
-        return getMusicBoxesByColor(pos, dyeColor, new ArrayList<>());
+    public Set<MusicBox> getMusicBoxesByColor(int color) {
+        return getMusicBoxesByColor(pos, color, new ArrayList<>());
     }
 
-    private static Set<MusicBox> getMusicBoxesByColor(BlockPos blockPos, DyeColor dyeColor, List<BlockPos> checkedPositions) {
+    private static Set<MusicBox> getMusicBoxesByColor(BlockPos blockPos, int color, List<BlockPos> checkedPositions) {
         Set<MusicBox> musicBoxes = new HashSet<>();
 
         List<AudioCable> audioCables = AudioCableListener.getAudioCablesByPos(blockPos);
 
         for (AudioCable audioCable : audioCables) {
-            if (audioCable.getColor().equals(dyeColor)) {
+            if (audioCable.getColor() == color || color == -1) {
                 if (audioCable.getMusicBoxStart() != null) {
                     musicBoxes.add(audioCable.getMusicBoxStart());
                 } if (audioCable.getMusicBoxEnd() != null) {
@@ -69,7 +69,7 @@ public class MusicController {
                 }
                 checkedPositions.add(blockPos);
 
-                musicBoxes.addAll(getMusicBoxesByColor(newBlockPos, dyeColor, checkedPositions));
+                musicBoxes.addAll(getMusicBoxesByColor(newBlockPos, color, checkedPositions));
             }
         }
 

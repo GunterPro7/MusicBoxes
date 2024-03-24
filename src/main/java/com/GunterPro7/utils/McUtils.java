@@ -1,53 +1,12 @@
 package com.GunterPro7.utils;
 
 import com.GunterPro7.Main;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class McUtils {
-    // Does not work in single player worlds
-    public static boolean isServerSide() {
-        return Minecraft.getInstance().player == null;
-    }
-
-    public static boolean isSinglePlayer() {
-        return Minecraft.getInstance().isSingleplayer();
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public static void sendPrivateChatMessage(String msg) {
-        LocalPlayer localPlayer = Minecraft.getInstance().player;
-        if (localPlayer != null)
-            localPlayer.sendSystemMessage(Component.literal(msg));
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public static boolean gameLoaded() {
-        return Minecraft.getInstance().player != null; // TODO this is not true server side
-    }
-
-    public static Level getLevelByName(String levelName) {
-        ResourceKey<Level> dimension = getDimensionByIdentifier(Integer.parseInt(String.valueOf(levelName.charAt(levelName.length() - 1))));
-        if (isSinglePlayer()) {
-            for (Level level : Minecraft.getInstance().getSingleplayerServer().getAllLevels()) {
-                if (getIdentifierByLevel(level).equals(levelName) && dimension.equals(level.dimension())) {
-                    return level;
-                }
-            }
-        } else {
-            return Minecraft.getInstance().level;
-        }
-
-        return null;
-    }
-
-    public static String getIdentifierByLevel(Level level) {
+    public static String getIdentifierByLevel(ServerLevel level) {
         return (level.toString().contains("[") ? level.toString().split("\\[")[1].
                 replaceAll("]", "") : level.toString()) + getShortDimensionByLevel(level);
     }
@@ -61,7 +20,7 @@ public class McUtils {
         };
     }
 
-    public static int getShortDimensionByLevel(Level level) {
+    public static int getShortDimensionByLevel(ServerLevel level) {
         return switch (level.dimension().location().getPath()) {
             case "overworld" -> 0;
             case "the_nether" -> 1;
@@ -70,13 +29,24 @@ public class McUtils {
         };
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public static LocalPlayer player() {
-        return Minecraft.getInstance().player;
+    public static Level getLevelByName(String levelName) {
+        ResourceKey<Level> dimension = getDimensionByIdentifier(Integer.parseInt(String.valueOf(levelName.charAt(levelName.length() - 1))));
+        if (Main.serverSide && Main.minecraftServer != null) {
+            for (ServerLevel level : Main.minecraftServer.getAllLevels()) {
+                if (getIdentifierByLevel(level).equals(levelName) && dimension.equals(level.dimension())) {
+                    return level;
+                }
+            }
+        }
+
+        return null;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public static Level level() {
-        return player().level();
+    public static float[] getRGB(int color) {
+        float[] rgb = new float[3];
+        rgb[0] = ((color >> 16) & 0xFF) / 255f;  // Red
+        rgb[1] = ((color >> 8) & 0xFF) / 255f;   // Green
+        rgb[2] = (color & 0xFF) / 255f;          // Blue
+        return rgb;
     }
 }

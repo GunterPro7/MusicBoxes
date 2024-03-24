@@ -8,6 +8,7 @@ import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.entity.MusicController;
+import com.GunterPro7.utils.ClientUtils;
 import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.core.BlockPos;
@@ -55,7 +56,7 @@ public class AudioCableListener {
                 if (audioCable.getMusicBoxStart() != null) audioCable.getMusicBoxStart().powerDisconnected();
                 if (audioCable.getMusicBoxEnd() != null) audioCable.getMusicBoxEnd().powerDisconnected();
                 audioCableList.add(audioCable);
-                if (Main.serverSide || McUtils.isSinglePlayer()) {
+                if (Main.serverSide || ClientUtils.isSinglePlayer()) {
                     audioCable.drop();
                 }
             }
@@ -63,7 +64,7 @@ public class AudioCableListener {
 
         boolean audioCablesRemoved = false;
 
-        if (Main.serverSide || McUtils.isSinglePlayer()) {
+        if (Main.serverSide || ClientUtils.isSinglePlayer()) {
             StringBuilder sb = new StringBuilder();
             for (AudioCable audioCable : audioCableList) {
                 sb.append(audioCable.toString()).append('/');
@@ -75,12 +76,12 @@ public class AudioCableListener {
             MusicController musicController = MusicController.getMusicControllerByMusicBox(new MusicBox(event.getPos(), event.getPlayer().level()));
 
             if (musicController != null) {
-                Set<MusicBox> musicBoxesBefore = musicController.getMusicBoxesByColor(DyeColor.LIME); // TODO How should I do that with the colors?
+                Set<MusicBox> musicBoxesBefore = musicController.getMusicBoxesByColor(-1); // TODO How should I do that with the colors?
 
                 audioCables.removeAll(audioCableList);
                 audioCablesRemoved = true;
 
-                Set<MusicBox> musicBoxesAfter = musicController.getMusicBoxesByColor(DyeColor.LIME);
+                Set<MusicBox> musicBoxesAfter = musicController.getMusicBoxesByColor(-1);
                 List<MusicBox> musicBoxesToDelete = musicBoxesBefore.stream().filter(musicBox -> !musicBoxesAfter.contains(musicBox) && musicBox.isActive()).toList();
 
                 List<BlockPos> posList = musicBoxesToDelete.stream().map(MusicBox::getBlockPos).toList();
@@ -116,7 +117,7 @@ public class AudioCableListener {
         } else if (action == MiscAction.AUDIO_CABLE_POST) {
             List<String> parts = Arrays.stream(data[0].split(";")).map(s -> s.split(":")[1]).toList();
             AudioCable audioCable = new AudioCable(Utils.vec3Of(parts.get(0)), Utils.vec3Of(parts.get(1)),
-                    Utils.blockPosOf(parts.get(2)), Utils.blockPosOf(parts.get(3)), event.getPlayer().level(), DyeColor.valueOf(parts.get(5)));
+                    Utils.blockPosOf(parts.get(2)), Utils.blockPosOf(parts.get(3)), event.getPlayer().level(), Integer.parseInt(parts.get(5)));
 
             if (audioCable.getBlockDistance() <= 32d && !ServerMusicBoxListener.isPowered(level, audioCable.getStartBlock())
                     && !ServerMusicBoxListener.isPowered(level, audioCable.getEndBlock())) {
@@ -149,20 +150,22 @@ public class AudioCableListener {
     @SubscribeEvent
     public void onLevelChange(EntityJoinLevelEvent event) {
         if (event.getLevel() instanceof ServerLevel level) {
-            if (!loadedLevels.contains(level)) {
-                audioCables.addAll(FileManager.AudioCables.getAll(level));
-                loadedLevels.add(level);
-            }
-
             if (event.getEntity() instanceof ServerPlayer serverPlayer) {
-                List<AudioCable> newAudioCables = audioCables.stream().filter(audioCable -> audioCable.getLevel() == level).toList();
-
-                StringBuilder sb = new StringBuilder();
-                for (AudioCable audioCable : newAudioCables) {
-                    sb.append(audioCable.toString()).append('/');
+                if (!loadedLevels.contains(level)) {
+                    audioCables.addAll(FileManager.AudioCables.getAll(level));
+                    loadedLevels.add(level);
                 }
 
-                MiscNetworkEvent.sendToClient(serverPlayer, -1, MiscAction.AUDIO_CABLE_FETCH, sb.toString());
+                List<AudioCable> newAudioCables = audioCables.stream().filter(audioCable -> audioCable.getLevel() == level).toList();
+
+                if (newAudioCables.size() > 0) {
+                    StringBuilder sb = new StringBuilder();
+                    for (AudioCable audioCable : newAudioCables) {
+                        sb.append(audioCable.toString()).append('/');
+                    }
+
+                    MiscNetworkEvent.sendToClient(serverPlayer, -1, MiscAction.AUDIO_CABLE_FETCH, sb.toString());
+                }
             }
         }
 

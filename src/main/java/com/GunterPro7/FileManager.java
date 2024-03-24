@@ -1,13 +1,10 @@
 package com.GunterPro7;
 
 import com.GunterPro7.entity.AudioCable;
-import com.GunterPro7.entity.MusicBox;
-import com.GunterPro7.utils.ServerUtils;
+import com.GunterPro7.utils.McUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -133,10 +130,9 @@ public class FileManager {
                         Vec3 endPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
                         BlockPos startBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
                         BlockPos endBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
-                        String id = raf.readUTF();
-                        DyeColor color = DyeColor.valueOf(raf.readUTF());
+                        int color = raf.readInt();
 
-                        audioCables.add(new AudioCable(startPos, endPos, startBlock, endBlock, ServerUtils.getLevelByName(id), color));
+                        audioCables.add(new AudioCable(startPos, endPos, startBlock, endBlock, level, color));
                     } catch (EOFException e) {
                         System.out.println("File is invalid!");
                     }
@@ -175,9 +171,7 @@ public class FileManager {
                 raf.writeInt(endBlock.getY());
                 raf.writeInt(endBlock.getZ());
 
-                raf.writeUTF(ServerUtils.getIdentifierByLevel((ServerLevel) audioCable.getLevel()));
-
-                raf.writeUTF(audioCable.getColor().name());
+                raf.writeInt(audioCable.getColor());
             }
         }
 
@@ -218,14 +212,13 @@ public class FileManager {
                         Vec3 endPos = new Vec3(raf.readDouble(), raf.readDouble(), raf.readDouble());
                         BlockPos startBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
                         BlockPos endBlock = new BlockPos(raf.readInt(), raf.readInt(), raf.readInt());
-                        String levelName = raf.readUTF();
-                        DyeColor dyeColor = DyeColor.valueOf(raf.readUTF());
+                        int dyeColor = raf.readInt();
 
-                        AudioCable curAudioCable = new AudioCable(startPos, endPos, startBlock, endBlock, ServerUtils.getLevelByName(levelName), dyeColor);
+                        AudioCable curAudioCable = new AudioCable(startPos, endPos, startBlock, endBlock, null, dyeColor);
 
                         for (AudioCable audioCable : audioCables) {
                             if (audioCable.hashCode() == curAudioCable.hashCode() && audioCable.equals(curAudioCable)) {
-                                removeEntry(raf, Double.BYTES * 6 + Integer.BYTES * 6 + dyeColor.name().length() + Short.BYTES + ServerUtils.getIdentifierByLevel((ServerLevel) audioCable.getLevel()).length() + Short.BYTES);
+                                removeEntry(raf, Double.BYTES * 6 + Integer.BYTES * 6 + Integer.BYTES);
                                 if (!all) {
                                     break;
                                 }
@@ -258,7 +251,7 @@ public class FileManager {
         }
 
         private static String getKey(ServerLevel level) {
-            return key + ServerUtils.getIdentifierByLevel(level) + ".bin";
+            return key + McUtils.getIdentifierByLevel(level) + ".bin";
         }
     }
 }
