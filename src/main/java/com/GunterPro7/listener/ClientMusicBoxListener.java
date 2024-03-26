@@ -5,7 +5,9 @@ import com.GunterPro7.block.ModBlocks;
 import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.entity.MusicBox;
+import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.ui.MusicBoxScreen;
+import com.GunterPro7.ui.MusicControllerScreen;
 import com.GunterPro7.utils.ClientUtils;
 import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.Utils;
@@ -20,12 +22,19 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class ClientMusicBoxListener {
     @SubscribeEvent
     public void onRightClickMusicBox(PlayerInteractEvent.RightClickBlock event) {
-        if (ClientUtils.gameLoaded() && !(Minecraft.getInstance().screen instanceof MusicBoxScreen)) {
-            if (event.getLevel().getBlockState(event.getPos()).is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
-                BlockPos pos = event.getPos();
-                long id = Utils.getRandomId();
-                MiscNetworkEvent.sendToServer(id, MiscAction.MUSIC_BOX_GET, pos.getX() + "," + pos.getY() + "," + pos.getZ());
-                Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new MusicBoxScreen(pos, id)));
+        if (ClientUtils.gameLoaded()) {
+            if (!(Minecraft.getInstance().screen instanceof MusicBoxScreen)) {
+                if (event.getLevel().getBlockState(event.getPos()).is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
+                    BlockPos pos = event.getPos();
+                    long id = Utils.getRandomId();
+                    MiscNetworkEvent.sendToServer(id, MiscAction.MUSIC_BOX_GET, pos.getX() + "," + pos.getY() + "," + pos.getZ());
+                    Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new MusicBoxScreen(pos, id)));
+                }
+            } if (!(Minecraft.getInstance().screen instanceof MusicControllerScreen)) {
+                if (event.getLevel().getBlockState(event.getPos()).is(ModBlocks.MUSIC_CONTROLLER_BLOCK.get())) {
+                    // TODO get data from server
+                    Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new MusicControllerScreen(MusicController.getController(event.getPos()))));
+                }
             }
         }
     }

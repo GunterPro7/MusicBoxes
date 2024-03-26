@@ -4,15 +4,15 @@ import com.GunterPro7.listener.AudioCableListener;
 import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.listener.ServerMusicBoxListener;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.DyeColor;
 
 import java.util.*;
 
 public class MusicController {
     public static final List<MusicController> musicControllers = new ArrayList<>(); // TODO instead of writing it into external files, save it into the basic minecraft file
     private final BlockPos pos;
-    public final Queue<String> musicQueue = new PriorityQueue<>();
+    public final MusicQueue musicQueue = new MusicQueue();
 
     public MusicController(BlockPos pos) {
         this.pos = pos;
@@ -31,6 +31,23 @@ public class MusicController {
         return "Position: " + pos;
     }
 
+    public Set<Integer> getColorsConnected() {
+        Set<Integer> colorsConnected = new HashSet<>();
+        for (AudioCable audioCable : getAudioCablesConnected()) {
+            colorsConnected.add(audioCable.getColor());
+        }
+
+        return colorsConnected;
+    }
+
+    public boolean switchColorConnection(int color) {
+        // TODO remove item metadata for "color" if "color" is already set. Add it if it cannot be found
+        return new Random().nextBoolean();
+    }
+
+    public boolean isColorConnectionActive(int color) {
+        return new Random().nextBoolean();
+    }
 
     public static MusicController getMusicControllerByMusicBox(MusicBox musicBox) {
         if (musicBox.hasAudioCable()) return getControllerByAudioCable(musicBox.getAudioCable(), new HashSet<>());
@@ -132,7 +149,7 @@ public class MusicController {
         players.forEach(player -> ServerMusicBoxListener.sendToClient(player, clientMusicBoxManager));
     }
 
-    public Queue<String> getMusicQueue() {
+    public MusicQueue getMusicQueue() {
         return this.musicQueue;
     }
 }
