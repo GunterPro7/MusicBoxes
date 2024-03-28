@@ -9,7 +9,6 @@ public class ColorNameDetector {
     private static final Map<String, int[]> colorMap = new HashMap<>();
     static {
         colorMap.put("red", new int[]{255, 0, 0});
-        colorMap.put("brown", new int[]{139, 69, 19});
         colorMap.put("green", new int[]{0, 255, 0});
         colorMap.put("blue", new int[]{0, 0, 255});
         colorMap.put("yellow", new int[]{255, 255, 0});

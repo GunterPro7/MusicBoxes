@@ -6,7 +6,10 @@ import net.minecraft.world.phys.Vec3;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Utils {
     public static Vec3 vec3Of(String string) {
@@ -66,6 +69,36 @@ public class Utils {
         return raf;
     }
 
+    public static Map<Integer, Boolean> integerBooleanListOf(String data) {
+        Map<Integer, Boolean> ints = new HashMap<>();
+        for (String part : data.split(";")) {
+            if (!part.isEmpty()) {
+                ints.put(Integer.parseInt(part.substring(1)), part.charAt(0) == '1');
+            }
+        }
+
+        return ints;
+    }
+
+    public static String[] split(String string, String by) {
+        String[] newString = string.split("(?=" + by + ")");
+
+        for (int i = 0; i < newString.length; i++) {
+            newString[i] = newString[i].replaceAll(by, "");
+        }
+
+        return newString;
+    }
+
+    public static String integerBooleanListToString(Map<Integer, Boolean> map) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Integer, Boolean> entry : map.entrySet()) {
+            sb.append(entry.getValue() ? '1' : '0').append(entry.getKey()).append(";");
+        }
+
+        return sb.toString();
+    }
+
 
     public <T> List<T> getStaticFields(Class<T> class_) {
         return null;
@@ -79,5 +112,12 @@ public class Utils {
         return 1L + (long) (Math.random() * (Long.MAX_VALUE - 1L));
     }
 
+    public static List<Integer> integerListOf(String data) {
+        List<Integer> ints = new ArrayList<>();
+        for (String part : data.split(";")) {
+            ints.add(Integer.valueOf(part));
+        }
 
+        return ints;
+    }
 }

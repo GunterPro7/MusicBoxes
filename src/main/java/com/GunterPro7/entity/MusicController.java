@@ -3,6 +3,8 @@ package com.GunterPro7.entity;
 import com.GunterPro7.listener.AudioCableListener;
 import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.listener.ServerMusicBoxListener;
+import com.GunterPro7.ui.MusicControllerScreen;
+import com.GunterPro7.utils.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,10 +14,15 @@ import java.util.*;
 public class MusicController {
     public static final List<MusicController> musicControllers = new ArrayList<>(); // TODO instead of writing it into external files, save it into the basic minecraft file
     private final BlockPos pos;
-    public final MusicQueue musicQueue = new MusicQueue();
+    public final MusicQueue musicQueue;
 
     public MusicController(BlockPos pos) {
+        this(pos, new MusicQueue());
+    }
+
+    public MusicController(BlockPos pos, MusicQueue queue) {
         this.pos = pos;
+        this.musicQueue = queue;
     }
 
     public BlockPos getPos() {
@@ -26,15 +33,19 @@ public class MusicController {
         return AudioCableListener.getAudioCablesByPos(pos);
     }
 
-    @Override
-    public String toString() {
-        return "Position: " + pos;
-    }
-
     public Set<Integer> getColorsConnected() {
         Set<Integer> colorsConnected = new HashSet<>();
         for (AudioCable audioCable : getAudioCablesConnected()) {
             colorsConnected.add(audioCable.getColor());
+        }
+
+        return colorsConnected;
+    }
+
+    public Map<Integer, Boolean> getColorInfos() { // TODO das von der config vom block lesen
+        Map<Integer, Boolean> colorsConnected = new HashMap<>();
+        for (AudioCable audioCable : getAudioCablesConnected()) {
+            colorsConnected.put(audioCable.getColor(), true);
         }
 
         return colorsConnected;
@@ -144,6 +155,16 @@ public class MusicController {
         return null;
     }
 
+    public void update(MusicController controller) {
+        MusicQueue newQueue = controller.getMusicQueue();
+        this.musicQueue.update(newQueue);
+        // TODO update tracks via sasving in file.
+    }
+
+    public void update(Map<Integer, Boolean> colors) {
+        // TODO update via saving to file.
+    }
+
     @Deprecated
     public void play(List<ServerPlayer> players, MusicBoxEvent clientMusicBoxManager) {
         players.forEach(player -> ServerMusicBoxListener.sendToClient(player, clientMusicBoxManager));
@@ -151,5 +172,16 @@ public class MusicController {
 
     public MusicQueue getMusicQueue() {
         return this.musicQueue;
+    }
+
+    @Override
+    public String toString() {
+        return pos.toShortString().replaceAll(", ", ",") + "/" + musicQueue;
+    }
+
+    public static MusicController fromString(String data) {
+        String[] parts = Utils.split(data, "/");
+        return new MusicController(Utils.blockPosOf(parts[0]),
+                MusicQueue.fromString(String.join("/", Arrays.copyOfRange(parts, 1, parts.length))));
     }
 }

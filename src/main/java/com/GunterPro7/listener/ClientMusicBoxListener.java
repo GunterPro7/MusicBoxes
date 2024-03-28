@@ -23,17 +23,19 @@ public class ClientMusicBoxListener {
     @SubscribeEvent
     public void onRightClickMusicBox(PlayerInteractEvent.RightClickBlock event) {
         if (ClientUtils.gameLoaded()) {
+            BlockPos pos = event.getPos();
+
             if (!(Minecraft.getInstance().screen instanceof MusicBoxScreen)) {
                 if (event.getLevel().getBlockState(event.getPos()).is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
-                    BlockPos pos = event.getPos();
                     long id = Utils.getRandomId();
                     MiscNetworkEvent.sendToServer(id, MiscAction.MUSIC_BOX_GET, pos.getX() + "," + pos.getY() + "," + pos.getZ());
                     Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new MusicBoxScreen(pos, id)));
                 }
             } if (!(Minecraft.getInstance().screen instanceof MusicControllerScreen)) {
                 if (event.getLevel().getBlockState(event.getPos()).is(ModBlocks.MUSIC_CONTROLLER_BLOCK.get())) {
-                    // TODO get data from server
-                    Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new MusicControllerScreen(MusicController.getController(event.getPos()))));
+                    long id = Utils.getRandomId();
+                    MiscNetworkEvent.sendToServer(id, MiscAction.MUSIC_CONTROLLER_GET, pos.getX() + "," + pos.getY() + "," + pos.getZ());
+                    Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new MusicControllerScreen(id, null)));
                 }
             }
         }
@@ -41,13 +43,18 @@ public class ClientMusicBoxListener {
 
     @SubscribeEvent
     public void clientReceiveEvent(MiscNetworkEvent.ClientReceivedEvent event) {
+        MiscAction action = event.getAction();
         if (Minecraft.getInstance().screen instanceof MusicBoxScreen screen) {
-            if (event.getAction() == MiscAction.MUSIC_BOX_GET && screen.id == event.getId()) {
+            if (action == MiscAction.MUSIC_BOX_GET && screen.id == event.getId()) {
                 String[] data = event.getData().split("/");
                 float volume = Float.parseFloat(data[0]);
                 boolean active = Boolean.parseBoolean(data[1]);
 
                 screen.updateInformation(volume, active);
+            }
+        } else if (Minecraft.getInstance().screen instanceof MusicControllerScreen screen) {
+            if (action == MiscAction.MUSIC_CONTROLLER_GET) {
+                screen.updateInformation(event.getId(), MusicController.fromString(event.getData()), Utils.integerBooleanListOf(Utils.split(event.getData(), "/")[4]));
             }
         }
     }
