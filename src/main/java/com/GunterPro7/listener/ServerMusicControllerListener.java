@@ -4,15 +4,20 @@ import com.GunterPro7.FileManager;
 import com.GunterPro7.block.ModBlocks;
 import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
+import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.entity.AudioCable;
+import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.DyeColor;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.io.IOException;
+import java.util.List;
 
 public class ServerMusicControllerListener {
     @SubscribeEvent
@@ -76,10 +81,19 @@ public class ServerMusicControllerListener {
                     controller.update(event.getPlayer().level(), Utils.integerBooleanListOf(data[4]));
                 }
             }
-        } else if (action == MiscAction.MUSIC_CONTROLLER_PLAY) {
-            // TODO hier aufgehlrt
-        } else if (action == MiscAction.MUSIC_CONTROLLER_STOP) {
+        } else if (action == MiscAction.MUSIC_CONTROLLER_PLAY || action == MiscAction.MUSIC_CONTROLLER_STOP) {
+            String[] data = Utils.split(event.getData(), "/");
+            MusicController controller = MusicController.getController(event.getPlayer().level(), Utils.blockPosOf(data[0]));
 
+            List<MusicBox> musicBoxes = controller.getMusicBoxesByColor(Utils.integerListOf(data[1])).stream().filter(MusicBox::isActive).toList();
+            List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
+            List<Float> volumeList = musicBoxes.stream().map(MusicBox::getVolume).toList();
+
+            ResourceLocation location = data.length > 2 ? new ResourceLocation(data[2]) : null;
+
+            MusicBoxEvent musicBoxEvent = new MusicBoxEvent(action == MiscAction.MUSIC_CONTROLLER_PLAY, location, posList, volumeList);
+
+            ((ServerLevel) event.getPlayer().level()).players().forEach(player -> ServerMusicBoxListener.sendToClient(player, musicBoxEvent));
         }
     }
 }

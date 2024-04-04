@@ -215,21 +215,11 @@ public class MusicController {
     }
 
     protected void play(String track, List<Integer> colors) {
-        MiscNetworkEvent.sendToServer(new MiscNetworkEvent(-1, MiscAction.MUSIC_CONTROLLER_PLAY, pos.toShortString() + "/" + track + "/" + Utils.intListToString(colors)));
+        MiscNetworkEvent.sendToServer(new MiscNetworkEvent(-1, MiscAction.MUSIC_CONTROLLER_PLAY, pos.toShortString() + "/" + Utils.intListToString(colors) + "/" + track));
     }
 
     protected void stop(List<Integer> colors) {
         MiscNetworkEvent.sendToServer(new MiscNetworkEvent(-1, MiscAction.MUSIC_CONTROLLER_STOP, pos.toShortString() + "/" + Utils.intListToString(colors)));
-    }
-
-    private void interact(String track, List<Integer> colors, boolean play) {
-        List<MusicBox> musicBoxes = getMusicBoxesByColor(colors).stream().filter(MusicBox::isActive).toList();
-        List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
-        List<Float> volumeList = musicBoxes.stream().map(MusicBox::getVolume).toList();
-
-        MusicBoxEvent musicBoxEvent = new MusicBoxEvent(play, track == null ? null : new ResourceLocation(track), posList, volumeList);
-
-        level.players().forEach(player -> ServerMusicBoxListener.sendToClient(player, musicBoxEvent));
     }
 
     public MusicQueue getMusicQueue() {
