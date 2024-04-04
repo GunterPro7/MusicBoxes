@@ -1,5 +1,7 @@
 package com.GunterPro7.block;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
@@ -18,6 +20,7 @@ public class MusicBoxBlock extends SlabBlock {
         super(BlockBehaviour.Properties.copy(Blocks.COBBLESTONE_SLAB).strength(3f));
         this.registerDefaultState(this.stateDefinition.any().setValue(VOLUME, 50));
         this.registerDefaultState(this.stateDefinition.any().setValue(ACTIVE, true));
+
     }
 
     @Override

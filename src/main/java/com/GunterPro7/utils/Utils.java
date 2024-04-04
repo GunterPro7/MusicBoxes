@@ -6,10 +6,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Utils {
     public static Vec3 vec3Of(String string) {
@@ -70,7 +67,7 @@ public class Utils {
     }
 
     public static Map<Integer, Boolean> integerBooleanListOf(String data) {
-        Map<Integer, Boolean> ints = new HashMap<>();
+        Map<Integer, Boolean> ints = new TreeMap<>();
         for (String part : data.split(";")) {
             if (!part.isEmpty()) {
                 ints.put(Integer.parseInt(part.substring(1)), part.charAt(0) == '1');
@@ -95,6 +92,19 @@ public class Utils {
         for (Map.Entry<Integer, Boolean> entry : map.entrySet()) {
             sb.append(entry.getValue() ? '1' : '0').append(entry.getKey()).append(";");
         }
+
+        return sb.toString();
+    }
+
+    public static String listToShortString(List<String> tracks) {
+        StringBuilder sb = new StringBuilder();
+        tracks.forEach(track -> sb.append(track).append(";"));
+        return sb.substring(0, sb.length() > 0 ? sb.length() - 1 : sb.length());
+    }
+
+    public static String intListToString(List<Integer> colors) {
+        StringBuilder sb = new StringBuilder();
+        colors.forEach(color -> sb.append(color).append(";"));
 
         return sb.toString();
     }

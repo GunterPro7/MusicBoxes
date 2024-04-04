@@ -73,7 +73,7 @@ public class AudioCableListener {
             event.getLevel().players().forEach(player -> MiscNetworkEvent.sendToClient((ServerPlayer) player, new MiscNetworkEvent(-1, MiscAction.AUDIO_CABLE_REMOVE, sb.toString())));
             FileManager.AudioCables.removeAll(audioCableList);
 
-            MusicController musicController = MusicController.getMusicControllerByMusicBox(new MusicBox(event.getPos(), event.getPlayer().level()));
+            MusicController musicController = MusicController.getMusicControllerByMusicBox(event.getPlayer().level(), new MusicBox(event.getPos(), event.getPlayer().level()));
 
             if (musicController != null) {
                 Set<MusicBox> musicBoxesBefore = musicController.getMusicBoxesByColor(-1); // TODO How should I do that with the colors?

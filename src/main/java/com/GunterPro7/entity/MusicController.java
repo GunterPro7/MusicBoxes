@@ -1,5 +1,9 @@
 package com.GunterPro7.entity;
 
+import com.GunterPro7.block.ModBlocks;
+import com.GunterPro7.block.MusicControllerBlockEntity;
+import com.GunterPro7.connection.MiscAction;
+import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.listener.AudioCableListener;
 import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.listener.ServerMusicBoxListener;
@@ -7,26 +11,40 @@ import com.GunterPro7.ui.MusicControllerScreen;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.*;
 
 public class MusicController {
     public static final List<MusicController> musicControllers = new ArrayList<>(); // TODO instead of writing it into external files, save it into the basic minecraft file
     private final BlockPos pos;
-    public final MusicQueue musicQueue;
+    private final MusicQueue musicQueue;
+    private final Level level;
 
-    public MusicController(BlockPos pos) {
-        this(pos, new MusicQueue());
+    public MusicController(Level level, BlockPos pos) {
+        this(level, pos, null);
     }
 
-    public MusicController(BlockPos pos, MusicQueue queue) {
+    public MusicController(Level level, BlockPos pos, MusicQueue queue) {
+        this.level = level;
         this.pos = pos;
+        if (queue == null) {
+            queue = loadQueue(this, level, pos);
+        }
         this.musicQueue = queue;
     }
 
     public BlockPos getPos() {
         return pos;
+    }
+
+    public Level getLevel() {
+        return level;
     }
 
     public List<AudioCable> getAudioCablesConnected() {
@@ -43,43 +61,60 @@ public class MusicController {
     }
 
     public Map<Integer, Boolean> getColorInfos() { // TODO das von der config vom block lesen
-        Map<Integer, Boolean> colorsConnected = new HashMap<>();
-        for (AudioCable audioCable : getAudioCablesConnected()) {
-            colorsConnected.put(audioCable.getColor(), true);
+        MusicControllerBlockEntity blockEntity = (MusicControllerBlockEntity) level.getBlockEntity(pos);
+        if (blockEntity != null) {
+            Map<Integer, Boolean> colorInfos = blockEntity.getColorInfos();
+            Set<Integer> colorsConnected = getColorsConnected();
+            if (colorInfos.size() != colorsConnected.size()) {
+                blockEntity.addColors(colorsConnected);
+                colorInfos = blockEntity.getColorInfos();
+            }
+            return colorInfos;
+        } else {
+            level.setBlockEntity(new MusicControllerBlockEntity(pos, level.getBlockState(pos)));
+            return new HashMap<>();
         }
-
-        return colorsConnected;
     }
 
-    public boolean switchColorConnection(int color) {
-        // TODO remove item metadata for "color" if "color" is already set. Add it if it cannot be found
-        return new Random().nextBoolean();
+    public List<Integer> getActiveColors() {
+        List<Integer> activeColors = new ArrayList<>();
+
+        getColorInfos().forEach((color, info) -> {
+            if (info) {
+                activeColors.add(color);
+            }
+        });
+
+        return activeColors;
     }
 
-    public boolean isColorConnectionActive(int color) {
-        return new Random().nextBoolean();
-    }
-
-    public static MusicController getMusicControllerByMusicBox(MusicBox musicBox) {
-        if (musicBox.hasAudioCable()) return getControllerByAudioCable(musicBox.getAudioCable(), new HashSet<>());
+    public static MusicController getMusicControllerByMusicBox(Level level, MusicBox musicBox) {
+        if (musicBox.hasAudioCable()) return getControllerByAudioCable(level, musicBox.getAudioCable(), new HashSet<>());
         return null;
     }
 
-    public static MusicController getMusicControllerByAudioCable(AudioCable audioCable) {
-        return getControllerByAudioCable(audioCable, new HashSet<>());
+    public static MusicController getMusicControllerByAudioCable(Level level, AudioCable audioCable) {
+        return getControllerByAudioCable(level, audioCable, new HashSet<>());
     }
 
     public Set<MusicBox> getMusicBoxesByColor(int color) {
-        return getMusicBoxesByColor(pos, color, new ArrayList<>());
+        return getMusicBoxesByColor(pos, List.of(color), new ArrayList<>());
     }
 
-    private static Set<MusicBox> getMusicBoxesByColor(BlockPos blockPos, int color, List<BlockPos> checkedPositions) {
+    public Set<MusicBox> getMusicBoxesByColor(List<Integer> colors) {
+        if (colors.contains(-1)) {
+            colors = List.of(-1);
+        }
+        return getMusicBoxesByColor(pos, colors, new ArrayList<>());
+    }
+
+    private static Set<MusicBox> getMusicBoxesByColor(BlockPos blockPos, List<Integer> colors, List<BlockPos> checkedPositions) {
         Set<MusicBox> musicBoxes = new HashSet<>();
 
         List<AudioCable> audioCables = AudioCableListener.getAudioCablesByPos(blockPos);
 
         for (AudioCable audioCable : audioCables) {
-            if (audioCable.getColor() == color || color == -1) {
+            if (colors.contains(audioCable.getColor()) || colors.contains(-1)) {
                 if (audioCable.getMusicBoxStart() != null) {
                     musicBoxes.add(audioCable.getMusicBoxStart());
                 } if (audioCable.getMusicBoxEnd() != null) {
@@ -97,23 +132,23 @@ public class MusicController {
                 }
                 checkedPositions.add(blockPos);
 
-                musicBoxes.addAll(getMusicBoxesByColor(newBlockPos, color, checkedPositions));
+                musicBoxes.addAll(getMusicBoxesByColor(newBlockPos, colors, checkedPositions));
             }
         }
 
         return musicBoxes;
     }
 
-    private static MusicController getControllerByAudioCable(AudioCable audioCable, Set<BlockPos> checkedPositions) {
+    private static MusicController getControllerByAudioCable(Level level, AudioCable audioCable, Set<BlockPos> checkedPositions) {
         BlockPos startBlock = audioCable.getStartBlock();
         BlockPos endBlock = audioCable.getEndBlock();
 
-        MusicController musicControllerStart = MusicController.getController(startBlock);
+        MusicController musicControllerStart = MusicController.getController(level, startBlock);
         if (musicControllerStart != null) {
             return musicControllerStart;
         }
 
-        MusicController musicControllerEnd = MusicController.getController(endBlock);
+        MusicController musicControllerEnd = MusicController.getController(level, endBlock);
         if (musicControllerEnd != null) {
             return musicControllerEnd;
         }
@@ -125,7 +160,7 @@ public class MusicController {
         for (AudioCable cable : startBlockCables) {
             BlockPos pos = cable.getStartBlock();
             if (!checkedPositions.contains(pos)) {
-                MusicController controllerPos = getControllerByAudioCable(cable, checkedPositions);
+                MusicController controllerPos = getControllerByAudioCable(level, cable, checkedPositions);
                 if (controllerPos != null) {
                     return controllerPos;
                 }
@@ -136,7 +171,7 @@ public class MusicController {
         for (AudioCable cable : endBlockCables) {
             BlockPos pos = cable.getEndBlock();
             if (!checkedPositions.contains(pos)) {
-                MusicController controllerPos = getControllerByAudioCable(cable, checkedPositions);
+                MusicController controllerPos = getControllerByAudioCable(level, cable, checkedPositions);
                 if (controllerPos != null) {
                     return controllerPos;
                 }
@@ -146,23 +181,32 @@ public class MusicController {
         return null;
     }
 
-    public static MusicController getController(BlockPos pos) {
-        for (MusicController mc : musicControllers) {
-            if (pos.equals(mc.getPos())) {
-                return mc;
-            }
-        }
-        return null;
+    public static MusicController getController(Level level, BlockPos pos) {
+        return level.getBlockState(pos).is(ModBlocks.MUSIC_CONTROLLER_BLOCK.get()) ? new MusicController(level, pos): null;
     }
 
     public void update(MusicController controller) {
         MusicQueue newQueue = controller.getMusicQueue();
-        this.musicQueue.update(newQueue);
-        // TODO update tracks via sasving in file.
+        this.musicQueue.update(this, newQueue);
     }
 
-    public void update(Map<Integer, Boolean> colors) {
-        // TODO update via saving to file.
+    public void update(Level level, Map<Integer, Boolean> colors) {
+        MusicControllerBlockEntity blockEntity = (MusicControllerBlockEntity) level.getBlockEntity(pos);
+        if (blockEntity == null) {
+            blockEntity = new MusicControllerBlockEntity(pos, level.getBlockState(pos));
+            level.setBlockEntity(blockEntity);
+        }
+
+        blockEntity.update(colors);
+    }
+
+    private static MusicQueue loadQueue(MusicController controller, Level level, BlockPos pos) {
+        MusicControllerBlockEntity blockEntity = (MusicControllerBlockEntity) level.getBlockEntity(pos);
+        if (blockEntity != null) {
+            return blockEntity.getNewQueue(controller);
+        }
+
+        return null;
     }
 
     @Deprecated
@@ -170,8 +214,39 @@ public class MusicController {
         players.forEach(player -> ServerMusicBoxListener.sendToClient(player, clientMusicBoxManager));
     }
 
+    protected void play(String track, List<Integer> colors) {
+        MiscNetworkEvent.sendToServer(new MiscNetworkEvent(-1, MiscAction.MUSIC_CONTROLLER_PLAY, pos.toShortString() + "/" + track + "/" + Utils.intListToString(colors)));
+    }
+
+    protected void stop(List<Integer> colors) {
+        MiscNetworkEvent.sendToServer(new MiscNetworkEvent(-1, MiscAction.MUSIC_CONTROLLER_STOP, pos.toShortString() + "/" + Utils.intListToString(colors)));
+    }
+
+    private void interact(String track, List<Integer> colors, boolean play) {
+        List<MusicBox> musicBoxes = getMusicBoxesByColor(colors).stream().filter(MusicBox::isActive).toList();
+        List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
+        List<Float> volumeList = musicBoxes.stream().map(MusicBox::getVolume).toList();
+
+        MusicBoxEvent musicBoxEvent = new MusicBoxEvent(play, track == null ? null : new ResourceLocation(track), posList, volumeList);
+
+        level.players().forEach(player -> ServerMusicBoxListener.sendToClient(player, musicBoxEvent));
+    }
+
     public MusicQueue getMusicQueue() {
         return this.musicQueue;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MusicController that = (MusicController) o;
+        return Objects.equals(pos, that.pos) && Objects.equals(level, that.level);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos, level);
     }
 
     @Override
@@ -179,9 +254,12 @@ public class MusicController {
         return pos.toShortString().replaceAll(", ", ",") + "/" + musicQueue;
     }
 
-    public static MusicController fromString(String data) {
+    public static MusicController fromString(Level level, String data) {
         String[] parts = Utils.split(data, "/");
-        return new MusicController(Utils.blockPosOf(parts[0]),
-                MusicQueue.fromString(String.join("/", Arrays.copyOfRange(parts, 1, parts.length))));
+
+        MusicController controller = new MusicController(level, Utils.blockPosOf(parts[0]));
+        controller.getMusicQueue().update(controller, MusicQueue.fromString(controller, String.join("/", Arrays.copyOfRange(parts, 1, parts.length))));
+
+        return controller;
     }
 }

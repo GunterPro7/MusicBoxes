@@ -71,7 +71,7 @@ public class MusicControllerScreen extends Screen {
             int centerX = (this.width) / 2 - 30;
             int centerY = (this.height) / 2;
 
-            int offsetTop = 50 - scrollOffset;
+            int offsetTop = 50 - scrollOffset; // TODO ⏯◼⏸⏯️
             int index = 0;
 
             MusicQueue musicQueue = musicController.getMusicQueue();
@@ -105,14 +105,21 @@ public class MusicControllerScreen extends Screen {
 
             offsetTop += 50;
 
-            StringWidget stringWidget = new StringWidget(centerX - 60, offsetTop, 55, 20, Component.literal("Currently running:"), this.font);
-            widgets.add(stringWidget);
+            Button runningButton = new Button.Builder(Component.literal(musicQueue.isRunning() ? "⏸" : "⏯"), thisButton -> {
+                if (musicQueue.switchRunning()) {
+                    musicQueue.play();
+                    thisButton.setMessage(Component.literal("⏸"));
+                } else {
+                    musicQueue.pause();
+                    thisButton.setMessage(Component.literal("⏯"));
+                }
+            }).bounds(centerX - 5, offsetTop, 20, 20).build();
+            widgets.add(runningButton);
 
-            Button button = new Button.Builder(Component.literal(String.valueOf(musicController.getMusicQueue().getCurrentTrack())), thisButton -> {
-                musicController.getMusicQueue().play(thisButton.getMessage().getString());
+            Button button = new Button.Builder(Component.literal(String.valueOf(musicQueue.getCurrentTrack())), thisButton -> {
+                musicQueue.play(thisButton.getMessage().getString());
                 rebuildWidgets();
             }).bounds(centerX + 20, offsetTop, 100, 20).build();
-
             widgets.add(button);
 
             offsetTop += 25;
@@ -200,13 +207,17 @@ public class MusicControllerScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
-        MiscNetworkEvent.sendToServer(-1, MiscAction.MUSIC_CONTROLLER_INNER_UPDATE, musicController.toString() + "/" + Utils.integerBooleanListToString(colors));
+        if (musicController != null) {
+            MiscNetworkEvent.sendToServer(-1, MiscAction.MUSIC_CONTROLLER_INNER_UPDATE, musicController + "/" +
+                    Utils.integerBooleanListToString(colors) + "/" + musicController.getMusicQueue().isRunning());
+        }
     }
 
-    public void updateInformation(long id, MusicController musicController, Map<Integer, Boolean> colors) {
+    public void updateInformation(long id, MusicController musicController, Map<Integer, Boolean> colors, boolean running) {
         if (this.interactionId == id) {
             this.musicController = musicController;
             this.colors = colors;
+            this.musicController.getMusicQueue().setRunning(running);
             this.rebuildWidgets();
         }
     }

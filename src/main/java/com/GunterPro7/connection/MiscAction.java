@@ -14,6 +14,8 @@ public enum MiscAction {
 
     MUSIC_CONTROLLER_GET(6),
     MUSIC_CONTROLLER_INNER_UPDATE(5),
+    MUSIC_CONTROLLER_PLAY(11),
+    MUSIC_CONTROLLER_STOP(12),
     ;
 
     public final int id;

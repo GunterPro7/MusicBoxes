@@ -65,7 +65,7 @@ public class MusicBoxesCommand {
     }
 
     private static int controllerCommand(CommandContext<CommandSourceStack> context, boolean play) {
-        MusicController musicController = MusicController.getController(new BlockPos(context.getArgument("x", Integer.class),
+        MusicController musicController = MusicController.getController(context.getSource().getLevel(), new BlockPos(context.getArgument("x", Integer.class),
                 context.getArgument("y", Integer.class), context.getArgument("z", Integer.class)));
 
         if (musicController != null) {

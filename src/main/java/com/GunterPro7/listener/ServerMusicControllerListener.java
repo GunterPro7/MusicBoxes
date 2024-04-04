@@ -8,6 +8,7 @@ import com.GunterPro7.entity.AudioCable;
 import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.DyeColor;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -18,7 +19,11 @@ public class ServerMusicControllerListener {
     public void blockPlace(BlockEvent.EntityPlaceEvent event) throws IOException {
         if (event.getPlacedBlock().is(ModBlocks.MUSIC_CONTROLLER_BLOCK.get())) {
             FileManager.Controller.add(event.getPos());
-            MusicController.musicControllers.add(new MusicController(event.getPos()));
+            if (event.getEntity() == null) {
+                event.setCanceled(true);
+                return;
+            }
+            MusicController.musicControllers.add(new MusicController(event.getEntity().level(), event.getPos()));
         }
     }
 
@@ -28,7 +33,8 @@ public class ServerMusicControllerListener {
             BlockPos pos = event.getPos();
 
             FileManager.Controller.remove(pos);
-            MusicController.musicControllers.remove(new MusicController(pos));
+
+            MusicController.musicControllers.remove(new MusicController(event.getPlayer().level(), pos));
 
             MusicController musicControllerToDelete = null;
             for (MusicController musicBox : MusicController.musicControllers) {
@@ -49,26 +55,31 @@ public class ServerMusicControllerListener {
         if (action == MiscAction.MUSIC_CONTROLLER_GET) {
             String[] data = event.getData().split("/");
             BlockPos pos = Utils.blockPosOf(data[0]);
-            MusicController controller = MusicController.getController(pos);
+            MusicController controller = MusicController.getController(event.getPlayer().level(), pos);
 
             if (controller != null) {
                 StringBuilder sb = new StringBuilder();
                 controller.getColorInfos().forEach((color, enabled) -> sb.append(enabled ? '1' : '0').append(color).append(";"));
 
-                event.reply(controller + "/" + sb);
+                event.reply(controller + "/" + sb + "/" + controller.getMusicQueue().isRunning());
             }
         } else if (action == MiscAction.MUSIC_CONTROLLER_INNER_UPDATE) {
             String[] data = event.getData().split("/");
             BlockPos pos = Utils.blockPosOf(data[0]);
-            MusicController controller = MusicController.getController(pos);
+            MusicController controller = MusicController.getController(event.getPlayer().level(), pos);
 
             if (controller != null) {
-                MusicController destController = MusicController.fromString(event.getData());
+                MusicController destController = MusicController.fromString(event.getPlayer().level(), event.getData());
                 controller.update(destController);
+
                 if (data.length > 4) {
-                    controller.update(Utils.integerBooleanListOf(data[4]));
+                    controller.update(event.getPlayer().level(), Utils.integerBooleanListOf(data[4]));
                 }
             }
+        } else if (action == MiscAction.MUSIC_CONTROLLER_PLAY) {
+            // TODO hier aufgehlrt
+        } else if (action == MiscAction.MUSIC_CONTROLLER_STOP) {
+
         }
     }
 }

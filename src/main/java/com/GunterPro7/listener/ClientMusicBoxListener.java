@@ -54,7 +54,9 @@ public class ClientMusicBoxListener {
             }
         } else if (Minecraft.getInstance().screen instanceof MusicControllerScreen screen) {
             if (action == MiscAction.MUSIC_CONTROLLER_GET) {
-                screen.updateInformation(event.getId(), MusicController.fromString(event.getData()), Utils.integerBooleanListOf(Utils.split(event.getData(), "/")[4]));
+                String[] parts = Utils.split(event.getData(), "/");
+                screen.updateInformation(event.getId(), MusicController.fromString(Minecraft.getInstance().level, event.getData()),
+                        Utils.integerBooleanListOf(parts[4]), Boolean.parseBoolean(parts[5]));
             }
         }
     }
