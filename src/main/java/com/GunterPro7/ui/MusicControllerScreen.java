@@ -117,6 +117,7 @@ public class MusicControllerScreen extends Screen {
             widgets.add(runningButton);
 
             Button button = new Button.Builder(Component.literal(String.valueOf(musicQueue.getCurrentTrack())), thisButton -> {
+                musicQueue.setRunning(true);
                 musicQueue.play(thisButton.getMessage().getString());
                 rebuildWidgets();
             }).bounds(centerX + 20, offsetTop, 100, 20).build();
@@ -158,6 +159,7 @@ public class MusicControllerScreen extends Screen {
                     rebuildWidgets();
                 }).bounds(centerX - 5, offsetTop, 20, 20).build();
                 Button buttonPlay = new Button.Builder(Component.literal(track), thisButton -> {
+                    musicQueue.setRunning(true);
                     musicController.getMusicQueue().play(track);
                     rebuildWidgets();
                 }).bounds(centerX + 20, offsetTop, 100, 20).build();

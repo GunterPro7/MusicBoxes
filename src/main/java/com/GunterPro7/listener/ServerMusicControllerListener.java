@@ -68,7 +68,7 @@ public class ServerMusicControllerListener {
 
                 event.reply(controller + "/" + sb + "/" + controller.getMusicQueue().isRunning());
             }
-        } else if (action == MiscAction.MUSIC_CONTROLLER_INNER_UPDATE) {
+        } else if (action == MiscAction.MUSIC_CONTROLLER_INNER_UPDATE) { // TODO beim zerstören einer music box hört die musik nicht auf zu spielen
             String[] data = event.getData().split("/");
             BlockPos pos = Utils.blockPosOf(data[0]);
             MusicController controller = MusicController.getController(event.getPlayer().level(), pos);
@@ -85,15 +85,17 @@ public class ServerMusicControllerListener {
             String[] data = Utils.split(event.getData(), "/");
             MusicController controller = MusicController.getController(event.getPlayer().level(), Utils.blockPosOf(data[0]));
 
-            List<MusicBox> musicBoxes = controller.getMusicBoxesByColor(Utils.integerListOf(data[1])).stream().filter(MusicBox::isActive).toList();
-            List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
-            List<Float> volumeList = musicBoxes.stream().map(MusicBox::getVolume).toList();
+            if (controller != null) {
+                List<MusicBox> musicBoxes = controller.getMusicBoxesByColor(controller.getActiveColors()).stream().filter(MusicBox::isActive).toList();
+                List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
+                List<Float> volumeList = musicBoxes.stream().map(MusicBox::getVolume).toList();
 
-            ResourceLocation location = data.length > 2 ? new ResourceLocation(data[2]) : null;
+                ResourceLocation location = data.length > 1 ? new ResourceLocation(data[1]) : null;
 
-            MusicBoxEvent musicBoxEvent = new MusicBoxEvent(action == MiscAction.MUSIC_CONTROLLER_PLAY, location, posList, volumeList);
+                MusicBoxEvent musicBoxEvent = new MusicBoxEvent(action == MiscAction.MUSIC_CONTROLLER_PLAY, location, posList, volumeList, true);
 
-            ((ServerLevel) event.getPlayer().level()).players().forEach(player -> ServerMusicBoxListener.sendToClient(player, musicBoxEvent));
+                ((ServerLevel) event.getPlayer().level()).players().forEach(player -> ServerMusicBoxListener.sendToClient(player, musicBoxEvent));
+            }
         }
     }
 }

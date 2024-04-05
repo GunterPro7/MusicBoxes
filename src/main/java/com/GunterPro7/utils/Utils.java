@@ -20,7 +20,7 @@ public class Utils {
 
     public static BlockPos blockPosOf(String string) {
         String[] parts = string.split(",");
-        return new BlockPos(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+        return new BlockPos(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()), Integer.parseInt(parts[2].trim()));
     }
 
     public static BlockPos blockPosOf(Vec3 vec3) {
@@ -125,7 +125,9 @@ public class Utils {
     public static List<Integer> integerListOf(String data) {
         List<Integer> ints = new ArrayList<>();
         for (String part : data.split(";")) {
-            ints.add(Integer.valueOf(part));
+            if (!data.isEmpty()) {
+                ints.add(Integer.valueOf(part));
+            }
         }
 
         return ints;

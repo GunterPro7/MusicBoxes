@@ -33,6 +33,7 @@ public class MusicBoxEvent {
     private final ResourceLocation resourceLocation;
     private final List<BlockPos> posList;
     private final List<Float> volumeList;
+    private final boolean stopLast;
 
     public MusicBoxEvent(FriendlyByteBuf buffer) {
         this.play = buffer.readBoolean();
@@ -50,13 +51,15 @@ public class MusicBoxEvent {
         }
 
         this.volumeList = floatListFromString(buffer.readUtf(buffer.readShort()));
+        this.stopLast = buffer.readBoolean();
     }
 
-    public MusicBoxEvent(boolean play, ResourceLocation resourceLocation, List<BlockPos> posList, List<Float> volumeList) {
+    public MusicBoxEvent(boolean play, ResourceLocation resourceLocation, List<BlockPos> posList, List<Float> volumeList, boolean stopLast) {
         this.resourceLocation = resourceLocation;
         this.posList = posList;
         this.volumeList = volumeList;
         this.play = play;
+        this.stopLast = stopLast;
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -76,10 +79,16 @@ public class MusicBoxEvent {
         String floatListString = floatListToString(volumeList);
         buffer.writeShort(floatListString.length());
         buffer.writeUtf(floatListString);
+
+        buffer.writeBoolean(stopLast);
     }
 
     public void handle(Supplier<NetworkEvent.Context> context) {
         context.get().enqueueWork(() -> {
+            if (stopLast) {
+                ClientBoxEventHandler.stopSounds(null, posList);
+            }
+
             if (play) {
                 playSounds(resourceLocation, posList, volumeList);
             } else {

@@ -90,7 +90,7 @@ public class MusicBoxesCommand {
             List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
             List<Float> volumeList = musicBoxes.stream().map(MusicBox::getVolume).toList();
 
-            musicController.play(players, new MusicBoxEvent(play, resourceLocation, posList, volumeList));
+            musicController.play(players, new MusicBoxEvent(play, resourceLocation, posList, volumeList, false));
         }
 
         return 1;

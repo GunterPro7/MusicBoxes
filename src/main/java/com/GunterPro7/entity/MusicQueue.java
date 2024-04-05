@@ -40,11 +40,11 @@ public class MusicQueue {
 
     public void play(String track) {
         curTrackIndex = tracks.indexOf(track);
-        controller.play(track, controller.getActiveColors());
+        controller.play(track);
     }
 
     public void pause() {
-        controller.stop(controller.getActiveColors());
+        controller.stop();
     }
 
     public void add(String track) {
@@ -69,6 +69,7 @@ public class MusicQueue {
         tracks.addAll(newQueue.tracks);
         curTrackIndex = newQueue.curTrackIndex;
         this.controller = newQueue.controller;
+        running = newQueue.running;
 
         MusicControllerBlockEntity blockEntity = (MusicControllerBlockEntity) controller.getLevel().getBlockEntity(controller.getPos());
         if (blockEntity != null) {
@@ -137,6 +138,6 @@ public class MusicQueue {
         }
 
         return new MusicQueue(controller, PlayType.valueOf(Integer.parseInt(parts[0])), Integer.parseInt(parts[1]),
-                new ArrayList<>(Arrays.asList(parts[2].split(";"))), Boolean.parseBoolean(parts[3]));
+                new ArrayList<>(Arrays.asList(parts[2].split(";"))), Boolean.parseBoolean(parts[4]));
     }
 }

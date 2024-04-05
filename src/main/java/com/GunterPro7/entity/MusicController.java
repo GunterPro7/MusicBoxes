@@ -17,6 +17,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.*;
 
@@ -121,18 +123,19 @@ public class MusicController {
                     musicBoxes.add(audioCable.getMusicBoxEnd());
                 }
 
-                BlockPos newBlockPos;
+                BlockPos newBlockPos = null;
                 if (!checkedPositions.contains(audioCable.getStartBlock())) {
                     newBlockPos = audioCable.getStartBlock() ;
                 } else {
-                    if (checkedPositions.contains(audioCable.getEndBlock())) {
-                        return musicBoxes;
+                    if (!checkedPositions.contains(audioCable.getEndBlock())) {
+                        newBlockPos = audioCable.getEndBlock();
                     }
-                    newBlockPos = audioCable.getEndBlock();
                 }
-                checkedPositions.add(blockPos);
 
-                musicBoxes.addAll(getMusicBoxesByColor(newBlockPos, colors, checkedPositions));
+                checkedPositions.add(blockPos);
+                if (newBlockPos != null) {
+                    musicBoxes.addAll(getMusicBoxesByColor(newBlockPos, colors, checkedPositions));
+                }
             }
         }
 
@@ -214,12 +217,14 @@ public class MusicController {
         players.forEach(player -> ServerMusicBoxListener.sendToClient(player, clientMusicBoxManager));
     }
 
-    protected void play(String track, List<Integer> colors) {
-        MiscNetworkEvent.sendToServer(new MiscNetworkEvent(-1, MiscAction.MUSIC_CONTROLLER_PLAY, pos.toShortString() + "/" + Utils.intListToString(colors) + "/" + track));
+    @OnlyIn(Dist.CLIENT)
+    protected void play(String track) {
+        MiscNetworkEvent.sendToServer(new MiscNetworkEvent(-1, MiscAction.MUSIC_CONTROLLER_PLAY, pos.toShortString() + "/" + track));
     }
 
-    protected void stop(List<Integer> colors) {
-        MiscNetworkEvent.sendToServer(new MiscNetworkEvent(-1, MiscAction.MUSIC_CONTROLLER_STOP, pos.toShortString() + "/" + Utils.intListToString(colors)));
+    @OnlyIn(Dist.CLIENT)
+    protected void stop() {
+        MiscNetworkEvent.sendToServer(new MiscNetworkEvent(-1, MiscAction.MUSIC_CONTROLLER_STOP, pos.toShortString()));
     }
 
     public MusicQueue getMusicQueue() {

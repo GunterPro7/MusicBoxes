@@ -99,7 +99,7 @@ public class MusicControllerBlockEntity extends BlockEntity {
 
     public void addColors(Set<Integer> colorsConnected) {
         for (int color : colorsConnected) {
-            if (!inactiveColors.contains(color)) {
+            if (!inactiveColors.contains(color) && !activeColors.contains(color)) {
                 inactiveColors.add(color);
             }
         }

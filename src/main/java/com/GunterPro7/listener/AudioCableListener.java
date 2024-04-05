@@ -87,7 +87,7 @@ public class AudioCableListener {
                 List<BlockPos> posList = musicBoxesToDelete.stream().map(MusicBox::getBlockPos).toList();
                 if (posList.size() != 0) {
                     List<Float> volumeList = musicBoxesToDelete.stream().map(MusicBox::getVolume).toList();
-                    event.getLevel().players().forEach(player -> ServerMusicBoxListener.sendToClient((ServerPlayer) player, new MusicBoxEvent(false, null, posList, volumeList)));
+                    event.getLevel().players().forEach(player -> ServerMusicBoxListener.sendToClient((ServerPlayer) player, new MusicBoxEvent(false, null, posList, volumeList, false)));
                 }
             }
         }
