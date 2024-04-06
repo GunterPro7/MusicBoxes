@@ -7,6 +7,7 @@ import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.item.ModItems;
 import com.GunterPro7.listener.*;
 import com.GunterPro7.recipe.ModRecipes;
+import com.GunterPro7.utils.TimeUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
@@ -44,6 +45,7 @@ public class Main {
         MinecraftForge.EVENT_BUS.register(new ServerMusicBoxListener());
         MinecraftForge.EVENT_BUS.register(new ServerMusicControllerListener());
         MinecraftForge.EVENT_BUS.register(new MusicBoxesCommand());
+        MinecraftForge.EVENT_BUS.register(new TimeUtils());
 
         if (!serverSide) {
             MinecraftForge.EVENT_BUS.register(new AudioCableRenderer());

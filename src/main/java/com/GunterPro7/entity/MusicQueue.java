@@ -1,6 +1,7 @@
 package com.GunterPro7.entity;
 
 import com.GunterPro7.block.MusicControllerBlockEntity;
+import com.GunterPro7.utils.TimeUtils;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -8,8 +9,11 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class MusicQueue {
+    private static final Random random = new Random();
+
     private MusicController controller;
     private int curTrackIndex;
     private final List<String> tracks;
@@ -95,6 +99,19 @@ public class MusicQueue {
 
     public boolean switchRunning() {
         return running = !running;
+    }
+
+    public void setLengthUntilAutoUpdate(int ticks) {
+        TimeUtils.addJob(ticks * 50, this::nextSong);
+    }
+
+    private void nextSong() {
+        switch (playType) {
+            case REPEAT -> curTrackIndex = curTrackIndex >= tracks.size() ? 0 : curTrackIndex + 1;
+            case RANDOM -> curTrackIndex = random.nextInt(tracks.size());
+        }
+
+        play();
     }
 
     public enum PlayType {

@@ -14,9 +14,7 @@ import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.DyeColor;
-import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -209,6 +207,10 @@ public class MusicControllerScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
+        updateToServer();
+    }
+
+    public void updateToServer() {
         if (musicController != null) {
             MiscNetworkEvent.sendToServer(-1, MiscAction.MUSIC_CONTROLLER_INNER_UPDATE, musicController + "/" +
                     Utils.integerBooleanListToString(colors) + "/" + musicController.getMusicQueue().isRunning());
