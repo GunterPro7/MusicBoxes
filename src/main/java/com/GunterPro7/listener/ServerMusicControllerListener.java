@@ -1,50 +1,34 @@
 package com.GunterPro7.listener;
 
 import com.GunterPro7.FileManager;
+import com.GunterPro7.Main;
 import com.GunterPro7.block.ModBlocks;
 import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.entity.MusicController;
-import com.GunterPro7.utils.MapUtils;
+import com.GunterPro7.utils.ClientUtils;
+import com.GunterPro7.utils.McUtils;
+import com.GunterPro7.utils.SoundUtils;
 import com.GunterPro7.utils.Utils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.RecordItem;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 public class ServerMusicControllerListener {
-    private final Map<String, RecordItem> MUSIC_DISCS = MapUtils.of(
-            "minecraft:music_disc.5", Items.MUSIC_DISC_5,
-            "minecraft:music_disc.11", Items.MUSIC_DISC_11,
-            "minecraft:music_disc.13", Items.MUSIC_DISC_13,
-            "minecraft:music_disc.blocks", Items.MUSIC_DISC_BLOCKS,
-            "minecraft:music_disc.cat", Items.MUSIC_DISC_CAT,
-            "minecraft:music_disc.chirp", Items.MUSIC_DISC_CHIRP,
-            "minecraft:music_disc.far", Items.MUSIC_DISC_FAR,
-            "minecraft:music_disc.mall", Items.MUSIC_DISC_MALL,
-            "minecraft:music_disc.mellohi", Items.MUSIC_DISC_MELLOHI,
-            "minecraft:music_disc.otherside", Items.MUSIC_DISC_OTHERSIDE,
-            "minecraft:music_disc.pigstep", Items.MUSIC_DISC_PIGSTEP,
-            "minecraft:music_disc.relic", Items.MUSIC_DISC_RELIC,
-            "minecraft:music_disc.stal", Items.MUSIC_DISC_STAL,
-            "minecraft:music_disc.strad", Items.MUSIC_DISC_STRAD,
-            "minecraft:music_disc.wait", Items.MUSIC_DISC_WAIT,
-            "minecraft:music_disc.ward", Items.MUSIC_DISC_WARD
-    );
 
     @SubscribeEvent
     public void blockPlace(BlockEvent.EntityPlaceEvent event) throws IOException {
         if (event.getPlacedBlock().is(ModBlocks.MUSIC_CONTROLLER_BLOCK.get())) {
-            FileManager.Controller.add(event.getPos());
             if (event.getEntity() == null) {
                 event.setCanceled(true);
                 return;
@@ -57,8 +41,6 @@ public class ServerMusicControllerListener {
     public void blockBreak(BlockEvent.BreakEvent event) throws IOException {
         if (event.getState().is(ModBlocks.MUSIC_BOX_BLOCK.get())) {
             BlockPos pos = event.getPos();
-
-            FileManager.Controller.remove(pos);
 
             MusicController.musicControllers.remove(new MusicController(event.getPlayer().level(), pos));
 
@@ -106,23 +88,39 @@ public class ServerMusicControllerListener {
             String[] data = Utils.split(event.getData(), "/");
             MusicController controller = MusicController.getController(event.getPlayer().level(), Utils.blockPosOf(data[0]));
 
-            if (controller != null) {
-                List<MusicBox> musicBoxes = controller.getMusicBoxesByColor(controller.getActiveColors()).stream().filter(MusicBox::isActive).toList();
-                List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
-                List<Float> volumeList = musicBoxes.stream().map(MusicBox::getVolume).toList();
+            sendMusicRequestToClient(controller, data.length > 1 ? new ResourceLocation(data[1]) : null, action == MiscAction.MUSIC_CONTROLLER_PLAY, true);
+        }
+    }
 
-                ResourceLocation location = data.length > 1 ? new ResourceLocation(data[1]) : null;
+    public static void sendMusicRequestToClient(MusicController controller, ResourceLocation location, boolean play, boolean autoUpdate) {
+        if (controller != null) {
+            List<MusicBox> musicBoxes = controller.getMusicBoxesByColor(controller.getActiveColors()).stream().filter(MusicBox::isActive).toList();
+            List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
+            List<Float> volumeList = musicBoxes.stream().map(MusicBox::getVolume).toList();
 
-                MusicBoxEvent musicBoxEvent = new MusicBoxEvent(action == MiscAction.MUSIC_CONTROLLER_PLAY, location, posList, volumeList, true);
+            MusicBoxEvent musicBoxEvent = new MusicBoxEvent(play, location, posList, volumeList, true);
 
-                if (action == MiscAction.MUSIC_CONTROLLER_PLAY && location != null) {
-                    int length = (location.getNamespace().equals("minecraft") ? MUSIC_DISCS.get("minecraft:" + location.getPath()).getLengthInTicks() : 0);
+            if (play && location != null && autoUpdate) {
+                if (McUtils.MUSIC_DISCS.containsKey("minecraft:" + location.getPath())) {
+                    int length = (location.getNamespace().equals("minecraft") ? McUtils.MUSIC_DISCS.get("minecraft:" + location.getPath()).getLengthInTicks() : 0);
+                    controller.getMusicQueue().setLengthUntilAutoUpdate(length + 25);
 
-                    controller.getMusicQueue().setLengthUntilAutoUpdate(length + 25); // TODO check if this works
+                } else if (location.toString().startsWith("musicboxes:custom")) {
+                    //try {
+                        //int ticks = SoundUtils.getAudioTickLength(McUtils.getInputStreamOfLocation(SoundUtils.location).open());
+                        //ClientUtils.sendPrivateChatMessage(ticks + " ticks "); // TODO check if this works
+                        int ticks = 2000;
+                    //} catch (IOException e) {
+                    //    e.printStackTrace();
+                    //}
+
+                } else {
+                    Main.LOGGER.info("Song from client '" + location + "' not found!");
+                    return;
                 }
-
-                ((ServerLevel) event.getPlayer().level()).players().forEach(player -> ServerMusicBoxListener.sendToClient(player, musicBoxEvent));
             }
+
+            ((ServerLevel) controller.getLevel()).players().forEach(player -> ServerMusicBoxListener.sendToClient(player, musicBoxEvent));
         }
     }
 }

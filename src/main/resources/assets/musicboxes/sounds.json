@@ -1,9 +1,18 @@
 {
-  "test_music": {
+  "custom2": {
     "sounds": [
-        {
-          "name": "musicboxes:TODO"
-        }
+      {
+        "name": "sounds/custom1",
+        "stream": true
+      }
+    ]
+  },
+  "custom1": {
+    "sounds": [
+      {
+        "name": "sounds/custom2",
+        "stream": true
+      }
     ]
   }
 }

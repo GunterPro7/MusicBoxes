@@ -25,7 +25,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.*;
 
 public class MusicController {
-    public static final List<MusicController> musicControllers = new ArrayList<>(); // TODO instead of writing it into external files, save it into the basic minecraft file
+    public static final List<MusicController> musicControllers = new ArrayList<>();
     private final BlockPos pos;
     private final MusicQueue musicQueue;
     private final Level level;

@@ -1,15 +1,12 @@
 package com.GunterPro7.listener;
 
-import com.GunterPro7.Main;
 import com.GunterPro7.block.ModBlocks;
 import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
-import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.ui.MusicBoxScreen;
 import com.GunterPro7.ui.MusicControllerScreen;
 import com.GunterPro7.utils.ClientUtils;
-import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -45,12 +42,12 @@ public class ClientMusicBoxListener {
     public void clientReceiveEvent(MiscNetworkEvent.ClientReceivedEvent event) {
         MiscAction action = event.getAction();
         if (Minecraft.getInstance().screen instanceof MusicBoxScreen screen) {
-            if (action == MiscAction.MUSIC_BOX_GET && screen.id == event.getId()) {
+            if (action == MiscAction.MUSIC_BOX_GET && screen.interactionId == event.getId()) {
                 String[] data = event.getData().split("/");
                 float volume = Float.parseFloat(data[0]);
                 boolean active = Boolean.parseBoolean(data[1]);
 
-                screen.updateInformation(volume, active);
+                screen.updateInformation(event.getId(), volume, active);
             }
         } else if (Minecraft.getInstance().screen instanceof MusicControllerScreen screen) {
             if (action == MiscAction.MUSIC_CONTROLLER_GET) {

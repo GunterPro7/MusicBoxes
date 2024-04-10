@@ -4,7 +4,12 @@ import com.GunterPro7.entity.AudioCable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
 
@@ -131,5 +136,16 @@ public class Utils {
         }
 
         return ints;
+    }
+
+    public static int getTrackLengthInTicks(InputStream inputStream) throws UnsupportedAudioFileException, IOException {
+        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(inputStream);
+
+        // Get the AudioFileFormat from the AudioInputStream
+        AudioFileFormat fileFormat = AudioSystem.getAudioFileFormat(audioInputStream);
+
+        // Get the duration of the audio file in seconds
+        float durationInSeconds = fileFormat.getFrameLength() / fileFormat.getFormat().getFrameRate();
+        return (int) (durationInSeconds * 20);
     }
 }

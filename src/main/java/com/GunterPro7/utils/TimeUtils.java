@@ -4,9 +4,10 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TimeUtils {
-    public static final Map<Long, List<Runnable>> TIME_JOB_MAP = new HashMap<>();
+    public static final Map<Long, List<Runnable>> TIME_JOB_MAP = new ConcurrentHashMap<>();
 
     public static void addJob(int duration, Runnable runnable) {
         addJob(System.currentTimeMillis() + duration, runnable);

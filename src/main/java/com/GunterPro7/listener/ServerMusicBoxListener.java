@@ -16,17 +16,17 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class ServerMusicBoxListener {
     private static final Random random = new Random();
+    private static final Map<ServerPlayer, Long> playersInMusicBoxScreen = new HashMap<>();
 
     public ServerMusicBoxListener() {
 
@@ -91,6 +91,11 @@ public class ServerMusicBoxListener {
     //}
 
     @SubscribeEvent
+    public void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
+        playersInMusicBoxScreen.remove((ServerPlayer) event.getEntity());
+    }
+
+    @SubscribeEvent
     public void onServerReceive(MiscNetworkEvent.ServerReceivedEvent event) throws IOException {
         String[] data = event.getData().split("/");
         MiscAction action = event.getAction();
@@ -102,6 +107,7 @@ public class ServerMusicBoxListener {
 
                 if (musicBox != null) {
                     event.reply(musicBox.getVolume() + "/" + musicBox.isActive());
+                    playersInMusicBoxScreen.put(event.getPlayer(), event.getId());
                 }
             }
         } else if (action == MiscAction.MUSIC_BOX_INNER_UPDATE) {
@@ -111,10 +117,17 @@ public class ServerMusicBoxListener {
                 if (musicBox != null) {
                     musicBox.setVolume(Float.parseFloat(data[1]));
                     musicBox.setActive(Boolean.parseBoolean(data[2]));
-                    //FileManager.Positions.update(musicBox);
-                }
 
+                    for (Map.Entry<ServerPlayer, Long> player : playersInMusicBoxScreen.entrySet()) {
+                        if (player.getKey() != event.getPlayer()) {
+                            MiscNetworkEvent.sendToClient(player.getKey(), player.getValue(), MiscAction.MUSIC_BOX_GET, musicBox.getVolume() + "/" + musicBox.isActive());
+                        }
+                    }
+
+                }
             }
+        } else if (action == MiscAction.MUSIC_BOX_INNER_EXIT) {
+            playersInMusicBoxScreen.remove(event.getPlayer());
         }
     }
 

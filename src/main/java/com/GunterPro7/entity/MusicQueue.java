@@ -1,11 +1,16 @@
 package com.GunterPro7.entity;
 
 import com.GunterPro7.block.MusicControllerBlockEntity;
+import com.GunterPro7.listener.ServerMusicControllerListener;
+import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.TimeUtils;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.Level;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +24,8 @@ public class MusicQueue {
     private final List<String> tracks;
     private PlayType playType;
     private boolean running;
+
+    private long timeId;
 
     public MusicQueue(MusicController controller) {
         this(controller, PlayType.REPEAT, 0, new ArrayList<>(), false);
@@ -34,6 +41,21 @@ public class MusicQueue {
 
     public String getCurrentTrack() {
         return curTrackIndex < tracks.size() && curTrackIndex >= 0 ? tracks.get(curTrackIndex) : null;
+    }
+
+    public ResourceLocation getLocationOfCurrentTrack() {
+        String curTrack = getCurrentTrack();
+
+        if (curTrack != null) {
+            String mcLocation = "minecraft:music_disc." + curTrack;
+            if (McUtils.MUSIC_DISCS.containsKey(mcLocation)) {
+                return new ResourceLocation(mcLocation);
+            } else {
+                return new ResourceLocation("musicboxes", "sounds/" + curTrack);
+            }
+        }
+
+        return null;
     }
 
     public void play() {
@@ -102,7 +124,14 @@ public class MusicQueue {
     }
 
     public void setLengthUntilAutoUpdate(int ticks) {
-        TimeUtils.addJob(ticks * 50, this::nextSong);
+        long id = Utils.getRandomId();
+        this.timeId = id;
+
+        TimeUtils.addJob(ticks * 50, () -> {
+            if (id == timeId && isRunning()) {
+                nextSong();
+            }
+        });
     }
 
     private void nextSong() {
@@ -111,7 +140,7 @@ public class MusicQueue {
             case RANDOM -> curTrackIndex = random.nextInt(tracks.size());
         }
 
-        play();
+        ServerMusicControllerListener.sendMusicRequestToClient(controller, getLocationOfCurrentTrack(), true, true);
     }
 
     public enum PlayType {
@@ -120,6 +149,7 @@ public class MusicQueue {
         REPEAT_TRACK(2),
         ;
 
+        private static final PlayType DEFAULT = PlayType.REPEAT;
         private final int id;
         PlayType(int id) {
             this.id = id;
@@ -131,7 +161,7 @@ public class MusicQueue {
                     return playType;
                 }
             }
-            return null;
+            return PlayType.DEFAULT;
         }
 
         public int getId() {

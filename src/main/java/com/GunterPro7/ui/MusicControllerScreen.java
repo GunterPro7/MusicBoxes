@@ -69,7 +69,7 @@ public class MusicControllerScreen extends Screen {
             int centerX = (this.width) / 2 - 30;
             int centerY = (this.height) / 2;
 
-            int offsetTop = 50 - scrollOffset; // TODO ⏯◼⏸⏯️
+            int offsetTop = 50 - scrollOffset;
             int index = 0;
 
             MusicQueue musicQueue = musicController.getMusicQueue();
@@ -207,10 +207,10 @@ public class MusicControllerScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
-        updateToServer();
+        updateServer();
     }
 
-    public void updateToServer() {
+    public void updateServer() {
         if (musicController != null) {
             MiscNetworkEvent.sendToServer(-1, MiscAction.MUSIC_CONTROLLER_INNER_UPDATE, musicController + "/" +
                     Utils.integerBooleanListToString(colors) + "/" + musicController.getMusicQueue().isRunning());

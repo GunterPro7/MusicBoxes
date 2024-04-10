@@ -27,7 +27,7 @@ import java.util.Set;
 
 // Server Side
 public class MusicBoxesCommand {
-    private static final Map<String, SoundEvent> discSounds = MapUtils.of(
+    public static final Map<String, SoundEvent> discSounds = MapUtils.of(
             "5", SoundEvents.MUSIC_DISC_5,
             "11", SoundEvents.MUSIC_DISC_11,
             "3", SoundEvents.MUSIC_DISC_13,
