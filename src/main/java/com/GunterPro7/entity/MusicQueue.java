@@ -5,12 +5,8 @@ import com.GunterPro7.listener.ServerMusicControllerListener;
 import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.TimeUtils;
 import com.GunterPro7.utils.Utils;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.RecordItem;
-import net.minecraft.world.level.Level;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +17,7 @@ public class MusicQueue {
 
     private MusicController controller;
     private int curTrackIndex;
-    private final List<String> tracks;
+    private final List<MusicTrack> tracks;
     private PlayType playType;
     private boolean running;
 
@@ -31,7 +27,7 @@ public class MusicQueue {
         this(controller, PlayType.REPEAT, 0, new ArrayList<>(), false);
     }
 
-    public MusicQueue(MusicController controller, PlayType playType, int curTrackIndex, List<String> tracks, boolean running) {
+    public MusicQueue(MusicController controller, PlayType playType, int curTrackIndex, List<MusicTrack> tracks, boolean running) {
         this.controller = controller;
         this.playType = playType;
         this.curTrackIndex = curTrackIndex;
@@ -39,12 +35,12 @@ public class MusicQueue {
         this.running = running;
     }
 
-    public String getCurrentTrack() {
+    public MusicTrack getCurrentTrack() {
         return curTrackIndex < tracks.size() && curTrackIndex >= 0 ? tracks.get(curTrackIndex) : null;
     }
 
     public ResourceLocation getLocationOfCurrentTrack() {
-        String curTrack = getCurrentTrack();
+        String curTrack = getCurrentTrack().getName();
 
         if (curTrack != null) {
             String mcLocation = "minecraft:music_disc." + curTrack;
@@ -64,24 +60,33 @@ public class MusicQueue {
         }
     }
 
-    public void play(String track) {
+    public void play(MusicTrack track) {
         curTrackIndex = tracks.indexOf(track);
         controller.play(track);
+    }
+
+    public MusicTrack getTrackByName(String trackName) {
+        for (MusicTrack track : tracks) {
+            if (track.getName().equals(trackName)) {
+                return track;
+            }
+        }
+        return null;
     }
 
     public void pause() {
         controller.stop();
     }
 
-    public void add(String track) {
+    public void add(MusicTrack track) {
         this.tracks.add(track);
     }
 
-    public void remove(String track) {
+    public void remove(MusicTrack track) {
         this.tracks.remove(track);
     }
 
-    public List<String> tracks() {
+    public List<MusicTrack> tracks() {
         return tracks;
     }
 
@@ -172,7 +177,7 @@ public class MusicQueue {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(playType.id + "/" + curTrackIndex + "/");
-        tracks.forEach(track -> sb.append(track).append(";"));
+        tracks.forEach(track -> sb.append(track).append("?"));
 
         return sb.toString();
     }
@@ -185,6 +190,7 @@ public class MusicQueue {
         }
 
         return new MusicQueue(controller, PlayType.valueOf(Integer.parseInt(parts[0])), Integer.parseInt(parts[1]),
-                new ArrayList<>(Arrays.asList(parts[2].split(";"))), Boolean.parseBoolean(parts[4]));
+                parts[2].isEmpty() ? new ArrayList<>() : new ArrayList<>(Arrays.stream(parts[2].split("\\?"))
+                        .map(e -> MusicTrack.fromString(e)).toList()), Boolean.parseBoolean(parts[4])); // Dont Change e -> MusicTrack.fromString(e), it causes an error? SMH
     }
 }

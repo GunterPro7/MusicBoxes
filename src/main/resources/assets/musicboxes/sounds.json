@@ -2,7 +2,7 @@
   "custom2": {
     "sounds": [
       {
-        "name": "sounds/custom1",
+        "name": "musicboxes:custom2",
         "stream": true
       }
     ]
@@ -10,7 +10,7 @@
   "custom1": {
     "sounds": [
       {
-        "name": "sounds/custom2",
+        "name": "musicboxes:custom1",
         "stream": true
       }
     ]

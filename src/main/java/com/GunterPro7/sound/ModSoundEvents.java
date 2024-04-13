@@ -12,6 +12,7 @@ import net.minecraftforge.registries.RegistryObject;
 public class ModSoundEvents {
     public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, "musicboxes");
     public static final RegistryObject<SoundEvent> CUSTOM1 = SOUNDS.register("custom2", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("musicboxes", "custom2")));
+    public static final RegistryObject<SoundEvent> CUSTOM2 = SOUNDS.register("custom1", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("musicboxes", "custom1")));
 
     public static void register(IEventBus bus) {
         SOUNDS.register(bus);

@@ -220,7 +220,7 @@ public class MusicController {
     }
 
     @OnlyIn(Dist.CLIENT)
-    protected void play(String track) {
+    protected void play(MusicTrack track) {
         MiscNetworkEvent.sendToServer(new MiscNetworkEvent(-1, MiscAction.MUSIC_CONTROLLER_PLAY, pos.toShortString() + "/" + track));
     }
 

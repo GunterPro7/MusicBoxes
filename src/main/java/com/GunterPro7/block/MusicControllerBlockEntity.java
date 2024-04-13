@@ -2,6 +2,7 @@ package com.GunterPro7.block;
 
 import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.entity.MusicQueue;
+import com.GunterPro7.entity.MusicTrack;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -15,7 +16,7 @@ public class MusicControllerBlockEntity extends BlockEntity {
     private final List<Integer> activeColors = new ArrayList<>();
     private final List<Integer> inactiveColors = new ArrayList<>();
 
-    private List<String> tracks = new ArrayList<>();
+    private List<MusicTrack> tracks = new ArrayList<>();
     private MusicQueue.PlayType playType;
     private int curPlayIndex;
     private boolean running;
@@ -43,7 +44,16 @@ public class MusicControllerBlockEntity extends BlockEntity {
             inactiveColors.add(i);
         }
 
-        tracks = new ArrayList<>(List.of(tag.getString("tracks").split(";")));
+        String[] trackNames = tag.getString("tracks").split(";");
+        String[] isMc = tag.getString("tracks_mc").split(";");
+        String[] trackSize = tag.getString("tracks_length").split(";");
+
+        tracks = new ArrayList<>();
+        for (int i = 0; i < trackNames.length; i++) {
+            tracks.add(new MusicTrack(trackNames[i], Boolean.parseBoolean(isMc[i]), Integer.parseInt(trackSize[i])));
+        }
+
+
         playType = MusicQueue.PlayType.valueOf(tag.getByte("playType"));
         curPlayIndex = tag.getInt("playIndex");
         running = tag.getBoolean("running");
@@ -55,7 +65,9 @@ public class MusicControllerBlockEntity extends BlockEntity {
         tag.putIntArray("active_colors", activeColors);
         tag.putIntArray("inactive_colors", inactiveColors);
 
-        tag.putString("tracks", Utils.listToShortString(tracks));
+        tag.putString("tracks", Utils.listToShortString(tracks.stream().map(MusicTrack::getName).toList()));
+        tag.putString("tracks_mc", Utils.listToShortString(tracks.stream().map(MusicTrack::isCustomSound).toList()));
+        tag.putString("tracks_length", Utils.listToShortString(tracks.stream().map(MusicTrack::getLengthInSec).toList()));
         tag.putInt("playIndex", curPlayIndex);
         tag.putByte("playType", (byte) playType.getId());
         tag.putBoolean("running", running);

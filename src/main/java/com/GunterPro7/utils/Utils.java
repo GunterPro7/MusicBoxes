@@ -101,7 +101,7 @@ public class Utils {
         return sb.toString();
     }
 
-    public static String listToShortString(List<String> tracks) {
+    public static <T> String listToShortString(List<T> tracks) {
         StringBuilder sb = new StringBuilder();
         tracks.forEach(track -> sb.append(track).append(";"));
         return sb.substring(0, sb.length() > 0 ? sb.length() - 1 : sb.length());
@@ -111,6 +111,16 @@ public class Utils {
         StringBuilder sb = new StringBuilder();
         colors.forEach(color -> sb.append(color).append(";"));
 
+        return sb.toString();
+    }
+
+    public static String removeNonNumberChars(String value) {
+        StringBuilder sb = new StringBuilder();
+        for (char c : value.toCharArray()) {
+            if (c >= 48 && c <= 57) {
+                sb.append(c);
+            }
+        }
         return sb.toString();
     }
 

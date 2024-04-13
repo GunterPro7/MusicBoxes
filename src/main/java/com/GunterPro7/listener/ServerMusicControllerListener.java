@@ -8,6 +8,7 @@ import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.entity.MusicController;
+import com.GunterPro7.entity.MusicTrack;
 import com.GunterPro7.utils.ClientUtils;
 import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.SoundUtils;
@@ -88,7 +89,7 @@ public class ServerMusicControllerListener {
             String[] data = Utils.split(event.getData(), "/");
             MusicController controller = MusicController.getController(event.getPlayer().level(), Utils.blockPosOf(data[0]));
 
-            sendMusicRequestToClient(controller, data.length > 1 ? new ResourceLocation(data[1]) : null, action == MiscAction.MUSIC_CONTROLLER_PLAY, true);
+            sendMusicRequestToClient(controller, data.length > 1 ? MusicTrack.fromString(data[1]).getLocation() : null, action == MiscAction.MUSIC_CONTROLLER_PLAY, true);
         }
     }
 
@@ -101,23 +102,7 @@ public class ServerMusicControllerListener {
             MusicBoxEvent musicBoxEvent = new MusicBoxEvent(play, location, posList, volumeList, true);
 
             if (play && location != null && autoUpdate) {
-                if (McUtils.MUSIC_DISCS.containsKey("minecraft:" + location.getPath())) {
-                    int length = (location.getNamespace().equals("minecraft") ? McUtils.MUSIC_DISCS.get("minecraft:" + location.getPath()).getLengthInTicks() : 0);
-                    controller.getMusicQueue().setLengthUntilAutoUpdate(length + 25);
 
-                } else if (location.toString().startsWith("musicboxes:custom")) {
-                    //try {
-                        //int ticks = SoundUtils.getAudioTickLength(McUtils.getInputStreamOfLocation(SoundUtils.location).open());
-                        //ClientUtils.sendPrivateChatMessage(ticks + " ticks "); // TODO check if this works
-                        int ticks = 2000;
-                    //} catch (IOException e) {
-                    //    e.printStackTrace();
-                    //}
-
-                } else {
-                    Main.LOGGER.info("Song from client '" + location + "' not found!");
-                    return;
-                }
             }
 
             ((ServerLevel) controller.getLevel()).players().forEach(player -> ServerMusicBoxListener.sendToClient(player, musicBoxEvent));
