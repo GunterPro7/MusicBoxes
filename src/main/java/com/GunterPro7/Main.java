@@ -67,11 +67,6 @@ public class Main {
         loadConfigs();
     }
 
-    public static MinecraftServer getServer() {
-        return Main.minecraftServer != null ? Main.minecraftServer :
-                Minecraft.getInstance().hasSingleplayerServer() ? Minecraft.getInstance().getSingleplayerServer() : null;
-    }
-
     private void loadConfigs() {
         //ServerMusicBoxListener.musicBoxes.addAll(FileManager.Positions.getAll());
         //FileManager.Controller.getAll().forEach(pos -> MusicController.musicControllers.add(new MusicController(pos)));

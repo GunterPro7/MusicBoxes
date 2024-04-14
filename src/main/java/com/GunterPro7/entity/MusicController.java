@@ -244,6 +244,10 @@ public class MusicController {
         return this.musicQueue;
     }
 
+    public MusicController clone() {
+        return new MusicController(level, new BlockPos(pos.getX(), pos.getY(), pos.getZ()), musicQueue.clone());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -265,7 +269,7 @@ public class MusicController {
     public static MusicController fromString(Level level, String data) {
         String[] parts = Utils.split(data, "/");
 
-        MusicController controller = new MusicController(level, Utils.blockPosOf(parts[0])); // TODO stopped here
+        MusicController controller = MusicController.getController(level, Utils.blockPosOf(parts[0]));
         controller.getMusicQueue().update(controller, MusicQueue.fromString(controller, String.join("/", Arrays.copyOfRange(parts, 1, parts.length))));
 
         return controller;

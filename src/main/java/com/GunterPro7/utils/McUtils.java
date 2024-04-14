@@ -89,7 +89,7 @@ public class McUtils {
     }
 
     public static Resource getInputStreamOfLocation(ResourceLocation location) {
-        MinecraftServer server = Main.getServer();
+        MinecraftServer server = null;
 
         if (server != null) {
             ResourceManager manager = server.getResourceManager();

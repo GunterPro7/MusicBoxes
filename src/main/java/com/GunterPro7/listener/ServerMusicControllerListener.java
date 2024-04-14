@@ -79,7 +79,7 @@ public class ServerMusicControllerListener {
             MusicController controller = MusicController.getController(event.getPlayer().level(), pos);
 
             if (controller != null) {
-                MusicController destController = MusicController.fromString(event.getPlayer().level(), event.getData());
+                MusicController destController = MusicController.fromString(event.getPlayer().level(), event.getData()).clone();
                 controller.update(destController);
 
                 if (data.length > 4) {

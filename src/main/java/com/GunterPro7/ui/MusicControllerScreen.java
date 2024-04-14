@@ -119,7 +119,7 @@ public class MusicControllerScreen extends Screen {
             widgets.add(runningButton);
 
             MusicTrack curTrack = musicQueue.getCurrentTrack();
-            Button button = new Button.Builder(Component.literal(curTrack != null ? curTrack.getClientName() : "None"), thisButton -> {
+            Button button = new Button.Builder(Component.literal(curTrack != null ? curTrack.getName() : "None"), thisButton -> {
 
                 MusicTrack track = musicQueue.getTrackByName(thisButton.getMessage().getString());
                 if (track != null) {
@@ -171,7 +171,7 @@ public class MusicControllerScreen extends Screen {
                     thisButton.setMessage(Component.literal(track.switchCustomSound() ? "custom" : "MC"));
                 }).bounds(centerX + 20, offsetTop, 35, 20).build();
 
-                Button buttonPlay = new Button.Builder(Component.literal(track.getClientName()), thisButton -> {
+                Button buttonPlay = new Button.Builder(Component.literal(track.getName()), thisButton -> {
                     musicQueue.setRunning(true);
                     musicController.getMusicQueue().play(track);
                     rebuildWidgets();

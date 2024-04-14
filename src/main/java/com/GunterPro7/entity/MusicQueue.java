@@ -94,7 +94,7 @@ public class MusicQueue {
         this.controller = newQueue.controller;
         running = newQueue.running;
 
-        MusicControllerBlockEntity blockEntity = (MusicControllerBlockEntity) controller.getLevel().getBlockEntity(controller.getPos());
+        MusicControllerBlockEntity blockEntity = (MusicControllerBlockEntity) controller.getLevel().getExistingBlockEntity(controller.getPos());
         if (blockEntity != null) {
             blockEntity.update(this);
         }
@@ -144,8 +144,6 @@ public class MusicQueue {
         }
 
         MusicTrack track = getCurrentTrack();
-
-        setLengthUntilAutoUpdate(track.getLengthInTicks() + 25);
         ServerMusicControllerListener.sendMusicRequestToClient(controller, track, true);
     }
 
@@ -173,6 +171,10 @@ public class MusicQueue {
         public int getId() {
             return this.id;
         }
+    }
+
+    public MusicQueue clone() {
+        return new MusicQueue(controller, playType, curTrackIndex, new ArrayList<>(tracks), running);
     }
 
     @Override

@@ -14,12 +14,6 @@ public class MusicTrack {
         this.lengthInSec = lengthInSec;
     }
 
-    public MusicTrack(String clientName, boolean customSound, int lengthInSec, boolean clientNameVariant) {
-        this.name = clientName; // TODO HERE
-        this.customSound = customSound;
-        this.lengthInSec = lengthInSec;
-    }
-
     public String getName() {
         return name;
     }
@@ -64,9 +58,5 @@ public class MusicTrack {
     public static MusicTrack fromString(String string) {
         String[] parts = string.split(";");
         return new MusicTrack(parts[0], Boolean.parseBoolean(parts[1]), Integer.parseInt(parts[2]));
-    }
-
-    public String getClientName() {
-        return name; // TODO return name writen in .TRACK_NAMES or some file like that not sure rn
     }
 }
