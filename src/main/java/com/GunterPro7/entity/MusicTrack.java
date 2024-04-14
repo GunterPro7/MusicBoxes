@@ -3,13 +3,19 @@ package com.GunterPro7.entity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 
-public class MusicTrack { // TODO think of the .TRACK_NAMES file, maybe we could combine it if customSound is set to "true" ?
+public class MusicTrack {
     private String name;
     private boolean customSound;
     private int lengthInSec;
 
     public MusicTrack(String name, boolean customSound, int lengthInSec) {
         this.name = name;
+        this.customSound = customSound;
+        this.lengthInSec = lengthInSec;
+    }
+
+    public MusicTrack(String clientName, boolean customSound, int lengthInSec, boolean clientNameVariant) {
+        this.name = clientName; // TODO HERE
         this.customSound = customSound;
         this.lengthInSec = lengthInSec;
     }
@@ -34,6 +40,10 @@ public class MusicTrack { // TODO think of the .TRACK_NAMES file, maybe we could
         return lengthInSec;
     }
 
+    public int getLengthInTicks() {
+        return lengthInSec * 20;
+    }
+
     public void setLengthInSec(int lengthInSec) {
         this.lengthInSec = lengthInSec;
     }
@@ -54,5 +64,9 @@ public class MusicTrack { // TODO think of the .TRACK_NAMES file, maybe we could
     public static MusicTrack fromString(String string) {
         String[] parts = string.split(";");
         return new MusicTrack(parts[0], Boolean.parseBoolean(parts[1]), Integer.parseInt(parts[2]));
+    }
+
+    public String getClientName() {
+        return name; // TODO return name writen in .TRACK_NAMES or some file like that not sure rn
     }
 }

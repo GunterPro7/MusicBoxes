@@ -62,7 +62,7 @@ public class AudioCableRenderer {
             String[] parts = event.getData().split("/");
             for (String part : parts) {
                 AudioCable audioCable = AudioCable.fromString(part);
-                audioCables.remove(audioCable); // TODO test if there are no errors when creating an AudioCable
+                audioCables.remove(audioCable);
             }
         } else if (event.getAction() == MiscAction.AUDIO_CABLE_NEW) {
             AudioCable audioCable = AudioCable.fromString(event.getData());
@@ -72,7 +72,7 @@ public class AudioCableRenderer {
             String[] parts = event.getData().split("/");
             for (String part : parts) {
                 AudioCable audioCable = AudioCable.fromString(part);
-                audioCables.add(audioCable); // TODO test if there are no errors when creating an AudioCable
+                audioCables.add(audioCable);
             }
         }
     }

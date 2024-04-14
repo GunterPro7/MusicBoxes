@@ -1,22 +1,24 @@
 package com.GunterPro7.utils;
 
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class TimeUtils {
-    public static final Map<Long, List<Runnable>> TIME_JOB_MAP = new ConcurrentHashMap<>();
+    public static final Map<Long, List<TimeTask>> TIME_JOB_MAP = new ConcurrentHashMap<>();
 
-    public static void addJob(int duration, Runnable runnable) {
-        addJob(System.currentTimeMillis() + duration, runnable);
+    public static void addJob(long id, int duration, Consumer<Long> runnable) {
+        addJob(id, System.currentTimeMillis() + duration, runnable);
     }
 
-    public static void addJob(long time, Runnable runnable) {
-        List<Runnable> runnables = TIME_JOB_MAP.containsKey(time) ? TIME_JOB_MAP.get(time) : new ArrayList<>();
-        runnables.add(runnable);
-
+    public static void addJob(long id, long time, Consumer<Long> runnable) {
+        List<TimeTask> runnables = TIME_JOB_MAP.containsKey(time) ? TIME_JOB_MAP.get(time) : new ArrayList<>();
+        runnables.add(new TimeTask(id, runnable));
         TIME_JOB_MAP.put(time, runnables);
     }
 
@@ -24,9 +26,11 @@ public class TimeUtils {
         List<Long> toDelete = new ArrayList<>();
         for (long time : TIME_JOB_MAP.keySet()) {
             if (System.currentTimeMillis() >= time) {
-                List<Runnable> runnables = TIME_JOB_MAP.get(time);
-                runnables.forEach(Runnable::run);
-                toDelete.add(time);
+                List<TimeTask> runnables = TIME_JOB_MAP.get(time);
+                if (runnables != null) {
+                    runnables.forEach(TimeTask::run);
+                    toDelete.add(time);
+                }
             }
         }
 
@@ -38,8 +42,8 @@ public class TimeUtils {
         checkJobs();
     }
 
-    @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event) {
-        checkJobs();
-    }
+    //@SubscribeEvent
+    //public void onTick(TickEvent.ClientTickEvent event) { // TODO we also need a ClientTickEvent here, what should we do?
+    //    checkJobs();                                      // TODO so the tasks are not run twice or something.
+    //}
 }

@@ -1,18 +1,4 @@
 {
-  "custom2": {
-    "sounds": [
-      {
-        "name": "musicboxes:custom2",
-        "stream": true
-      }
-    ]
-  },
-  "custom1": {
-    "sounds": [
-      {
-        "name": "musicboxes:custom1",
-        "stream": true
-      }
-    ]
-  }
+  "custom1": {},
+  "custom2": {}
 }

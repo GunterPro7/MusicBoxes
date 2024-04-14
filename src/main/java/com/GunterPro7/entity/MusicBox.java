@@ -13,7 +13,7 @@ public class MusicBox {
     private final BlockPos blockPos;
     private final Level level;
     private AudioCable audioCable;
-    private boolean powered; // TODO bei dem MusicBox interface menü beim Inner update wenn man den ton verstellt oder disabled, dann neues paket verschicken  ; )
+    private boolean powered;
 
     public MusicBox(BlockPos blockPos, Level level) {
         if (!(level instanceof ServerLevel)) {

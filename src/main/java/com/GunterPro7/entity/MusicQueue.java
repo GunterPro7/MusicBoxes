@@ -6,11 +6,14 @@ import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.TimeUtils;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class MusicQueue {
     private static final Random random = new Random();
@@ -22,6 +25,7 @@ public class MusicQueue {
     private boolean running;
 
     private long timeId;
+    private AtomicLong songIntId = new AtomicLong(0);
 
     public MusicQueue(MusicController controller) {
         this(controller, PlayType.REPEAT, 0, new ArrayList<>(), false);
@@ -39,30 +43,22 @@ public class MusicQueue {
         return curTrackIndex < tracks.size() && curTrackIndex >= 0 ? tracks.get(curTrackIndex) : null;
     }
 
-    public ResourceLocation getLocationOfCurrentTrack() {
-        String curTrack = getCurrentTrack().getName();
-
-        if (curTrack != null) {
-            String mcLocation = "minecraft:music_disc." + curTrack;
-            if (McUtils.MUSIC_DISCS.containsKey(mcLocation)) {
-                return new ResourceLocation(mcLocation);
-            } else {
-                return new ResourceLocation("musicboxes", "sounds/" + curTrack);
-            }
-        }
-
-        return null;
-    }
-
+    @OnlyIn(Dist.CLIENT)
     public void play() {
         if (curTrackIndex < tracks.size()) {
             this.play(tracks.get(curTrackIndex));
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     public void play(MusicTrack track) {
         curTrackIndex = tracks.indexOf(track);
         controller.play(track);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public void pause() {
+        controller.stop();
     }
 
     public MusicTrack getTrackByName(String trackName) {
@@ -72,10 +68,6 @@ public class MusicQueue {
             }
         }
         return null;
-    }
-
-    public void pause() {
-        controller.stop();
     }
 
     public void add(MusicTrack track) {
@@ -129,23 +121,32 @@ public class MusicQueue {
     }
 
     public void setLengthUntilAutoUpdate(int ticks) {
-        long id = Utils.getRandomId();
-        this.timeId = id;
+        long curId = Utils.getRandomId();
+        this.timeId = curId;
 
-        TimeUtils.addJob(ticks * 50, () -> {
-            if (id == timeId && isRunning()) {
+        AtomicLong interactionId = new AtomicLong(this.songIntId.get());
+
+        TimeUtils.addJob(curId, ticks * 50, id -> {
+            if (id == timeId && isRunning() && interactionId.get() == this.songIntId.get()) {
                 nextSong();
             }
         });
     }
 
+    public void newSongIntId() {
+        this.songIntId.set(Utils.getRandomId());
+    }
+
     private void nextSong() {
         switch (playType) {
-            case REPEAT -> curTrackIndex = curTrackIndex >= tracks.size() ? 0 : curTrackIndex + 1;
+            case REPEAT -> curTrackIndex = curTrackIndex + 1 >= tracks.size() ? 0 : curTrackIndex + 1;
             case RANDOM -> curTrackIndex = random.nextInt(tracks.size());
         }
 
-        ServerMusicControllerListener.sendMusicRequestToClient(controller, getLocationOfCurrentTrack(), true, true);
+        MusicTrack track = getCurrentTrack();
+
+        setLengthUntilAutoUpdate(track.getLengthInTicks() + 25);
+        ServerMusicControllerListener.sendMusicRequestToClient(controller, track, true);
     }
 
     public enum PlayType {

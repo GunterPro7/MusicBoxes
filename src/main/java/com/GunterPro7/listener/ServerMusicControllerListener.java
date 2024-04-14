@@ -14,6 +14,7 @@ import com.GunterPro7.utils.McUtils;
 import com.GunterPro7.utils.SoundUtils;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -72,7 +73,7 @@ public class ServerMusicControllerListener {
 
                 event.reply(controller + "/" + sb + "/" + controller.getMusicQueue().isRunning());
             }
-        } else if (action == MiscAction.MUSIC_CONTROLLER_INNER_UPDATE) { // TODO beim zerstören einer music box hört die musik nicht auf zu spielen
+        } else if (action == MiscAction.MUSIC_CONTROLLER_INNER_UPDATE) {
             String[] data = event.getData().split("/");
             BlockPos pos = Utils.blockPosOf(data[0]);
             MusicController controller = MusicController.getController(event.getPlayer().level(), pos);
@@ -89,23 +90,31 @@ public class ServerMusicControllerListener {
             String[] data = Utils.split(event.getData(), "/");
             MusicController controller = MusicController.getController(event.getPlayer().level(), Utils.blockPosOf(data[0]));
 
-            sendMusicRequestToClient(controller, data.length > 1 ? MusicTrack.fromString(data[1]).getLocation() : null, action == MiscAction.MUSIC_CONTROLLER_PLAY, true);
+            if (controller != null) {
+                controller.getMusicQueue().newSongIntId();
+
+                sendMusicRequestToClient(controller, data.length > 1 ? MusicTrack.fromString(data[1]) : null, action == MiscAction.MUSIC_CONTROLLER_PLAY);
+            }
         }
     }
 
-    public static void sendMusicRequestToClient(MusicController controller, ResourceLocation location, boolean play, boolean autoUpdate) {
-        if (controller != null) {
+    public static void sendMusicRequestToClient(MusicController controller, MusicTrack musicTrack, boolean play) {
+        if (controller != null && !(play && (musicTrack == null || musicTrack.getLocation() == null))) {
             List<MusicBox> musicBoxes = controller.getMusicBoxesByColor(controller.getActiveColors()).stream().filter(MusicBox::isActive).toList();
             List<BlockPos> posList = musicBoxes.stream().map(MusicBox::getBlockPos).toList();
             List<Float> volumeList = musicBoxes.stream().map(MusicBox::getVolume).toList();
 
-            MusicBoxEvent musicBoxEvent = new MusicBoxEvent(play, location, posList, volumeList, true);
+            ResourceLocation location = musicTrack != null ? musicTrack.getLocation() : null;
 
-            if (play && location != null && autoUpdate) {
-
+            if (play) {
+                controller.getMusicQueue().setLengthUntilAutoUpdate(musicTrack.getLengthInTicks() + 25);
             }
 
-            ((ServerLevel) controller.getLevel()).players().forEach(player -> ServerMusicBoxListener.sendToClient(player, musicBoxEvent));
+            MusicBoxEvent musicBoxEvent = new MusicBoxEvent(play, location, posList, volumeList, true);
+
+            if (controller.getLevel() instanceof ServerLevel serverLevel) {
+                serverLevel.players().forEach(player -> ServerMusicBoxListener.sendToClient(player, musicBoxEvent));
+            }
         }
     }
 }

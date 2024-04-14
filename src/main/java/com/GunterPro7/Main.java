@@ -61,8 +61,6 @@ public class Main {
             MinecraftForge.EVENT_BUS.register(new ServerLoader());
         }
 
-        ResourceLocation loc = SoundUtils.location;
-
         MusicBoxEvent.INSTANCE.registerMessage(0, MusicBoxEvent.class, MusicBoxEvent::encode, MusicBoxEvent::new, MusicBoxEvent::handle);
         MiscNetworkEvent.INSTANCE.registerMessage(0, MiscNetworkEvent.class, MiscNetworkEvent::encode, MiscNetworkEvent::new, MiscNetworkEvent::handle);
 

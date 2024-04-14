@@ -10,6 +10,7 @@ import com.GunterPro7.listener.ServerMusicBoxListener;
 import com.GunterPro7.ui.MusicControllerScreen;
 import com.GunterPro7.utils.Utils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -43,6 +44,20 @@ public class MusicController {
         this.musicQueue = queue;
     }
 
+    public static MusicController getController(Level level, BlockPos pos) {
+        return musicControllers.stream().filter(e -> e.getPos().equals(pos)).findAny().orElseGet(() -> {
+            if (level.getBlockState(pos).is(ModBlocks.MUSIC_CONTROLLER_BLOCK.get())) {
+                MusicController controller = new MusicController(level, pos);
+                if (level instanceof ServerLevel) {
+                    musicControllers.add(controller);
+                }
+
+                return controller;
+            } else {
+                return null;
+            }});
+    }
+
     public BlockPos getPos() {
         return pos;
     }
@@ -64,8 +79,8 @@ public class MusicController {
         return colorsConnected;
     }
 
-    public Map<Integer, Boolean> getColorInfos() { // TODO das von der config vom block lesen
-        MusicControllerBlockEntity blockEntity = (MusicControllerBlockEntity) level.getBlockEntity(pos);
+    public Map<Integer, Boolean> getColorInfos() {
+        MusicControllerBlockEntity blockEntity = (MusicControllerBlockEntity) level.getExistingBlockEntity(pos);
         if (blockEntity != null) {
             Map<Integer, Boolean> colorInfos = blockEntity.getColorInfos();
             Set<Integer> colorsConnected = getColorsConnected();
@@ -186,10 +201,6 @@ public class MusicController {
         return null;
     }
 
-    public static MusicController getController(Level level, BlockPos pos) {
-        return level.getBlockState(pos).is(ModBlocks.MUSIC_CONTROLLER_BLOCK.get()) ? new MusicController(level, pos): null;
-    }
-
     public void update(MusicController controller) {
         MusicQueue newQueue = controller.getMusicQueue();
         this.musicQueue.update(this, newQueue);
@@ -254,7 +265,7 @@ public class MusicController {
     public static MusicController fromString(Level level, String data) {
         String[] parts = Utils.split(data, "/");
 
-        MusicController controller = new MusicController(level, Utils.blockPosOf(parts[0]));
+        MusicController controller = new MusicController(level, Utils.blockPosOf(parts[0])); // TODO stopped here
         controller.getMusicQueue().update(controller, MusicQueue.fromString(controller, String.join("/", Arrays.copyOfRange(parts, 1, parts.length))));
 
         return controller;

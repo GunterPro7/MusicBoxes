@@ -64,7 +64,7 @@ public class ClientUtils {
 
     @OnlyIn(Dist.CLIENT)
     public static boolean gameLoaded() {
-        return Minecraft.getInstance().player != null; // TODO this is not true server side
+        return Minecraft.getInstance().player != null;
     }
 
     @OnlyIn(Dist.CLIENT)

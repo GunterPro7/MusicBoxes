@@ -43,7 +43,7 @@ public class AudioCableListener {
     }
 
     @SubscribeEvent
-    public void onPlayerBreakBlock(BlockEvent.BreakEvent event) throws IOException { // TODO is this call client side?
+    public void onPlayerBreakBlock(BlockEvent.BreakEvent event) throws IOException {
         BlockPos pos = event.getPos();
         List<AudioCable> audioCableList = new ArrayList<>();
 
@@ -76,7 +76,7 @@ public class AudioCableListener {
             MusicController musicController = MusicController.getMusicControllerByMusicBox(event.getPlayer().level(), new MusicBox(event.getPos(), event.getPlayer().level()));
 
             if (musicController != null) {
-                Set<MusicBox> musicBoxesBefore = musicController.getMusicBoxesByColor(-1); // TODO How should I do that with the colors?
+                Set<MusicBox> musicBoxesBefore = musicController.getMusicBoxesByColor(-1);
 
                 audioCables.removeAll(audioCableList);
                 audioCablesRemoved = true;

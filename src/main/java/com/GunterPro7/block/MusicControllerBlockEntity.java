@@ -32,7 +32,7 @@ public class MusicControllerBlockEntity extends BlockEntity {
         activeColors.clear();
         inactiveColors.clear();
 
-        if (!tag.contains("active_colors")) { // Todo we should check all tbh
+        if (!tag.contains("running")) {
             return;
         }
         int[] arr = tag.getIntArray("active_colors");
@@ -69,7 +69,7 @@ public class MusicControllerBlockEntity extends BlockEntity {
         tag.putString("tracks_mc", Utils.listToShortString(tracks.stream().map(MusicTrack::isCustomSound).toList()));
         tag.putString("tracks_length", Utils.listToShortString(tracks.stream().map(MusicTrack::getLengthInSec).toList()));
         tag.putInt("playIndex", curPlayIndex);
-        tag.putByte("playType", (byte) playType.getId());
+        tag.putByte("playType", playType != null ? (byte) playType.getId() : 0);
         tag.putBoolean("running", running);
     }
 

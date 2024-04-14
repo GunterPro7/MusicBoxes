@@ -11,7 +11,6 @@ import java.nio.file.Path;
 
 public class SoundUtils {
     private static final String path = "libraries/MusicBox/";
-    public static final ResourceLocation location = new ResourceLocation("musicboxes", "custom1");
 
     public static int getAudioTickLength(InputStream stream) {
         int sec = readAudioFileLength(stream);
