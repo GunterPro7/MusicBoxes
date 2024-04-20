@@ -1,5 +1,6 @@
 package com.GunterPro7.utils;
 
+import com.GunterPro7.Main;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -42,8 +43,10 @@ public class TimeUtils {
         checkJobs();
     }
 
-    //@SubscribeEvent
-    //public void onTick(TickEvent.ClientTickEvent event) { // TODO we also need a ClientTickEvent here, what should we do?
-    //    checkJobs();                                      // TODO so the tasks are not run twice or something.
-    //}
+    @SubscribeEvent
+    public void onTick(TickEvent.ClientTickEvent event) {
+        if (Main.minecraftServer != null && !Minecraft.getInstance().hasSingleplayerServer()) {
+            checkJobs();
+        }
+    }
 }

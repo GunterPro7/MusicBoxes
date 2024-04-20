@@ -70,21 +70,20 @@ public class MusicControllerScreen extends Screen {
     public void init() {
         super.init();
         if (musicController != null) {
-            int centerX = (this.width) / 2 - 30;
-            int centerY = (this.height) / 2;
+            int centerX = (this.width) / 2;
 
             int offsetTop = 50 - scrollOffset;
-            int index = 0;
+            int index = 1;
 
             MusicQueue musicQueue = musicController.getMusicQueue();
 
 
             for (Map.Entry<Integer, Boolean> colorInfo : colors.entrySet()) {
                 int color = colorInfo.getKey();
-                EditBox editBox = new EditBox(this.font, centerX + 20, offsetTop, 100, 20, Component.literal(""));
+                EditBox editBox = new EditBox(this.font, centerX - 27, offsetTop, 100, 20, Component.literal(""));
                 editBox.setValue(ColorNameDetector.getColorName(color) + " Output");
 
-                StringWidget string = new StringWidget(centerX - editBox.getWidth() / 20 + 10, offsetTop + (20 - this.font.lineHeight) / 2 + 1,
+                StringWidget string = new StringWidget(centerX - 42, offsetTop + (20 - this.font.lineHeight) / 2 + 1,
                         10, 10, Component.literal(index++ + ":").setStyle(Style.EMPTY.withColor(color).withBold(true)), this.font);
 
                 Button button = new Button.Builder(colorInfo.getValue() ?
@@ -96,7 +95,7 @@ public class MusicControllerScreen extends Screen {
                             thisButton.setMessage(enabled ? Component.literal("✓").setStyle(Style.EMPTY.withColor(DyeColor.LIME.getTextColor())) :
                                     Component.literal("x").setStyle(Style.EMPTY.withColor(DyeColor.RED.getTextColor())));
                         })
-                        .bounds(centerX - editBox.getWidth() / 20 - 20, offsetTop, 20, 20).build();
+                        .bounds(centerX - 70, offsetTop, 20, 20).build();
 
                 widgets.add(button);
                 widgets.add(string);
@@ -115,7 +114,7 @@ public class MusicControllerScreen extends Screen {
                     musicQueue.pause();
                     thisButton.setMessage(Component.literal("⏯"));
                 }
-            }).bounds(centerX - 5, offsetTop, 20, 20).build();
+            }).bounds(centerX - 70, offsetTop, 20, 20).build();
             widgets.add(runningButton);
 
             MusicTrack curTrack = musicQueue.getCurrentTrack();
@@ -128,7 +127,7 @@ public class MusicControllerScreen extends Screen {
                     rebuildWidgets();
                 }
 
-            }).bounds(centerX + 20, offsetTop, 100, 20).build();
+            }).bounds(centerX - 45, offsetTop, 100, 20).build();
             widgets.add(button);
 
             offsetTop += 25;
@@ -137,19 +136,19 @@ public class MusicControllerScreen extends Screen {
                     .setStyle(Style.EMPTY.withBold(musicQueue.getPlayType() == MusicQueue.PlayType.REPEAT)), thisButton -> {
                 musicController.getMusicQueue().setPlayType(MusicQueue.PlayType.REPEAT);
                 switchMusicTypeBold(thisButton, musicTypes);
-            }).bounds(centerX, offsetTop, 20, 20).build();
+            }).bounds(centerX - 35, offsetTop, 20, 20).build();
 
             Button repeat_track = new Button.Builder(Component.literal("\uD83D\uDD02")
                     .setStyle(Style.EMPTY.withBold(musicQueue.getPlayType() == MusicQueue.PlayType.REPEAT_TRACK)), thisButton -> {
                 musicController.getMusicQueue().setPlayType(MusicQueue.PlayType.REPEAT_TRACK);
                 switchMusicTypeBold(thisButton, musicTypes);
-            }).bounds(centerX + 25, offsetTop, 20, 20).build();
+            }).bounds(centerX - 10, offsetTop, 20, 20).build();
 
             Button random = new Button.Builder(Component.literal("\uD83D\uDD00")
                     .setStyle(Style.EMPTY.withBold(musicQueue.getPlayType() == MusicQueue.PlayType.RANDOM)), thisButton -> {
                 musicController.getMusicQueue().setPlayType(MusicQueue.PlayType.RANDOM);
                 switchMusicTypeBold(thisButton, musicTypes);
-            }).bounds(centerX + 50, offsetTop, 20, 20).build();
+            }).bounds(centerX + 15, offsetTop, 20, 20).build();
 
             musicTypes.add(repeat);
             musicTypes.add(repeat_track);
@@ -165,19 +164,19 @@ public class MusicControllerScreen extends Screen {
                 Button buttonDelete = new Button.Builder(Component.literal("\uD83D\uDDD1"), thisButton -> {
                     musicController.getMusicQueue().remove(track);
                     rebuildWidgets();
-                }).bounds(centerX - 5, offsetTop, 20, 20).build();
+                }).bounds(centerX - 110, offsetTop, 20, 20).build();
 
                 Button buttonSource = new Button.Builder(Component.literal(track.isCustomSound() ? "custom" : "MC"), thisButton -> {
                     thisButton.setMessage(Component.literal(track.switchCustomSound() ? "custom" : "MC"));
-                }).bounds(centerX + 20, offsetTop, 35, 20).build();
+                }).bounds(centerX - 85, offsetTop, 35, 20).build();
 
                 Button buttonPlay = new Button.Builder(Component.literal(track.getName()), thisButton -> {
                     musicQueue.setRunning(true);
                     musicController.getMusicQueue().play(track);
                     rebuildWidgets();
-                }).bounds(centerX + 60, offsetTop, 100, 20).build();
+                }).bounds(centerX - 45, offsetTop, 100, 20).build();
 
-                EditBox setTime = new EditBox(this.font, centerX + 165, offsetTop, 50, 20, Component.literal(""));
+                EditBox setTime = new EditBox(this.font, centerX + 60, offsetTop, 50, 20, Component.literal(""));
                 setTime.setValue(String.valueOf(track.getLengthInSec()));
 
 
@@ -192,11 +191,11 @@ public class MusicControllerScreen extends Screen {
             }
 
 
-            EditBox newTrackEditBox = new EditBox(this.font, centerX + 60, offsetTop, 100, 20, Component.literal(""));
-            EditBox newTrackTimeEditBox = new EditBox(this.font, centerX + 165, offsetTop, 50, 20, Component.literal(""));
+            EditBox newTrackEditBox = new EditBox(this.font, centerX - 45, offsetTop, 100, 20, Component.literal(""));
+            EditBox newTrackTimeEditBox = new EditBox(this.font, centerX + 60, offsetTop, 50, 20, Component.literal(""));
             Button buttonAddSource = new Button.Builder(Component.literal("MC"), thisButton -> {
                 thisButton.setMessage(Component.literal(thisButton.getMessage().getString().equals("MC") ? "custom" : "MC"));
-            }).bounds(centerX + 20, offsetTop, 35, 20).build();
+            }).bounds(centerX - 85, offsetTop, 35, 20).build();
 
             Button buttonAdd = new Button.Builder(Component.literal("+"), thisButton -> {
                 musicController.getMusicQueue().add(new MusicTrack(newTrackEditBox.getValue(),
@@ -204,7 +203,7 @@ public class MusicControllerScreen extends Screen {
                         Integer.parseInt(Utils.removeNonNumberChars(newTrackTimeEditBox.getValue()))));
                 newTrackEditBox.setValue("");
                 rebuildWidgets();
-            }).bounds(centerX - 5, offsetTop, 20, 20).build();
+            }).bounds(centerX - 110, offsetTop, 20, 20).build();
 
             widgets.add(buttonAdd);
             widgets.add(buttonAddSource);
