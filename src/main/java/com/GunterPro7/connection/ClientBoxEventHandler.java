@@ -1,5 +1,6 @@
 package com.GunterPro7.connection;
 
+import com.GunterPro7.Main;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -38,6 +39,28 @@ public class ClientBoxEventHandler {
                     soundManager.stop(soundInstance);
                 }
             }
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void playSounds(ResourceLocation resourceLocation, List<BlockPos> blockPosList, List<Float> volumeList) {
+        ClientBoxEventHandler.removeInactiveSounds();
+
+        SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
+
+        for (int i = 0; i < blockPosList.size(); i++) {
+            BlockPos pos = blockPosList.get(i);
+            float volume = volumeList.get(i);
+
+
+            double v;
+            try {
+                v = Double.parseDouble(Main.fileManager.valueByKeyAndName("config.txt", "musicBoxLoudness"));
+            } catch (NumberFormatException e) {
+                v = 25;
+            }
+
+            playSound(soundEvent, pos, (float) (volume / 75 * v / 25));
         }
     }
 

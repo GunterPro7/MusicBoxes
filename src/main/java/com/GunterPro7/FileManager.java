@@ -31,6 +31,43 @@ public class FileManager {
         return new RandomAccessFile(file, "rw");
     }
 
+    public BufferedReader readerByKey(String key) throws IOException {
+        File file = new File(path + key);
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        return new BufferedReader(new FileReader(file));
+    }
+
+    public BufferedWriter writerByKey(String key) throws IOException {
+        File file = new File(path + key);
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        return new BufferedWriter(new FileWriter(file));
+    }
+
+    public String valueByKeyAndName(String key, String name) {
+        try (BufferedReader reader = readerByKey(key)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(": ");
+
+                if (parts.length > 1) {
+                    if (parts[0].equals(name)) {
+                        return parts[1];
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public boolean existsByKey(String key) {
         return new File(path + key).exists();
     }

@@ -18,6 +18,9 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.world.item.DyeColor;
+import net.minecraftforge.client.event.MovementInputUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

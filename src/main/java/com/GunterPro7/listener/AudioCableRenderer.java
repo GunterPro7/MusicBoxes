@@ -1,5 +1,6 @@
 package com.GunterPro7.listener;
 
+import com.GunterPro7.Main;
 import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.entity.AudioCable;
@@ -16,12 +17,14 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.*;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11C;
@@ -116,6 +119,7 @@ public class AudioCableRenderer {
 
     @SubscribeEvent
     public void renderLines(RenderLevelStageEvent event) {
+        if (!Boolean.parseBoolean(Main.fileManager.valueByKeyAndName("config.txt", "musicCableVisibility"))) return;
         if (Minecraft.getInstance().player == null) return;
         if (vertexBuffer == null) vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 

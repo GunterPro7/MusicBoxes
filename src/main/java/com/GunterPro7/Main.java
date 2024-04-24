@@ -1,6 +1,7 @@
 package com.GunterPro7;
 
 import com.GunterPro7.block.ModBlocks;
+import com.GunterPro7.client.ClientCommandManager;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.connection.MusicBoxEvent;
 import com.GunterPro7.item.ModItems;
@@ -29,7 +30,10 @@ import org.apache.logging.log4j.Logger;
 public class Main {
     public static final String MODID = "musicboxes";
     public static final Logger LOGGER = LogManager.getLogger();
-    public static Random random = new Random();
+
+    public static final Random random = new Random();
+    public static final FileManager fileManager = new FileManager();
+
     @Nullable
     public static MinecraftServer minecraftServer;
     public static boolean serverSide;
@@ -57,6 +61,7 @@ public class Main {
         if (!serverSide) {
             MinecraftForge.EVENT_BUS.register(new AudioCableRenderer());
             MinecraftForge.EVENT_BUS.register(new ClientMusicBoxListener());
+            MinecraftForge.EVENT_BUS.register(new ClientCommandManager());
         } else {
             MinecraftForge.EVENT_BUS.register(new ServerLoader());
         }

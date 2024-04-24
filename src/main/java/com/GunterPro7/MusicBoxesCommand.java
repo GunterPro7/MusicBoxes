@@ -3,6 +3,7 @@ package com.GunterPro7;
 import com.GunterPro7.entity.MusicBox;
 import com.GunterPro7.entity.MusicController;
 import com.GunterPro7.connection.MusicBoxEvent;
+import com.GunterPro7.ui.MusicBoxesConfigScreen;
 import com.GunterPro7.utils.MapUtils;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -16,14 +17,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.item.DyeColor;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 // Server Side
 public class MusicBoxesCommand {
@@ -48,7 +47,7 @@ public class MusicBoxesCommand {
 
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("musicBox")
+        event.getDispatcher().register(Commands.literal("music_boxes")
                 .then(Commands.literal("controller")
                         .then(Commands.argument("x", IntegerArgumentType.integer())
                                 .then(Commands.argument("y", IntegerArgumentType.integer())
@@ -98,6 +97,16 @@ public class MusicBoxesCommand {
 
     private static int helpCommand(CommandContext<CommandSourceStack> context) {
         String[] args = context.getInput().split(" ");
+
+        ServerPlayer player = context.getSource().getPlayer();
+        if (player != null) {
+            player.sendSystemMessage(Component.literal("""
+                    §e§lMusicBoxes Help Page: (1/1)
+                    -> §6§lversion§r - Displays the version
+                    -> §6§lcontroller§r - Plays / Stops a running sound
+                    """));
+        }
+
 
         return 1;
     }

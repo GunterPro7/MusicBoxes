@@ -90,29 +90,13 @@ public class MusicBoxEvent {
             }
 
             if (play) {
-                playSounds(resourceLocation, posList, volumeList);
+                ClientBoxEventHandler.playSounds(resourceLocation, posList, volumeList);
             } else {
                 ClientBoxEventHandler.stopSounds(resourceLocation, posList);
             }
         });
         context.get().setPacketHandled(true);
     }
-
-    @OnlyIn(Dist.CLIENT)
-    public void playSounds(ResourceLocation resourceLocation, List<BlockPos> blockPosList, List<Float> volumeList) {
-        ClientBoxEventHandler.removeInactiveSounds();
-
-        SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
-
-        for (int i = 0; i < blockPosList.size(); i++) {
-            BlockPos pos = blockPosList.get(i);
-            float volume = volumeList.get(i);
-
-            ClientBoxEventHandler.playSound(soundEvent, pos, volume / 75);
-        }
-    }
-
-
 
     public BlockPos parsePosString(String posString) {
         String[] parts = posString.split(",");
