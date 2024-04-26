@@ -32,6 +32,7 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11C;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,7 +128,7 @@ public class AudioCableRenderer {
     }
 
     @SubscribeEvent
-    public void renderLines(RenderLevelStageEvent event) {
+    public void renderLines(RenderLevelStageEvent event) throws IOException {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) return;
 
         if (Minecraft.getInstance().player == null || Main.fileManager.valueByKeyAndName("config.txt", "musicCableVisibility").equals("Off")) return;
@@ -140,8 +141,17 @@ public class AudioCableRenderer {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
 
+        double range;
+        try {
+            range = Double.parseDouble(Main.fileManager.valueByKeyAndName("config.txt", "musicCableRenderDistance"));
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            Main.fileManager.setValueByKeyAndName("config.txt", "musicCableRenderDistance", "32");
+            range = 32d;
+        }
+
         for (AudioCable audioCable : audioCables) {
-            if (audioCable.isInRange(Minecraft.getInstance().player.position(), 32d)) {
+            if (audioCable.isInRange(Minecraft.getInstance().player.position(), range)) {
                 renderLine(audioCable, view, buffer, event);
             }
 

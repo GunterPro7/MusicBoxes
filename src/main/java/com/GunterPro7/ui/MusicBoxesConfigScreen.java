@@ -21,9 +21,11 @@ public class MusicBoxesConfigScreen extends Screen {
     private static final String fileKey = "config.txt";
 
     private double lastBoxLoudness = 25d;
+    private double lastCableRenderDistance = 16;
 
     private ForgeSlider boxLoudnessSlider;
     private Button cableVisibilityButton;
+    private ForgeSlider cableRenderDistance;
 
     private MusicBoxesConfigScreen() {
         super(Component.literal("Music Boxes Config"));
@@ -53,13 +55,18 @@ public class MusicBoxesConfigScreen extends Screen {
         }).bounds(centerX + 10, 175, 100, 20).build();
         addRenderableWidget(cableVisibilityButton);
 
+        addRenderableWidget(new StringWidget(centerX - 120, 200, 110, 20, Component.literal("Music Cable Render Distance:"), this.font));
+        cableRenderDistance = new ForgeSlider(centerX + 10, 200, 100, 20, Component.literal(""), Component.literal(" Blocks"), 16, 256, 32, 1, -1, true);
+        addRenderableWidget(cableRenderDistance);
+
         readFromFile();
     }
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        if (boxLoudnessSlider.getValue() != lastBoxLoudness) {
+        if (boxLoudnessSlider.getValue() != lastBoxLoudness || cableRenderDistance.getValue() != lastCableRenderDistance) {
             lastBoxLoudness = boxLoudnessSlider.getValue();
+            lastCableRenderDistance = cableRenderDistance.getValue();
             saveToFile();
         }
 
@@ -75,22 +82,29 @@ public class MusicBoxesConfigScreen extends Screen {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(": ");
                 if (parts.length > 1) {
+                    double v;
                     switch (parts[0]) {
-                        case "musicBoxLoudness":
-                            double v;
+                        case "musicBoxLoudness" -> {
                             try {
                                 v = Double.parseDouble(parts[1]);
                             } catch (NumberFormatException e) {
                                 e.printStackTrace();
                                 v = 25;
                             }
-
                             boxLoudnessSlider.setValue(v);
                             lastBoxLoudness = v;
-                            break;
-                        case "musicCableVisibility":
-                            cableVisibilityButton.setMessage(Component.literal(parts[1]));
-                            break;
+                        }
+                        case "musicCableVisibility" -> cableVisibilityButton.setMessage(Component.literal(parts[1]));
+                        case "musicCableRenderDistance" -> {
+                            try {
+                                v = Double.parseDouble(parts[1]);
+                            } catch (NumberFormatException e) {
+                                e.printStackTrace();
+                                v = 32;
+                            }
+                            cableRenderDistance.setValue(v);
+                            lastCableRenderDistance = v;
+                        }
                     }
                 }
             }
@@ -103,7 +117,8 @@ public class MusicBoxesConfigScreen extends Screen {
         if (boxLoudnessSlider != null && cableVisibilityButton != null) {
             try (BufferedWriter writer = Main.fileManager.writerByKey(fileKey)) {
                 writer.write("musicBoxLoudness: " + boxLoudnessSlider.getValue() + "\n");
-                writer.write("musicCableVisibility: " + cableVisibilityButton.getMessage().getString());
+                writer.write("musicCableVisibility: " + cableVisibilityButton.getMessage().getString() + "\n");
+                writer.write("musicCableRenderDistance: " + cableRenderDistance.getValue() + "\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }

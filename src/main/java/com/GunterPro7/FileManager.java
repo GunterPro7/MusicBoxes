@@ -49,6 +49,19 @@ public class FileManager {
         return new BufferedWriter(new FileWriter(file));
     }
 
+    public List<String> readFile(String key) throws IOException {
+        List<String> lines = new ArrayList<>();
+
+        try (BufferedReader reader = readerByKey(key)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        }
+
+        return lines;
+    }
+
     public String valueByKeyAndName(String key, String name) {
         try (BufferedReader reader = readerByKey(key)) {
             String line;
@@ -65,7 +78,30 @@ public class FileManager {
             e.printStackTrace();
         }
 
-        return null;
+        return "";
+    }
+
+    public void setValueByKeyAndName(String key, String name, String value) throws IOException {
+        List<String> lines = readFile(key);
+
+        boolean foundKey = false;
+        try (BufferedWriter writer = writerByKey(key)) {
+            for (String line : lines) {
+                if (!foundKey && line.split(": ")[0].equals(name)) {
+                    line = name + ": " + value;
+                    foundKey = true;
+                }
+
+                writer.write(line + "\n");
+            }
+
+            if (!foundKey) {
+                writer.write(name + ": " + value + "\n");
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean existsByKey(String key) {
