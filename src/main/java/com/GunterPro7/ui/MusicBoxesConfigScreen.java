@@ -3,6 +3,7 @@ package com.GunterPro7.ui;
 import com.GunterPro7.Main;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -20,10 +21,9 @@ public class MusicBoxesConfigScreen extends Screen {
     private static final String fileKey = "config.txt";
 
     private double lastBoxLoudness = 25d;
-    private boolean lastCableVisibility = true;
 
     private ForgeSlider boxLoudnessSlider;
-    private Checkbox cableVisibilityCheckbox;
+    private Button cableVisibilityButton;
 
     private MusicBoxesConfigScreen() {
         super(Component.literal("Music Boxes Config"));
@@ -42,17 +42,24 @@ public class MusicBoxesConfigScreen extends Screen {
         addRenderableWidget(boxLoudnessSlider);
 
         addRenderableWidget(new StringWidget(centerX - 90, 175, 80, 20, Component.literal("Music Cables Visible:"), this.font));
-        cableVisibilityCheckbox = new Checkbox(centerX + 10, 175, 20, 20, Component.literal(""), true, false);
-        addRenderableWidget(cableVisibilityCheckbox);
+        cableVisibilityButton = new Button.Builder(Component.literal("Off"), thisButton -> {
+            switch (thisButton.getMessage().getString()) {
+                case "Off" -> thisButton.setMessage(Component.literal("Fast"));
+                case "Fast" -> thisButton.setMessage(Component.literal("Fancy"));
+                default -> thisButton.setMessage(Component.literal("Off"));
+            }
+
+            saveToFile();
+        }).bounds(centerX + 10, 175, 100, 20).build();
+        addRenderableWidget(cableVisibilityButton);
 
         readFromFile();
     }
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        if (boxLoudnessSlider.getValue() != lastBoxLoudness || cableVisibilityCheckbox.selected() != lastCableVisibility) {
+        if (boxLoudnessSlider.getValue() != lastBoxLoudness) {
             lastBoxLoudness = boxLoudnessSlider.getValue();
-            lastCableVisibility = cableVisibilityCheckbox.selected();
             saveToFile();
         }
 
@@ -82,11 +89,7 @@ public class MusicBoxesConfigScreen extends Screen {
                             lastBoxLoudness = v;
                             break;
                         case "musicCableVisibility":
-                            boolean b = Boolean.parseBoolean(parts[1]);
-                            if (!cableVisibilityCheckbox.selected() && b || !b && cableVisibilityCheckbox.selected()) {
-                                cableVisibilityCheckbox.onPress();
-                            }
-                            lastCableVisibility = b;
+                            cableVisibilityButton.setMessage(Component.literal(parts[1]));
                             break;
                     }
                 }
@@ -97,10 +100,10 @@ public class MusicBoxesConfigScreen extends Screen {
     }
 
     private void saveToFile() {
-        if (boxLoudnessSlider != null && cableVisibilityCheckbox != null) {
+        if (boxLoudnessSlider != null && cableVisibilityButton != null) {
             try (BufferedWriter writer = Main.fileManager.writerByKey(fileKey)) {
                 writer.write("musicBoxLoudness: " + boxLoudnessSlider.getValue() + "\n");
-                writer.write("musicCableVisibility: " + cableVisibilityCheckbox.selected());
+                writer.write("musicCableVisibility: " + cableVisibilityButton.getMessage().getString());
             } catch (IOException e) {
                 e.printStackTrace();
             }

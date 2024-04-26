@@ -124,6 +124,14 @@ public class Utils {
         return sb.toString();
     }
 
+    public static float[] toDarkerColor(float[] rgb) {
+        float[] darkerRgb = new float[3];
+        for (int i = 0; i < 3; i++) {
+            darkerRgb[i] = Math.max(rgb[i] - 40 / 255.0f, 0);
+        }
+        return darkerRgb;
+    }
+
 
     public <T> List<T> getStaticFields(Class<T> class_) {
         return null;

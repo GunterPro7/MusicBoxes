@@ -1,6 +1,7 @@
 package com.GunterPro7;
 
 import com.GunterPro7.block.ModBlocks;
+import com.GunterPro7.client.AudioCableRenderer;
 import com.GunterPro7.client.ClientCommandManager;
 import com.GunterPro7.connection.MiscNetworkEvent;
 import com.GunterPro7.connection.MusicBoxEvent;
@@ -8,10 +9,8 @@ import com.GunterPro7.item.ModItems;
 import com.GunterPro7.listener.*;
 import com.GunterPro7.recipe.ModRecipes;
 import com.GunterPro7.sound.ModSoundEvents;
-import com.GunterPro7.utils.SoundUtils;
 import com.GunterPro7.utils.TimeUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartedEvent;

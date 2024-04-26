@@ -1,5 +1,6 @@
-package com.GunterPro7.listener;
+package com.GunterPro7.client;
 
+import com.GunterPro7.FileManager;
 import com.GunterPro7.Main;
 import com.GunterPro7.connection.MiscAction;
 import com.GunterPro7.connection.MiscNetworkEvent;
@@ -16,17 +17,18 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11C;
 
 import javax.annotation.Nullable;
@@ -46,11 +48,18 @@ public class AudioCableRenderer {
     private BlockPos preferredBlockPos;
 
     private static VertexBuffer vertexBuffer;
+    private static VertexBuffer inline;
 
-    //@SubscribeEvent
-    //public void registerItemColors(RegisterColorHandlersEvent.Item event) {
-    //    event.register((item, tintIndex) -> tintIndex == 0 ? ((MusicCableItem) item.getItem()).getColor(item) : 0xFFFFFF, ModItems.MUSIC_CABLE_ITEM.get());
-    //}
+    private static final VertexFormat.Mode inlineMode = VertexFormat.Mode.QUADS;
+    private static final VertexFormat.Mode outLineMode = VertexFormat.Mode.DEBUG_LINES;
+
+    private static final double ls = 0.015625d;
+    private static final double[][] dirs = {
+            {-ls, +ls, -ls}, {-ls, -ls, -ls}, {-ls, -ls, -ls}, {-ls, +ls, -ls},
+            {+ls, +ls, +ls}, {+ls, -ls, +ls}, {+ls, -ls, +ls}, {+ls, +ls, +ls},
+            {+ls, +ls, +ls}, {-ls, +ls, -ls}, {-ls, +ls, -ls}, {+ls, +ls, +ls},
+            {+ls, -ls, +ls}, {-ls, -ls, -ls}, {-ls, -ls, -ls}, {+ls, -ls, +ls},
+    };
 
     @SubscribeEvent
     public void onServerMessage(MiscNetworkEvent.ClientReceivedEvent event) {
@@ -119,9 +128,12 @@ public class AudioCableRenderer {
 
     @SubscribeEvent
     public void renderLines(RenderLevelStageEvent event) {
-        if (!Boolean.parseBoolean(Main.fileManager.valueByKeyAndName("config.txt", "musicCableVisibility"))) return;
-        if (Minecraft.getInstance().player == null) return;
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) return;
+
+        if (Minecraft.getInstance().player == null || Main.fileManager.valueByKeyAndName("config.txt", "musicCableVisibility").equals("Off")) return;
+
         if (vertexBuffer == null) vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+        if (inline == null) inline = new VertexBuffer(VertexBuffer.Usage.STATIC);
 
         Vec3 view = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 
@@ -130,7 +142,7 @@ public class AudioCableRenderer {
 
         for (AudioCable audioCable : audioCables) {
             if (audioCable.isInRange(Minecraft.getInstance().player.position(), 32d)) {
-                renderLine(audioCable, view, buffer, event, VertexFormat.Mode.DEBUG_LINES);
+                renderLine(audioCable, view, buffer, event);
             }
 
         }
@@ -147,7 +159,7 @@ public class AudioCableRenderer {
                     BlockPos blockPos = ((BlockHitResult) hitResult).getBlockPos();
                     if (Minecraft.getInstance().level != null && !Minecraft.getInstance().level.getBlockState(blockPos).is(Blocks.AIR)) {
                         if (pos1.closerThan(hitResult.getLocation(), 32d)) {
-                            renderLine(pos1, hitResult.getLocation(), rgb, view, buffer, vertexBuffer, event, VertexFormat.Mode.DEBUG_LINE_STRIP);
+                            renderLine(pos1, hitResult.getLocation(), rgb, view, buffer, vertexBuffer, event);
                         }
                     }
                 }
@@ -156,33 +168,71 @@ public class AudioCableRenderer {
     }
 
 
-    private void renderLine(AudioCable audioCable, Vec3 view, BufferBuilder buffer, RenderLevelStageEvent event, VertexFormat.Mode mode) {
-        renderLine(audioCable.getStartPos(), audioCable.getEndPos(), audioCable.getRGB(), view, buffer, vertexBuffer, event, mode);
+    private void renderLine(AudioCable audioCable, Vec3 view, BufferBuilder buffer, RenderLevelStageEvent event) {
+        renderLine(audioCable.getStartPos(), audioCable.getEndPos(), audioCable.getRGB(), view, buffer, vertexBuffer, event);
     }
 
-    private void renderLine(Vec3 pos1, Vec3 pos2, float[] rgb, Vec3 view, BufferBuilder buffer, VertexBuffer vertexBuffer, RenderLevelStageEvent event, VertexFormat.Mode mode) {
+    private void renderLine(Vec3 pos1, Vec3 pos2, float[] rgb, Vec3 view, BufferBuilder bufferBuilder, VertexBuffer vertexBuffer, RenderLevelStageEvent event) {
         if (vertexBuffer != null) {
-            buffer.begin(mode, DefaultVertexFormat.POSITION_COLOR);
-            buffer.vertex(pos1.x(), pos1.y(), pos1.z()).color(rgb[0], rgb[1], rgb[2], 1f).endVertex();
-            buffer.vertex(pos2.x(), pos2.y(), pos2.z()).color(rgb[0], rgb[1], rgb[2], 1f).endVertex();
-            vertexBuffer.bind();
-            vertexBuffer.upload(buffer.end());
+            if (Main.fileManager.valueByKeyAndName("config.txt", "musicCableVisibility").equals("Fancy")) {
+                bufferBuilder.begin(inlineMode, DefaultVertexFormat.POSITION_COLOR);
 
-            PoseStack matrix = event.getPoseStack();
-            matrix.pushPose();
-            matrix.translate(-view.x, -view.y, -view.z);
-            ShaderInstance shader = GameRenderer.getPositionColorShader();
+                for (int i = 0; i < dirs.length; i += 4) {
+                    drawSquare(bufferBuilder, pos1, pos2, rgb, i);
+                    drawSquare(bufferBuilder, pos2, pos1, rgb, i);
+                }
 
-            if (shader != null) {
-                RenderSystem.enableDepthTest();
-                RenderSystem.depthFunc(GL11C.GL_LEQUAL);
-                vertexBuffer.drawWithShader(matrix.last().pose(), event.getProjectionMatrix(), shader);
-                RenderSystem.disableDepthTest();
-                matrix.popPose();
+                vertexBuffer.bind();
+                vertexBuffer.upload(bufferBuilder.end());
+                renderVertexBuffer(vertexBuffer, event.getPoseStack(), view, event.getProjectionMatrix());
 
-                VertexBuffer.unbind();
+                bufferBuilder.begin(outLineMode, DefaultVertexFormat.POSITION_COLOR);
+
+                float[] darkerColor = Utils.toDarkerColor(rgb);
+                for (int i = 0; i < dirs.length; i += 4) {
+                    drawLine(bufferBuilder, pos1, pos2, darkerColor, i);
+                }
+
+            } else {
+                bufferBuilder.begin(outLineMode, DefaultVertexFormat.POSITION_COLOR);
+
+                bufferBuilder.vertex(pos1.x(), pos1.y(), pos1.z()).color(rgb[0], rgb[1], rgb[2], 1f).endVertex();
+                bufferBuilder.vertex(pos2.x(), pos2.y(), pos2.z()).color(rgb[0], rgb[1], rgb[2], 1f).endVertex();
+
             }
+
+            vertexBuffer.bind();
+            vertexBuffer.upload(bufferBuilder.end());
+            renderVertexBuffer(vertexBuffer, event.getPoseStack(), view, event.getProjectionMatrix());
         }
+    }
+
+    private void renderVertexBuffer(VertexBuffer vertexBuffer, PoseStack matrix, Vec3 view, Matrix4f matrix4f) {
+        matrix.pushPose();
+        matrix.translate(-view.x, -view.y, -view.z);
+        ShaderInstance shader = GameRenderer.getPositionColorShader();
+
+        if (shader != null) {
+            RenderSystem.enableDepthTest();
+            RenderSystem.depthFunc(GL11C.GL_LEQUAL);
+            vertexBuffer.drawWithShader(matrix.last().pose(), matrix4f, shader);
+            RenderSystem.disableDepthTest();
+            matrix.popPose();
+
+            VertexBuffer.unbind();
+        }
+    }
+
+    private void drawLine(BufferBuilder bufferBuilder, Vec3 pos1, Vec3 pos2, float[] rgb, int index) {
+        bufferBuilder.vertex(pos1.x() + dirs[index][0], pos1.y() + dirs[index][1], pos1.z() + dirs[index][2]).color(rgb[0], rgb[1], rgb[2], 1f).endVertex();
+        bufferBuilder.vertex(pos2.x() + dirs[index + 3][0], pos2.y() + dirs[index + 3][1], pos2.z() + dirs[index + 3][2]).color(rgb[0], rgb[1], rgb[2], 1f).endVertex();
+    }
+
+    private void drawSquare(BufferBuilder bufferBuilder, Vec3 pos1, Vec3 pos2, float[] rgb, int index) {
+        bufferBuilder.vertex(pos1.x() + dirs[index][0], pos1.y() + dirs[index][1], pos1.z() + dirs[index][2]).color(rgb[0], rgb[1], rgb[2], 1f).endVertex();
+        bufferBuilder.vertex(pos1.x() + dirs[index + 1][0], pos1.y() + dirs[index + 1][1], pos1.z() + dirs[index + 1][2]).color(rgb[0], rgb[1], rgb[2], 1f).endVertex();
+        bufferBuilder.vertex(pos2.x() + dirs[index + 2][0], pos2.y() + dirs[index + 2][1], pos2.z() + dirs[index + 2][2]).color(rgb[0], rgb[1], rgb[2], 1f).endVertex();
+        bufferBuilder.vertex(pos2.x() + dirs[index + 3][0], pos2.y() + dirs[index + 3][1], pos2.z() + dirs[index + 3][2]).color(rgb[0], rgb[1], rgb[2], 1f).endVertex();
     }
 
 }
