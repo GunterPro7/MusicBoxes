@@ -55,7 +55,7 @@ public class MusicBoxesConfigScreen extends Screen {
         }).bounds(centerX + 10, 175, 100, 20).build();
         addRenderableWidget(cableVisibilityButton);
 
-        addRenderableWidget(new StringWidget(centerX - 120, 200, 110, 20, Component.literal("Music Cable Render Distance:"), this.font));
+        addRenderableWidget(new StringWidget(centerX - 128, 200, 110, 20, Component.literal("Music Cable Render Distance:"), this.font));
         cableRenderDistance = new ForgeSlider(centerX + 10, 200, 100, 20, Component.literal(""), Component.literal(" Blocks"), 16, 256, 32, 1, -1, true);
         addRenderableWidget(cableRenderDistance);
 
